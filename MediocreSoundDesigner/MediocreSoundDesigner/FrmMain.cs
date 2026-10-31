@@ -58,11 +58,14 @@ public partial class FrmMain : Form {
     return base.ProcessCmdKey(ref msg, keyData);
   }
 
-  private void FrmMain_SizeChanged(object sender, EventArgs e) {
-    UpdateSizes();
-  }
+    private void FrmMain_SizeChanged(object sender, EventArgs e)
+    {
+        if (trackManager is null)
+            return;
+        UpdateSizes();
+    }
 
-  private void btnPlay_Click(object sender, EventArgs e) {
+    private void btnPlay_Click(object sender, EventArgs e) {
     if (trackManager.State is NAudio.Wave.PlaybackState.Stopped or NAudio.Wave.PlaybackState.Paused) {
       trackManager.PlayAll();
       btnPlay.BackgroundImage = Resources.pause;
