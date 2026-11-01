@@ -58,10 +58,10 @@ namespace MediocreSoundDesigner
       buttonRecord = new Button();
       buttonTrim = new Button();
       buttonGuitar = new Button();
-      buttonSynth = new Button();
+      buttonTone = new Button();
       buttonDrums = new Button();
       buttonPiano = new Button();
-      lbInstPanel = new TextBox();
+      lbGeneratorPanel = new TextBox();
       imageList1 = new ImageList(components);
       buttonReset = new Button();
       buttonDeleteSelection = new Button();
@@ -308,24 +308,24 @@ namespace MediocreSoundDesigner
       buttonGuitar.UseVisualStyleBackColor = false;
       buttonGuitar.Click += buttonGuitar_Click;
       // 
-      // buttonSynth
+      // buttonTone
       // 
-      buttonSynth.BackColor = Color.FromArgb(52, 52, 52);
-      buttonSynth.BackgroundImage = (Image)resources.GetObject("buttonSynth.BackgroundImage");
-      buttonSynth.BackgroundImageLayout = ImageLayout.Stretch;
-      buttonSynth.Enabled = false;
-      buttonSynth.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-      buttonSynth.FlatStyle = FlatStyle.Flat;
-      buttonSynth.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold);
-      buttonSynth.ForeColor = Color.White;
-      buttonSynth.Location = new Point(1041, 935);
-      buttonSynth.Name = "buttonSynth";
-      buttonSynth.Size = new Size(100, 85);
-      buttonSynth.TabIndex = 12;
-      buttonSynth.TextAlign = ContentAlignment.BottomCenter;
-      buttonSynth.TextImageRelation = TextImageRelation.ImageAboveText;
-      buttonSynth.UseVisualStyleBackColor = false;
-      buttonSynth.Click += buttonSynth_Click;
+      buttonTone.BackColor = Color.FromArgb(52, 52, 52);
+      buttonTone.BackgroundImage = (Image)resources.GetObject("buttonTone.BackgroundImage");
+      buttonTone.BackgroundImageLayout = ImageLayout.Stretch;
+      buttonTone.Enabled = false;
+      buttonTone.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+      buttonTone.FlatStyle = FlatStyle.Flat;
+      buttonTone.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold);
+      buttonTone.ForeColor = Color.White;
+      buttonTone.Location = new Point(1041, 935);
+      buttonTone.Name = "buttonTone";
+      buttonTone.Size = new Size(100, 85);
+      buttonTone.TabIndex = 12;
+      buttonTone.TextAlign = ContentAlignment.BottomCenter;
+      buttonTone.TextImageRelation = TextImageRelation.ImageAboveText;
+      buttonTone.UseVisualStyleBackColor = false;
+      buttonTone.Click += buttonTone_Click;
       // 
       // buttonDrums
       // 
@@ -365,19 +365,19 @@ namespace MediocreSoundDesigner
       buttonPiano.UseVisualStyleBackColor = false;
       buttonPiano.Click += buttonPiano_Click;
       // 
-      // lbInstPanel
+      // lbGeneratorPanel
       // 
-      lbInstPanel.BackColor = Color.Black;
-      lbInstPanel.BorderStyle = BorderStyle.None;
-      lbInstPanel.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-      lbInstPanel.ForeColor = Color.White;
-      lbInstPanel.Location = new Point(900, 899);
-      lbInstPanel.Name = "lbInstPanel";
-      lbInstPanel.Size = new Size(110, 23);
-      lbInstPanel.TabIndex = 14;
-      lbInstPanel.Text = "Instruments";
-      lbInstPanel.TextAlign = HorizontalAlignment.Center;
-      lbInstPanel.TextChanged += lbInstPanel_TextChanged;
+      lbGeneratorPanel.BackColor = Color.Black;
+      lbGeneratorPanel.BorderStyle = BorderStyle.None;
+      lbGeneratorPanel.Font = new Font("Segoe UI", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+      lbGeneratorPanel.ForeColor = Color.White;
+      lbGeneratorPanel.Location = new Point(900, 899);
+      lbGeneratorPanel.Name = "lbGeneratorPanel";
+      lbGeneratorPanel.Size = new Size(110, 23);
+      lbGeneratorPanel.TabIndex = 14;
+      lbGeneratorPanel.Text = "Generators";
+      lbGeneratorPanel.TextAlign = HorizontalAlignment.Center;
+      lbGeneratorPanel.TextChanged += lbInstPanel_TextChanged;
       // 
       // imageList1
       // 
@@ -439,12 +439,12 @@ namespace MediocreSoundDesigner
       Controls.Add(buttonImport);
       Controls.Add(buttonDeleteSelection);
       Controls.Add(buttonReset);
-      Controls.Add(lbInstPanel);
+      Controls.Add(lbGeneratorPanel);
       Controls.Add(buttonRecord);
       Controls.Add(buttonPiano);
       Controls.Add(buttonDrums);
       Controls.Add(buttonTrim);
-      Controls.Add(buttonSynth);
+      Controls.Add(buttonTone);
       Controls.Add(btnPlay);
       Controls.Add(buttonGuitar);
       Controls.Add(trkDrawTimescale);
@@ -495,10 +495,10 @@ namespace MediocreSoundDesigner
     private Button buttonRecord;
     private Button buttonTrim;
     private Button buttonGuitar;
-    private Button buttonSynth;
+    private Button buttonTone;
     private Button buttonDrums;
     private Button buttonPiano;
-    private TextBox lbInstPanel;
+    private TextBox lbGeneratorPanel;
     private ImageList imageList1;
     private Button buttonReset;
     private Button buttonDeleteSelection;

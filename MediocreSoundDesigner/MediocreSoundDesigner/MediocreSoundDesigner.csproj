@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MeltySynth" Version="2.4.1" />
     <PackageReference Include="NAudio" Version="3.3.0" />
   </ItemGroup>
 
@@ -36,6 +37,9 @@
   <ItemGroup>
     <None Update="Resources\noise.wav">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="SoundFonts\GeneralUser GS SoftSynth v1.44.sf2">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
