@@ -163,9 +163,9 @@ namespace MediocreSoundDesigner.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap synthesizer {
+        internal static System.Drawing.Bitmap tone {
             get {
-                object obj = ResourceManager.GetObject("synthesizer", resourceCulture);
+                object obj = ResourceManager.GetObject("tone", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

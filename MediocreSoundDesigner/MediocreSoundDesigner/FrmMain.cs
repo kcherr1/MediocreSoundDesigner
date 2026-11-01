@@ -90,7 +90,7 @@ public partial class FrmMain : Form
     imageList1.Images.Add(buttonDrums.BackgroundImage);
     imageList1.Images.Add(buttonGuitar.BackgroundImage);
     imageList1.Images.Add(buttonPiano.BackgroundImage);
-    imageList1.Images.Add(buttonSynth.BackgroundImage);
+    imageList1.Images.Add(buttonTone.BackgroundImage);
 
     // Toolbar icons: indexes 4–7
     imageList1.Images.Add(Resources.play);
@@ -104,24 +104,24 @@ public partial class FrmMain : Form
     buttonDrums.BackgroundImage = null;
     buttonDrums.ImageList = imageList1;
     buttonDrums.ImageIndex = 0;
-    buttonDrums.Text = "Drums";
+    buttonDrums.Text = "Beat";
 
     buttonGuitar.BackgroundImage = null;
     buttonGuitar.ImageList = imageList1;
     buttonGuitar.ImageIndex = 1;
-    buttonGuitar.Text = "Guitar";
+    buttonGuitar.Text = "Pluck";
 
     buttonPiano.BackgroundImage = null;
     buttonPiano.ImageList = imageList1;
     buttonPiano.ImageIndex = 2;
-    buttonPiano.Text = "Piano";
+    buttonPiano.Text = "Chord";
 
-    buttonSynth.BackgroundImage = null;
-    buttonSynth.ImageList = imageList1;
-    buttonSynth.ImageIndex = 3;
-    buttonSynth.Text = "Synth";
+    buttonTone.BackgroundImage = null;
+    buttonTone.ImageList = imageList1;
+    buttonTone.ImageIndex = 3;
+    buttonTone.Text = "Tone";
 
-    Button[] instrumentButtons = { buttonDrums, buttonGuitar, buttonPiano, buttonSynth };
+    Button[] instrumentButtons = { buttonDrums, buttonGuitar, buttonPiano, buttonTone};
 
     foreach (Button button in instrumentButtons)
     {
@@ -182,6 +182,7 @@ public partial class FrmMain : Form
       button.FlatAppearance.MouseOverBackColor = Color.FromArgb(72, 72, 72);
     }
 
+
     topButtonTips = new ToolTip
     {
       ShowAlways = true,
@@ -215,7 +216,7 @@ public partial class FrmMain : Form
     BackColor = Settings.Color.WinBg;
     panTracks.BackColor = Settings.Color.TrackBg_Unselected;
     lblPlayhead.BackColor = Settings.Color.Playline;
-    lbInstPanel.BackColor = Settings.Color.WinBg;
+    lbGeneratorPanel.BackColor = Settings.Color.WinBg;
     trackManager.ApplySettings();
   }
 
@@ -752,16 +753,16 @@ public partial class FrmMain : Form
     int contentWidth = Math.Max(1, ClientSize.Width - padding * 2);
 
     int gap = 14;
-    int rowWidth = buttonDrums.Width + buttonGuitar.Width + buttonPiano.Width + buttonSynth.Width + gap * 3;
+    int rowWidth = buttonDrums.Width + buttonGuitar.Width + buttonPiano.Width + buttonTone.Width + gap * 3;
     int left = (ClientSize.Width - rowWidth) / 2;
     int instrumentsY = Math.Min(935 * DeviceDpi / 96, ClientSize.Height - buttonDrums.Height - 20 * DeviceDpi / 96);
 
-    lbInstPanel.Size = new Size(rowWidth, 24 * DeviceDpi / 96);
-    lbInstPanel.Location = new Point(left, instrumentsY - lbInstPanel.Height - 10 * DeviceDpi / 96);
+    lbGeneratorPanel.Size = new Size(rowWidth, 24 * DeviceDpi / 96);
+    lbGeneratorPanel.Location = new Point(left, instrumentsY - lbGeneratorPanel.Height - 10 * DeviceDpi / 96);
     buttonDrums.Location = new Point(left, instrumentsY);
     buttonGuitar.Location = new Point(left + buttonDrums.Width + gap, instrumentsY);
     buttonPiano.Location = new Point(left + buttonDrums.Width + buttonGuitar.Width + gap * 2, instrumentsY);
-    buttonSynth.Location = new Point(left + buttonDrums.Width + buttonGuitar.Width + buttonPiano.Width + gap * 3, instrumentsY);
+    buttonTone.Location = new Point(left + buttonDrums.Width + buttonGuitar.Width + buttonPiano.Width + gap * 3, instrumentsY);
 
     trkDrawTimescale.Left = padding;
     trkDrawTimescale.Width = contentWidth;
@@ -772,7 +773,7 @@ public partial class FrmMain : Form
     int tracksTop = panTimeRuler.Bottom + 4;
     int scrollbarHeight = SystemInformation.HorizontalScrollBarHeight;
     int scrollbarGap = 3 * DeviceDpi / 96;
-    int tracksBottom = lbInstPanel.Top - scrollbarHeight - scrollbarGap;
+    int tracksBottom = lbGeneratorPanel.Top - scrollbarHeight - scrollbarGap;
     panTracks.SetBounds(padding, tracksTop, contentWidth, Math.Max(1, tracksBottom - tracksTop));
     hsbTimeline.SetBounds(padding, tracksBottom + scrollbarGap, contentWidth, scrollbarHeight);
 
@@ -862,24 +863,126 @@ public partial class FrmMain : Form
 
   }
 
-  private void buttonSynth_Click(object sender, EventArgs e)
+  private void buttonTone_Click(object sender, EventArgs e)
   {
+    using GenerateTone dialog = new();
 
+    if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+    Track newTrack = new(dialog.GeneratedSamples, dialog.GeneratedFormat);
+    newTrack.DrawOffset = (int)Math.Round(
+      dialog.StartTimeSeconds * newTrack.SampleValuesPerSecond /
+      Math.Max(1, trackManager.DrawTimescale));
+    newTrack.SetDisplayName($"Tone {dialog.WaveformName} {dialog.FrequencyHz} Hz");
+
+    CreateTrackPanel(newTrack);
+    trackManager.AddTrack(newTrack);
+    SelectTrack(newTrack);
+    UpdateSizes();
+    newTrack.PanDrawSamples.Invalidate();
   }
 
   private void buttonGuitar_Click(object sender, EventArgs e)
   {
+    using FrmGeneratePluck dialog = new();
+
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+    {
+      return;
+    }
+
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreatePluckTrack(
+        dialog.Instrument,
+        dialog.Note,
+        dialog.Octave,
+        dialog.DurationSeconds);
+
+      newTrack.SetDisplayName($"{dialog.Instrument} {dialog.Note}{dialog.Octave}");
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds * newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale));
+
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(ex.Message, "Pluck", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
 
   }
 
   private void buttonPiano_Click(object sender, EventArgs e)
   {
+    using FrmGenerateChord dialog = new();
 
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+    {
+      return;
+    }
+
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreateChordTrack(
+        dialog.RootNote,
+        dialog.ChordType,
+        dialog.Octave,
+        dialog.DurationSeconds);
+
+      newTrack.SetDisplayName($"{dialog.RootNote} {dialog.ChordType} Chord");
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds * newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale));
+
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(ex.Message, "Chord", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
   }
 
   private void buttonDrums_Click(object sender, EventArgs e)
   {
+    using FrmGenerateBeat dialog = new();
 
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+    {
+      return;
+    }
+
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreateBeatTrack(
+        dialog.DrumKit,
+        dialog.Rhythm,
+        dialog.Tempo,
+        dialog.Bars);
+
+      newTrack.SetDisplayName($"{dialog.DrumKit} {dialog.Rhythm}");
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds * newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale));
+
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(ex.Message, "Beat", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
   }
 
   private void lbInstPanel_TextChanged(object sender, EventArgs e)
