@@ -1,7 +1,9 @@
 ﻿using NAudio.Wave;
 
 namespace MediocreSoundDesigner; 
-
+/// <summary>
+/// Manages the tracks
+/// </summary>
 public class TrackManager {
   private Track pseudoCombinedTrack;
   private Panel panContainer;
@@ -17,15 +19,24 @@ public class TrackManager {
     pseudoCombinedTrack = null;
     this.panContainer = panContainer;
   }
-
+    /// <summary>
+    /// Adds a track
+    /// </summary>
+    /// <param name="track">The track to add</param>
 	public void AddTrack(Track track) {
 		Tracks.Add(track);
 	}
-
+    /// <summary>
+    /// Removes a track
+    /// </summary>
+    /// <param name="track">The track to remove</param>
 	public void RemTrack(Track track) {
 		Tracks.Remove(track);
 	}
-
+    /// <summary>
+    /// Selects a track
+    /// </summary>
+    /// <param name="track">The track selected</param>
 	public void SelectTrack(Track track) {
 		SelectedTrack = track;
     Tracks.ForEach(track => {
@@ -35,7 +46,9 @@ public class TrackManager {
     track.PanDrawSamples.BorderStyle = BorderStyle.Fixed3D;
     track.PanDrawSamples.BackColor = Settings.Color.TrackBg_Selected;
   }
-
+  /// <summary>
+  /// Redraws all of the tracks by marking each track's panel as needing a redo
+  /// </summary>
   public void RedrawAll() {
     Tracks.ForEach(track => track.PanDrawSamples.Invalidate());
   }

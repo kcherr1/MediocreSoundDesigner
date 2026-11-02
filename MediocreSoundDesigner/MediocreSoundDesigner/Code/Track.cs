@@ -109,6 +109,12 @@ public class Track : IDisposable {
     this.sampleRate = 0;
     IsDisabled = false;
   }
+    /// <summary>
+    /// Links the track the panel that the track's waveform is drawn over,
+    /// and the container that holds all of the track panels
+    /// </summary>
+    /// <param name="panDrawSamples">The panel that the track's waveform is drawn over.</param>
+    /// <param name="panContainer">Container that holds all of the track panels</param>
   public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
     this.PanDrawSamples = panDrawSamples;
     this.panContainer = panContainer;

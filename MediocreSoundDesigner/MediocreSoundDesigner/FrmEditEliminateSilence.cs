@@ -23,7 +23,8 @@ public partial class FrmEditEliminateSilence : FrmEditMaster {
       0 => SampleRegion.BEGINNING_ONLY,
       1 => SampleRegion.END_ONLY,
       2 => SampleRegion.BEGINNING_AND_END,
-      3 => SampleRegion.ANYWHERE
+      3 => SampleRegion.ANYWHERE,
+      _ => throw new InvalidOperationException("Unexpected option selected in the 'where' list."),
     };
     track.EliminateSilence(region, (float)nudMinDuration.Value, (float)nudThreshold.Value);
   }
