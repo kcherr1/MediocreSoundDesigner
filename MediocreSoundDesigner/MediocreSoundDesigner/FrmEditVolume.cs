@@ -10,7 +10,10 @@ public partial class FrmEditVolume : FrmEditMaster {
     nudVolume.Value = (decimal)(track.Volume * 100.0f);
   }
 
-  protected override void Apply() {
-    track.SetVolume((float)nudVolume.Value / 100.0f);
-  }
+
+    protected override void Apply()
+    {
+        track.ChangeVolume((float)nudVolume.Value / 100.0f);
+    }
+
 }

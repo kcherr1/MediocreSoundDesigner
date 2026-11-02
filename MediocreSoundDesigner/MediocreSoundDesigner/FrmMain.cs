@@ -100,13 +100,30 @@ public partial class FrmMain : Form {
     }
   }
 
-  private void menuEditFlip_Click(object sender, EventArgs e) {
-    trackManager.SelectedTrack?.Flip();
-  }
-  private void menuEditReverse_Click(object sender, EventArgs e) {
-    trackManager.SelectedTrack?.Reverse();
-  }
-  private void menuEditVolume_Click(object sender, EventArgs e) {
+    private void menuEditUndo_Click(object sender, EventArgs e)
+    {
+        trackManager.SelectedTrack?.Undo();
+    }
+
+    private void menuEditRedo_Click(object sender, EventArgs e)
+    {
+        trackManager.SelectedTrack?.Redo();
+    }
+
+
+    private void menuEditFlip_Click(object sender, EventArgs e)
+    {
+        trackManager.SelectedTrack?.Flip();
+        trackManager.SelectedTrack?.PanDrawSamples?.Invalidate();
+    }
+
+    private void menuEditReverse_Click(object sender, EventArgs e)
+    {
+        trackManager.SelectedTrack?.Reverse();
+        trackManager.SelectedTrack?.PanDrawSamples?.Invalidate();
+    }
+
+    private void menuEditVolume_Click(object sender, EventArgs e) {
     if (trackManager.SelectedTrack is not null) {
       FrmEditVolume frm = new();
       frm.SetSound(trackManager.SelectedTrack);

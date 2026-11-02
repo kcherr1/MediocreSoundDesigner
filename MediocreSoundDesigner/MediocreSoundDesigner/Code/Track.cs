@@ -25,8 +25,47 @@ public class Track : IDisposable {
   private Panel panContainer;
   private int drawTimescale;
 
-  // properties
-  public int DrawOffset { get; set; }
+  private readonly Stack<(float[] Samples, float Volume)> undoHistory = new();
+  private readonly Stack<(float[] Samples, float Volume)> redoHistory = new();
+
+    private void SaveState()
+    {
+        undoHistory.Push((CloneSamples(), Volume));
+        redoHistory.Clear();
+    }
+
+    public bool Undo()
+    {
+        if (undoHistory.Count == 0)
+        {
+            return false;
+        }
+        redoHistory.Push((CloneSamples(), Volume));
+        var previousState = undoHistory.Pop();
+        ReplaceSamples(previousState.Samples);
+        SetVolume(previousState.Volume);
+        PanDrawSamples?.Invalidate();
+        return true;
+    }
+
+
+    public bool Redo()
+    {
+        if (redoHistory.Count == 0)
+        {
+            return false;
+        }
+        undoHistory.Push((CloneSamples(), Volume));
+        var nextState = redoHistory.Pop();
+        ReplaceSamples(nextState.Samples);
+        SetVolume(nextState.Volume);
+        PanDrawSamples?.Invalidate();
+        return true;
+    }
+
+
+    // properties
+    public int DrawOffset { get; set; }
   public bool IsDisabled { get; private set; }
   public Panel PanDrawSamples { get; private set; }
   public float Volume { get; private set; }
@@ -81,6 +120,7 @@ public class Track : IDisposable {
     this.samples = samples;
   }
   public void Reverse() {
+    SaveState();
     for (int i = 0; i < samples.Length / 2; i++) {
       var temp = samples[i];
       samples[i] = samples[samples.Length - 1 - i];
@@ -88,6 +128,7 @@ public class Track : IDisposable {
     }
   }
   public void Flip() {
+    SaveState();
     for (int i = 0; i < samples.Length; i++) {
       samples[i] *= -1;
     }
@@ -99,7 +140,19 @@ public class Track : IDisposable {
   public void SetVolume(float newVolume) {
     Volume = newVolume;
   }
-  public void EliminateSilence(SampleRegion region, float minDuration, float thres) {
+
+    public void ChangeVolume(float newVolume)
+    {
+        if (Volume == newVolume)
+        {
+            return;
+        }
+
+        SaveState();
+        SetVolume(newVolume);
+    }
+
+    public void EliminateSilence(SampleRegion region, float minDuration, float thres) {
     float[] newSamples = CloneSamples();
     if (region is SampleRegion.BEGINNING_ONLY or SampleRegion.BEGINNING_AND_END) {
       int silentDurationInNumSamples = 0;
@@ -150,8 +203,14 @@ public class Track : IDisposable {
         newSamples = [.. newSamples[0..silentRegionStart], .. newSamples[i..]];
       }
     }
-    samples = newSamples;
-  }
+
+        if (newSamples.Length != samples.Length)
+        {
+            SaveState();
+            samples = newSamples;
+        }
+    }
+
 
   // play
   public void Play() {
