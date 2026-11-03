@@ -22,7 +22,7 @@ public static class Settings {
     public Colors() {
       WinBg = System.Drawing.Color.Black;
       WinFg = System.Drawing.Color.White;
-      TrackSamples_Enabled = System.Drawing.Color.Cyan;
+      TrackSamples_Enabled = System.Drawing.Color.Black;
       TrackSamples_Disabled = System.Drawing.Color.LightGray;
       TrackBg_Unselected = System.Drawing.Color.DimGray;
       TrackBg_Selected = System.Drawing.Color.Gray;
@@ -36,7 +36,20 @@ public static class Settings {
 
   public static Colors Color { get; private set; }
 
-  private const string FILENAME = "settings.json";
+    public static System.Drawing.Color[] DefaultTrackColors { get; } = [
+      ColorTranslator.FromHtml("#E98989"), // red
+      ColorTranslator.FromHtml("#F2A46F"), // orange
+      ColorTranslator.FromHtml("#E4C76D"), // gold
+      ColorTranslator.FromHtml("#A5CF7B"), // green
+      ColorTranslator.FromHtml("#72CDB7"), // teal
+      ColorTranslator.FromHtml("#75B9E7"), // blue
+      ColorTranslator.FromHtml("#968EE4"), // violet
+      ColorTranslator.FromHtml("#C690D9"), // purple
+      ColorTranslator.FromHtml("#E5A1BC"), // pink
+      ColorTranslator.FromHtml("#A4B4C9")  // slate
+    ];
+
+    private const string FILENAME = "settings.json";
 
   public static void SaveToFile() {
     JsonSerializerOptions options = new() { Converters = { new ColorJsonConverter() } };

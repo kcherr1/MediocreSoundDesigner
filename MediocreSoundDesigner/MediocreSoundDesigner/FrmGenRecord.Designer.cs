@@ -22,7 +22,8 @@
     /// Required method for Designer support - do not modify
     /// the contents of this method with the code editor.
     /// </summary>
-    private void InitializeComponent() {
+    private void InitializeComponent()
+    {
       btnApply = new Button();
       btnCancel = new Button();
       btnRecord = new Button();
@@ -32,11 +33,11 @@
       // 
       btnApply.BackColor = Color.Black;
       btnApply.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-      btnApply.ForeColor = Color.Lime;
-      btnApply.Location = new Point(234, 162);
-      btnApply.Margin = new Padding(7);
+      btnApply.ForeColor = Color.FromArgb(0, 192, 0);
+      btnApply.Location = new Point(292, 201);
+      btnApply.Margin = new Padding(9, 9, 9, 9);
       btnApply.Name = "btnApply";
-      btnApply.Size = new Size(125, 47);
+      btnApply.Size = new Size(156, 58);
       btnApply.TabIndex = 2;
       btnApply.Text = "Apply";
       btnApply.UseVisualStyleBackColor = false;
@@ -47,11 +48,11 @@
       btnCancel.AutoSize = true;
       btnCancel.BackColor = Color.Black;
       btnCancel.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-      btnCancel.ForeColor = Color.Red;
-      btnCancel.Location = new Point(37, 162);
-      btnCancel.Margin = new Padding(7);
+      btnCancel.ForeColor = Color.FromArgb(192, 0, 0);
+      btnCancel.Location = new Point(46, 201);
+      btnCancel.Margin = new Padding(9, 9, 9, 9);
       btnCancel.Name = "btnCancel";
-      btnCancel.Size = new Size(144, 47);
+      btnCancel.Size = new Size(180, 58);
       btnCancel.TabIndex = 3;
       btnCancel.Text = "Cancel";
       btnCancel.UseVisualStyleBackColor = false;
@@ -66,25 +67,25 @@
       btnRecord.FlatStyle = FlatStyle.Popup;
       btnRecord.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
       btnRecord.ForeColor = Color.Red;
-      btnRecord.Location = new Point(129, 29);
-      btnRecord.Margin = new Padding(7);
+      btnRecord.Location = new Point(161, 36);
+      btnRecord.Margin = new Padding(9, 9, 9, 9);
       btnRecord.Name = "btnRecord";
-      btnRecord.Padding = new Padding(5);
-      btnRecord.Size = new Size(125, 110);
+      btnRecord.Padding = new Padding(6, 6, 6, 6);
+      btnRecord.Size = new Size(156, 137);
       btnRecord.TabIndex = 4;
       btnRecord.UseVisualStyleBackColor = false;
       btnRecord.Click += btnRecord_Click;
       // 
       // FrmGenRecord
       // 
-      AutoScaleDimensions = new SizeF(16F, 37F);
+      AutoScaleDimensions = new SizeF(20F, 46F);
       AutoScaleMode = AutoScaleMode.Font;
       BackColor = Color.Black;
-      ClientSize = new Size(381, 231);
+      ClientSize = new Size(476, 287);
       Controls.Add(btnRecord);
       Controls.Add(btnCancel);
       Controls.Add(btnApply);
-      Margin = new Padding(16, 17, 16, 17);
+      Margin = new Padding(20, 21, 20, 21);
       Name = "FrmGenRecord";
       Text = "Record Audio";
       ResumeLayout(false);
