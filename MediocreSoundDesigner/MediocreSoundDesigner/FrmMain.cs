@@ -1,4 +1,5 @@
 using MediocreSoundDesigner.Properties;
+using System.Drawing.Printing;
 using System.Text.Json;
 
 namespace MediocreSoundDesigner;
@@ -425,29 +426,60 @@ public partial class FrmMain : Form
 
     private void UpdateSizes()
     {
-        const int PADDING = 15;
+        int availableWidth = panApp.ClientSize.Width;
 
-        panTracks.Left = PADDING;
-        panTracks.Width = ClientSize.Width - (PADDING * 2);
+        // align top action panel
+        pnlTopActions.Left = 0;
+        pnlTopActions.Top = menu.Bottom;
+        pnlTopActions.Width = availableWidth;
 
+        // align bottom action panel
+        BottomPanel.Left = 0;
+        BottomPanel.Top = panApp.ClientSize.Height - BottomPanel.Height;
+        BottomPanel.Width = availableWidth;
+
+        // align middle area holding tracks
+        panTracks.Left = 0;
+        panTracks.Top = pnlTopActions.Bottom;
+        panTracks.Width = availableWidth;
+        panTracks.Height = Math.Max(50, BottomPanel.Top - panTracks.Top);
+
+        // align playhead label
+        lblPlayhead.Left = 0;
+        lblPlayhead.Height = panTracks.ClientSize.Height;
+        lblPlayhead.BringToFront();
+
+        // align timer with center of screen
+        lblCurrTime.AutoSize = true;
+        lblCurrTime.Left = (BottomPanel.ClientSize.Width - lblCurrTime.Width) / 2;
+        lblCurrTime.Top = (BottomPanel.ClientSize.Height - lblCurrTime.Height) / 2;
+
+        // align timescale trackbar with icon
+        picSoundWave.Left = lblCurrTime.Right + 350;
+        picSoundWave.Top = (BottomPanel.ClientSize.Height - picSoundWave.Height) / 2;
+
+        // 4. Position Timescale Slider directly to the right of the Icon
+        trkDrawTimescale.Left = picSoundWave.Right + 8;
+        trkDrawTimescale.Top = (BottomPanel.ClientSize.Height - trkDrawTimescale.Height) / 2;
+        trkDrawTimescale.Width = (BottomPanel.ClientSize.Width - 15) - trkDrawTimescale.Left;
+
+        // adjust track sizing
         if (trackManager.Tracks.Count == 0) return;
 
         int trackCount = trackManager.Tracks.Count;
-        int containerHeight = Math.Max(100, (panTracks.Height / trackCount) - 4);
+        int containerHeight = Math.Max(60, (panTracks.ClientSize.Height / trackCount) - 4);
         int top = 0;
 
         foreach (Control ctrl in panTracks.Controls)
         {
-            // track outer panel (holding buttons and track panel)
             if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
             {
                 panTrackContainer.Left = 0;
-                panTrackContainer.Width = panTracks.Width;
+                panTrackContainer.Width = panTracks.ClientSize.Width;
                 panTrackContainer.Height = containerHeight;
                 panTrackContainer.Top = top;
                 top += containerHeight + 4;
 
-                // handle inner panel (track)
                 foreach (Control child in panTrackContainer.Controls)
                 {
                     if (child is DoubleBufferedPanel panTrack)
@@ -461,12 +493,6 @@ public partial class FrmMain : Form
                 }
             }
         }
-
-        trkDrawTimescale.Width = panTracks.Width;
-        trkDrawTimescale.Left = PADDING;
-        lblPlayhead.Left = 0;
-        lblPlayhead.Height = panTracks.Height;
-        lblPlayhead.BringToFront();
     }
 }
 

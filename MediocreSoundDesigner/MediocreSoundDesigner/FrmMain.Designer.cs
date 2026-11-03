@@ -32,6 +32,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             panTracks = new Panel();
             lblPlayhead = new Label();
+            pnlTopActions = new Panel();
+            bttnMicOptions = new Button();
+            bttnRecord = new Button();
+            bttnPlay = new Button();
             lblDebug = new Label();
             ofdLoadFile = new OpenFileDialog();
             menu = new MenuStrip();
@@ -48,21 +52,21 @@
             menuGenRecord = new ToolStripMenuItem();
             menuGenNoise = new ToolStripMenuItem();
             menuGenGradientNoise = new ToolStripMenuItem();
-            bttnPlay = new Button();
             tmrUpdate = new System.Windows.Forms.Timer(components);
             sfdSaveFile = new SaveFileDialog();
             colorDialog = new ColorDialog();
             BottomPanel = new Panel();
+            picSoundWave = new PictureBox();
             lblCurrTime = new Label();
             trkDrawTimescale = new TrackBar();
-            pnlTopActions = new Panel();
-            bttnMicOptions = new Button();
-            bttnRecord = new Button();
+            panApp = new Panel();
             panTracks.SuspendLayout();
+            pnlTopActions.SuspendLayout();
             menu.SuspendLayout();
             BottomPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picSoundWave).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkDrawTimescale).BeginInit();
-            pnlTopActions.SuspendLayout();
+            panApp.SuspendLayout();
             SuspendLayout();
             // 
             // panTracks
@@ -71,9 +75,9 @@
             panTracks.BackColor = Color.DimGray;
             panTracks.BorderStyle = BorderStyle.Fixed3D;
             panTracks.Controls.Add(lblPlayhead);
-            panTracks.Location = new Point(0, 73);
+            panTracks.Location = new Point(0, 49);
             panTracks.Name = "panTracks";
-            panTracks.Size = new Size(1612, 647);
+            panTracks.Size = new Size(1598, 617);
             panTracks.TabIndex = 0;
             // 
             // lblPlayhead
@@ -84,14 +88,80 @@
             lblPlayhead.Size = new Size(5, 385);
             lblPlayhead.TabIndex = 9;
             // 
+            // pnlTopActions
+            // 
+            pnlTopActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            pnlTopActions.BackColor = Color.DarkGray;
+            pnlTopActions.Controls.Add(bttnMicOptions);
+            pnlTopActions.Controls.Add(bttnRecord);
+            pnlTopActions.Controls.Add(bttnPlay);
+            pnlTopActions.ForeColor = Color.White;
+            pnlTopActions.Location = new Point(0, 0);
+            pnlTopActions.Name = "pnlTopActions";
+            pnlTopActions.Size = new Size(1604, 49);
+            pnlTopActions.TabIndex = 10;
+            // 
+            // bttnMicOptions
+            // 
+            bttnMicOptions.AutoSize = true;
+            bttnMicOptions.BackColor = Color.Transparent;
+            bttnMicOptions.BackgroundImage = (Image)resources.GetObject("bttnMicOptions.BackgroundImage");
+            bttnMicOptions.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnMicOptions.FlatAppearance.BorderSize = 0;
+            bttnMicOptions.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnMicOptions.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnMicOptions.FlatStyle = FlatStyle.Flat;
+            bttnMicOptions.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnMicOptions.Location = new Point(136, 5);
+            bttnMicOptions.Name = "bttnMicOptions";
+            bttnMicOptions.Size = new Size(38, 38);
+            bttnMicOptions.TabIndex = 8;
+            bttnMicOptions.UseVisualStyleBackColor = false;
+            // 
+            // bttnRecord
+            // 
+            bttnRecord.AutoSize = true;
+            bttnRecord.BackColor = Color.Transparent;
+            bttnRecord.BackgroundImage = (Image)resources.GetObject("bttnRecord.BackgroundImage");
+            bttnRecord.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnRecord.FlatAppearance.BorderSize = 0;
+            bttnRecord.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnRecord.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnRecord.FlatStyle = FlatStyle.Flat;
+            bttnRecord.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnRecord.Location = new Point(10, 5);
+            bttnRecord.Name = "bttnRecord";
+            bttnRecord.Size = new Size(41, 41);
+            bttnRecord.TabIndex = 7;
+            bttnRecord.UseVisualStyleBackColor = false;
+            bttnRecord.Click += menuGenRecord_Click;
+            // 
+            // bttnPlay
+            // 
+            bttnPlay.AutoSize = true;
+            bttnPlay.BackColor = Color.Transparent;
+            bttnPlay.BackgroundImage = (Image)resources.GetObject("bttnPlay.BackgroundImage");
+            bttnPlay.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnPlay.FlatAppearance.BorderSize = 0;
+            bttnPlay.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnPlay.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnPlay.FlatStyle = FlatStyle.Flat;
+            bttnPlay.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnPlay.Location = new Point(70, 4);
+            bttnPlay.Name = "bttnPlay";
+            bttnPlay.Size = new Size(41, 41);
+            bttnPlay.TabIndex = 6;
+            bttnPlay.UseVisualStyleBackColor = false;
+            bttnPlay.Click += btnPlay_Click;
+            // 
             // lblDebug
             // 
             lblDebug.Dock = DockStyle.Bottom;
             lblDebug.Font = new Font("Segoe UI", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDebug.ForeColor = Color.FromArgb(255, 255, 192);
-            lblDebug.Location = new Point(0, 746);
+            lblDebug.Location = new Point(0, 773);
             lblDebug.Name = "lblDebug";
-            lblDebug.Size = new Size(1604, 37);
+            lblDebug.Size = new Size(1604, 10);
             lblDebug.TabIndex = 1;
             // 
             // ofdLoadFile
@@ -198,24 +268,6 @@
             menuGenGradientNoise.Text = "Gradient Noise";
             menuGenGradientNoise.Click += menuGenGradientNoise_Click;
             // 
-            // bttnPlay
-            // 
-            bttnPlay.AutoSize = true;
-            bttnPlay.BackColor = Color.Transparent;
-            bttnPlay.BackgroundImage = (Image)resources.GetObject("bttnPlay.BackgroundImage");
-            bttnPlay.BackgroundImageLayout = ImageLayout.Stretch;
-            bttnPlay.FlatAppearance.BorderSize = 0;
-            bttnPlay.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            bttnPlay.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            bttnPlay.FlatStyle = FlatStyle.Flat;
-            bttnPlay.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            bttnPlay.Location = new Point(70, 4);
-            bttnPlay.Name = "bttnPlay";
-            bttnPlay.Size = new Size(41, 41);
-            bttnPlay.TabIndex = 6;
-            bttnPlay.UseVisualStyleBackColor = false;
-            bttnPlay.Click += btnPlay_Click;
-            // 
             // tmrUpdate
             // 
             tmrUpdate.Enabled = true;
@@ -225,13 +277,24 @@
             // BottomPanel
             // 
             BottomPanel.BackColor = Color.DarkGray;
+            BottomPanel.Controls.Add(picSoundWave);
             BottomPanel.Controls.Add(lblCurrTime);
             BottomPanel.Controls.Add(trkDrawTimescale);
             BottomPanel.ForeColor = Color.White;
-            BottomPanel.Location = new Point(0, 718);
+            BottomPanel.Location = new Point(0, 666);
             BottomPanel.Name = "BottomPanel";
             BottomPanel.Size = new Size(1604, 65);
             BottomPanel.TabIndex = 8;
+            // 
+            // picSoundWave
+            // 
+            picSoundWave.BackgroundImage = Properties.Resources.soundWavesIcon;
+            picSoundWave.BackgroundImageLayout = ImageLayout.Stretch;
+            picSoundWave.Location = new Point(1064, 6);
+            picSoundWave.Name = "picSoundWave";
+            picSoundWave.Size = new Size(50, 50);
+            picSoundWave.TabIndex = 10;
+            picSoundWave.TabStop = false;
             // 
             // lblCurrTime
             // 
@@ -248,6 +311,7 @@
             // 
             // trkDrawTimescale
             // 
+            trkDrawTimescale.AutoSize = false;
             trkDrawTimescale.LargeChange = 50;
             trkDrawTimescale.Location = new Point(1120, 15);
             trkDrawTimescale.Maximum = 1000;
@@ -260,52 +324,16 @@
             trkDrawTimescale.Value = 500;
             trkDrawTimescale.Scroll += trkDrawTimescale_Scroll;
             // 
-            // pnlTopActions
+            // panApp
             // 
-            pnlTopActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            pnlTopActions.BackColor = Color.DarkGray;
-            pnlTopActions.Controls.Add(bttnMicOptions);
-            pnlTopActions.Controls.Add(bttnRecord);
-            pnlTopActions.Controls.Add(bttnPlay);
-            pnlTopActions.ForeColor = Color.White;
-            pnlTopActions.Location = new Point(0, 24);
-            pnlTopActions.Name = "pnlTopActions";
-            pnlTopActions.Size = new Size(1604, 49);
-            pnlTopActions.TabIndex = 10;
-            // 
-            // bttnMicOptions
-            // 
-            bttnMicOptions.AutoSize = true;
-            bttnMicOptions.BackColor = Color.Transparent;
-            bttnMicOptions.BackgroundImage = (Image)resources.GetObject("bttnMicOptions.BackgroundImage");
-            bttnMicOptions.BackgroundImageLayout = ImageLayout.Stretch;
-            bttnMicOptions.FlatAppearance.BorderSize = 0;
-            bttnMicOptions.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            bttnMicOptions.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            bttnMicOptions.FlatStyle = FlatStyle.Flat;
-            bttnMicOptions.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            bttnMicOptions.Location = new Point(136, 5);
-            bttnMicOptions.Name = "bttnMicOptions";
-            bttnMicOptions.Size = new Size(38, 38);
-            bttnMicOptions.TabIndex = 8;
-            bttnMicOptions.UseVisualStyleBackColor = false;
-            // 
-            // bttnRecord
-            // 
-            bttnRecord.AutoSize = true;
-            bttnRecord.BackColor = Color.Transparent;
-            bttnRecord.BackgroundImage = (Image)resources.GetObject("bttnRecord.BackgroundImage");
-            bttnRecord.BackgroundImageLayout = ImageLayout.Stretch;
-            bttnRecord.FlatAppearance.BorderSize = 0;
-            bttnRecord.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            bttnRecord.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            bttnRecord.FlatStyle = FlatStyle.Flat;
-            bttnRecord.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            bttnRecord.Location = new Point(10, 5);
-            bttnRecord.Name = "bttnRecord";
-            bttnRecord.Size = new Size(41, 41);
-            bttnRecord.TabIndex = 7;
-            bttnRecord.UseVisualStyleBackColor = false;
+            panApp.Controls.Add(pnlTopActions);
+            panApp.Controls.Add(BottomPanel);
+            panApp.Controls.Add(panTracks);
+            panApp.Dock = DockStyle.Fill;
+            panApp.Location = new Point(0, 0);
+            panApp.Name = "panApp";
+            panApp.Size = new Size(1604, 783);
+            panApp.TabIndex = 11;
             // 
             // FrmMain
             // 
@@ -313,24 +341,24 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
             ClientSize = new Size(1604, 783);
-            Controls.Add(pnlTopActions);
-            Controls.Add(BottomPanel);
             Controls.Add(lblDebug);
-            Controls.Add(panTracks);
             Controls.Add(menu);
+            Controls.Add(panApp);
             KeyPreview = true;
             MainMenuStrip = menu;
             Name = "FrmMain";
             Text = "Mediocre Sound Designer";
             SizeChanged += FrmMain_SizeChanged;
             panTracks.ResumeLayout(false);
+            pnlTopActions.ResumeLayout(false);
+            pnlTopActions.PerformLayout();
             menu.ResumeLayout(false);
             menu.PerformLayout();
             BottomPanel.ResumeLayout(false);
             BottomPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picSoundWave).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkDrawTimescale).EndInit();
-            pnlTopActions.ResumeLayout(false);
-            pnlTopActions.PerformLayout();
+            panApp.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -338,33 +366,35 @@
         #endregion
 
         private Panel panTracks;
-    private Label lblDebug;
-    private OpenFileDialog ofdLoadFile;
-    private MenuStrip menu;
-    private ToolStripMenuItem menuEdit;
-    private Button bttnPlay;
-    private ToolStripMenuItem menuEditVolume;
-    private ToolStripMenuItem menuEditReverse;
-    private ToolStripMenuItem menuFile;
-    private ToolStripMenuItem menuFileOpen;
-    private ToolStripMenuItem menuFileSave;
-    private System.Windows.Forms.Timer tmrUpdate;
-    private ToolStripMenuItem menuGen;
-    private ToolStripMenuItem menuGenNoise;
-    private ToolStripMenuItem menuGenGradientNoise;
-    private ToolStripMenuItem menuEditFlip;
-    private SaveFileDialog sfdSaveFile;
-    private TrackBar trkDrawTimescale;
+        private Label lblDebug;
+        private OpenFileDialog ofdLoadFile;
+        private MenuStrip menu;
+        private ToolStripMenuItem menuEdit;
+        private Button bttnPlay;
+        private ToolStripMenuItem menuEditVolume;
+        private ToolStripMenuItem menuEditReverse;
+        private ToolStripMenuItem menuFile;
+        private ToolStripMenuItem menuFileOpen;
+        private ToolStripMenuItem menuFileSave;
+        private System.Windows.Forms.Timer tmrUpdate;
+        private ToolStripMenuItem menuGen;
+        private ToolStripMenuItem menuGenNoise;
+        private ToolStripMenuItem menuGenGradientNoise;
+        private ToolStripMenuItem menuEditFlip;
+        private SaveFileDialog sfdSaveFile;
+        private TrackBar trkDrawTimescale;
         private Label lblCurrTime;
         private Panel pnlTopActions;
         private ColorDialog colorDialog;
-    private ToolStripMenuItem menuEditEliminateSilence;
-    private Label lblPlayhead;
-    private ToolStripMenuItem menuGenRecord;
-    private ToolStripMenuItem menuFileSettings;
+        private ToolStripMenuItem menuEditEliminateSilence;
+        private Label lblPlayhead;
+        private ToolStripMenuItem menuGenRecord;
+        private ToolStripMenuItem menuFileSettings;
         private Panel BottomPanel;
         private TextBox textBox1;
         private Button bttnRecord;
         private Button bttnMicOptions;
+        private Panel panApp;
+        private PictureBox picSoundWave;
     }
 }
