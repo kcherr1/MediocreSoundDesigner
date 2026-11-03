@@ -20,6 +20,7 @@ public partial class FrmMain : Form
     private void Setup()
     {
         DoubleBuffered = true;
+        panTracks.AutoScroll = false;
 
         // Enable double-buffering on panTracks container to prevent child clipping flicker
         typeof(Panel).InvokeMember("DoubleBuffered",
@@ -36,6 +37,37 @@ public partial class FrmMain : Form
     }
     private void ApplySettings()
     {
+        btnPlay.BackgroundImage = Resources.play;
+
+        // slider range comes from the same constants the clamp uses
+        trkDrawTimescale.Minimum = TrackManager.MIN_DRAW_TIMESCALE;
+        trkDrawTimescale.Maximum = TrackManager.MAX_DRAW_TIMESCALE;
+
+        trackManager.DrawTimescale = GetTimescaleFromSlider();
+        UpdateSizes();
+        ApplySettings();
+    }
+
+    private int GetTimescaleFromSlider()
+    {
+        // far right = most zoomed in = 1 sample per pixel, never 0
+        return trkDrawTimescale.Maximum - trkDrawTimescale.Value + trkDrawTimescale.Minimum;
+    }
+
+    private void FitToWindow()
+    {
+        if (trackManager.Tracks.Count == 0) return;
+
+        int longest = trackManager.Tracks.Max(t => t.SampleCount);
+        int fit = (int)Math.Ceiling((double)longest / Math.Max(1, panTracks.ClientSize.Width));
+        fit = Math.Clamp(fit, TrackManager.MIN_DRAW_TIMESCALE, TrackManager.MAX_DRAW_TIMESCALE);
+
+        // inverse of GetTimescaleFromSlider
+        trkDrawTimescale.Value = trkDrawTimescale.Maximum - fit + trkDrawTimescale.Minimum;
+        trackManager.DrawTimescale = fit;
+    }
+
+    private void ApplySettings() {
         BackColor = Settings.Color.WinBg;
         panTracks.BackColor = Settings.Color.TrackBg_Unselected;
         lblPlayhead.BackColor = Settings.Color.Playline;
@@ -120,6 +152,7 @@ public partial class FrmMain : Form
                 Track newTrack = new(file);
                 CreateTrackPanel(newTrack);
                 trackManager.AddTrack(newTrack);
+                FitToWindow();
                 UpdateSizes();
                 newTrack.PanDrawSamples.Invalidate();
             }
@@ -183,64 +216,56 @@ public partial class FrmMain : Form
         }
     }
 
-    private void menuGenRecord_Click(object sender, EventArgs e)
-    {
+    private void menuGenRecord_Click(object sender, EventArgs e) {
         Track newTrack = new(new float[0]);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
+        FitToWindow();
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
 
         FrmGenRecord frm = new();
-        frm.SetSound(trackManager.SelectedTrack);
+        frm.SetSound(newTrack);
         if (frm.ShowDialog() == DialogResult.Cancel)
         {
+            panTracks.Controls.Remove(newTrack.PanDrawSamples);
+            newTrack.PanDrawSamples.Dispose();
+            newTrack.Dispose();
             trackManager.RemTrack(newTrack);
+            UpdateSizes();
         }
     }
-    private void menuGenNoise_Click(object sender, EventArgs e)
-    {
+    private void menuGenNoise_Click(object sender, EventArgs e) {
         const int NUM_SAMPLES = 100_000;
         float[] samples = new float[NUM_SAMPLES];
         Random rand = new();
-        for (int i = 0; i < NUM_SAMPLES; i++)
-        {
+        for (int i = 0; i < NUM_SAMPLES; i++) {
             samples[i] = rand.NextSingle() * 2.0f - 1.0f;
         }
-        Track newTrack = new(samples);
-        CreateTrackPanel(newTrack);
-        trackManager.AddTrack(newTrack);
-        UpdateSizes();
-        newTrack.PanDrawSamples.Invalidate();
+            Track newTrack = new(samples);
+            CreateTrackPanel(newTrack);
+            trackManager.AddTrack(newTrack);
+            FitToWindow();
+            UpdateSizes();
+            newTrack.PanDrawSamples.Invalidate();
     }
-    private void menuGenGradientNoise_Click(object sender, EventArgs e)
-    {
+    private void menuGenGradientNoise_Click(object sender, EventArgs e) {
         const int NUM_SAMPLES = 250_000;
         float[] samples = new float[NUM_SAMPLES];
         Random rand = new();
         float cur = 0;
         float inc = 0.005f;
         int dir = +1;
-        for (int i = 0; i < NUM_SAMPLES; i++)
-        {
+        for (int i = 0; i < NUM_SAMPLES; i++) {
             cur += (inc * dir);
-            if (rand.NextSingle() < 0.5f)
-            {
-                dir *= -1;
+            if (rand.NextSingle() < 0.5f) {
+            dir *= -1;
             }
-            if (cur > 0.9f)
-            {
-                dir = -1;
-            }
-            if (cur < -0.9f)
-            {
-                dir = +1;
-            }
-            samples[i] = cur;
         }
         Track newTrack = new(samples);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
+        FitToWindow();
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
     }
@@ -269,7 +294,7 @@ public partial class FrmMain : Form
 
     private void trkDrawTimescale_Scroll(object sender, EventArgs e)
     {
-        trackManager.DrawTimescale = trkDrawTimescale.Maximum - trkDrawTimescale.Value;
+        trackManager.DrawTimescale = GetTimescaleFromSlider();
         trackManager.RedrawAll();
     }
 

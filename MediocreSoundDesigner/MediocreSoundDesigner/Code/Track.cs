@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace MediocreSoundDesigner;
 
@@ -9,7 +10,12 @@ public enum SampleRegion {
     ANYWHERE,
 }
 
-public class Track : IDisposable {
+public class Track : IDisposable
+{
+    // Every track stored in this format, no matter where it came from
+    public const int INTERNAL_SAMPLE_RATE = 44100;
+    public const int INTERNAL_CHANNELS = 1;
+
     // Fields
     private string file;
     private TimeSpan duration;
@@ -18,9 +24,7 @@ public class Track : IDisposable {
     private int sampleRate;
     private float[] samples;
     private float pitch;
-    private int bits;
-    private int channels;
-    private AudioFileReader fileReader;
+    private AudioFileReader fileReader; // playback only
     private WaveOut outputDevice;
     private Panel panContainer;
     private int drawTimescale;
@@ -35,32 +39,55 @@ public class Track : IDisposable {
     public int? SelectionStartSample { get; set; } = null;
     public int? SelectionEndSample { get; set; } = null;
     public bool HasSelection => SelectionStartSample.HasValue && SelectionEndSample.HasValue;
+    public int SampleCount => samples?.Length ?? 0;
+
+    private static WaveFormat OutputFormat => WaveFormat.CreateIeeeFloatWaveFormat(INTERNAL_SAMPLE_RATE, INTERNAL_CHANNELS);
     public TimeSpan CurrentTime => fileReader?.CurrentTime ?? TimeSpan.Zero;
     public TimeSpan TotalTime => fileReader?.TotalTime ?? TimeSpan.Zero;
     public String GetFileName() => Path.GetFileName(file);
-
+    
     // ctor
-    public Track(string file) {
-        fileReader = new AudioFileReader(file);
-        int sampleCount = (int)(fileReader.Length / 4);
-        this.samples = new float[sampleCount];
-        int samplesRead = ((ISampleProvider)fileReader).Read(samples);
-        if (samplesRead < sampleCount) {
-            Array.Resize(ref samples, samplesRead);
+    public Track(string file)
+    {
+        using AudioFileReader reader = new(file);
+        ISampleProvider provider = reader;
+
+        if (reader.WaveFormat.Channels == 2)
+        {
+            provider = new StereoToMonoSampleProvider(provider) { LeftVolume = 0.5f, RightVolume = 0.5f };
+        }
+        else if (reader.WaveFormat.Channels > 2)
+        {
+            throw new NotSupportedException("Only mono and stereo files are supported.");
         }
 
+        if (provider.WaveFormat.SampleRate != INTERNAL_SAMPLE_RATE)
+        {
+            provider = new WdlResamplingSampleProvider(provider, INTERNAL_SAMPLE_RATE);
+        }
+
+        List<float> loaded = new();
+        float[] buffer = new float[INTERNAL_SAMPLE_RATE];
+        int read;
+
+        // translate from mono -> stereo and vice versa
+        while ((read = provider.Read(buffer)) > 0)
+        {
+            loaded.AddRange(new ArraySegment<float>(buffer, 0, read));
+        }
+
+        this.samples = loaded.ToArray();
         this.file = file;
-        this.duration = fileReader.TotalTime;
+        this.duration = TimeSpan.FromSeconds((double)samples.Length / INTERNAL_SAMPLE_RATE);
         this.offset = 0;
         this.timeScale = 1.0f;
         this.Volume = 1.0f;
         this.pitch = 1.0f;
-        this.bits = fileReader.WaveFormat.BitsPerSample;
-        this.channels = fileReader.WaveFormat.Channels;
-        this.sampleRate = fileReader.WaveFormat.SampleRate;
+        this.sampleRate = INTERNAL_SAMPLE_RATE;
         IsDisabled = false;
     }
-    public Track(float[] samples) {
+    public Track(float[] samples)
+    {
         this.samples = samples;
 
         this.file = "";
@@ -69,9 +96,7 @@ public class Track : IDisposable {
         this.timeScale = 1.0f;
         this.Volume = 1.0f;
         this.pitch = 1.0f;
-        this.bits = 32;
-        this.channels = 1;
-        this.sampleRate = 44100;
+        this.sampleRate = INTERNAL_SAMPLE_RATE;
         IsDisabled = false;
     }
     public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
@@ -251,18 +276,19 @@ public class Track : IDisposable {
     }
 
     // file i/o
+
     private void SaveToTempFile()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(tempFilePath));
-        using var writer = new WaveFileWriter(tempFilePath, fileReader?.WaveFormat ?? new WaveFormat(44100, 16, 1));
-        writer.WriteSamples(GetAdjustedSamples(), 0, samples.Length);
+        SaveToFile(tempFilePath);
     }
     public void SaveToFile(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path));
-        using var writer = new WaveFileWriter(path, fileReader?.WaveFormat ?? new WaveFormat(44100, 16, 1));
-        writer.WriteSamples(GetAdjustedSamples(), 0, samples.Length);
+        float[] adjSamples = GetAdjustedSamples();
+        using var writer = new WaveFileWriter(path, OutputFormat);
+        writer.WriteSamples(adjSamples, 0, adjSamples.Length);
     }
+
     public float[] GetAdjustedSamples() {
     float[] adjSamples = new float[samples.Length];
     for (int s = 0; s < samples.Length; s++) {
