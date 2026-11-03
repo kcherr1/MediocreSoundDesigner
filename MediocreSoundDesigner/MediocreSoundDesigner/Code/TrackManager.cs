@@ -12,7 +12,17 @@ public class TrackManager
     public int? SelectionStartX { get; private set; }
     public int? SelectionEndX { get; private set; }
     public bool HasSelection => SelectionStartX.HasValue && SelectionEndX.HasValue;
-    public int DrawTimescale { get; set; }
+    public const int MIN_DRAW_TIMESCALE = 1;
+    public const int MAX_DRAW_TIMESCALE = 200;
+
+    // what the slider asked for; the real value is clamped when read
+    private int requestedDrawTimescale = MIN_DRAW_TIMESCALE;
+    public int DrawTimescale
+    {
+        get => Math.Clamp(requestedDrawTimescale, MIN_DRAW_TIMESCALE, MAX_DRAW_TIMESCALE);
+        set => requestedDrawTimescale = value;
+    }
+
     public PlaybackState State => pseudoCombinedTrack?.State ?? PlaybackState.Stopped;
 
     public TrackManager(Panel panContainer)
