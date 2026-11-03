@@ -40,6 +40,7 @@
       menuEditFlip = new ToolStripMenuItem();
       menuEditReverse = new ToolStripMenuItem();
       menuEditVolume = new ToolStripMenuItem();
+      menuEditPitch = new ToolStripMenuItem();
       menuEditEliminateSilence = new ToolStripMenuItem();
       menuGen = new ToolStripMenuItem();
       menuGenRecord = new ToolStripMenuItem();
@@ -121,7 +122,7 @@
       // 
       // menuEdit
       // 
-      menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditVolume, menuEditEliminateSilence });
+      menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditVolume, menuEditPitch, menuEditEliminateSilence });
       menuEdit.Name = "menuEdit";
       menuEdit.Size = new Size(39, 20);
       menuEdit.Text = "E&dit";
@@ -146,6 +147,13 @@
       menuEditVolume.Size = new Size(180, 22);
       menuEditVolume.Text = "Alter Volume...";
       menuEditVolume.Click += menuEditVolume_Click;
+      // 
+      // menuEditPitch
+      // 
+      menuEditPitch.Name = "menuEditPitch";
+      menuEditPitch.Size = new Size(180, 22);
+      menuEditPitch.Text = "Alter Pitch...";
+      menuEditPitch.Click += menuEditPitch_Click;
       // 
       // menuEditEliminateSilence
       // 
@@ -260,6 +268,7 @@
     private ToolStripMenuItem menuEdit;
     private Button btnPlay;
     private ToolStripMenuItem menuEditVolume;
+    private ToolStripMenuItem menuEditPitch;
     private ToolStripMenuItem menuEditReverse;
     private ToolStripMenuItem menuFile;
     private ToolStripMenuItem menuFileOpen;

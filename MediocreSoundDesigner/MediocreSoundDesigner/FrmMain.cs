@@ -147,6 +147,17 @@ public partial class FrmMain : Form
             frm.ShowDialog();
         }
     }
+    private void menuEditPitch_Click(object sender, EventArgs e)
+    {
+        if (trackManager.SelectedTrack is not null)
+        {
+            FrmEditPitch frm = new();
+            frm.SetSound(trackManager.SelectedTrack);
+            frm.ShowDialog();
+            UpdateSizes();
+            trackManager.RedrawAll();
+        }
+    }
     private void menuEditEliminateSilence_Click(object sender, EventArgs e)
     {
         if (trackManager.SelectedTrack is not null)

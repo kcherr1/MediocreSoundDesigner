@@ -168,8 +168,35 @@ public class Track : IDisposable {
     /// Sets the volume to the given newVolume
     /// </summary>
     public void SetVolume(float newVolume) {
-    Volume = newVolume;
-  }
+        Volume = newVolume;
+    }
+    /// <summary>
+    /// Changes the pitch by resampling. A factor above 1 raises the pitch (and shortens the track).
+    /// </summary>
+    /// <param name="factor">Playback-rate multiplier, e.g. 2.0 = one octave up</param>
+    public void AlterPitch(float factor)
+    {
+        if (factor <= 0) return;
+        int ch = Math.Max(1, channels);
+        int frames = samples.Length / ch;
+        if (frames < 2) return;
+
+        int newFrames = (int)(frames / factor);
+        float[] result = new float[newFrames * ch];
+        for (int f = 0; f < newFrames; f++)
+        {
+            float src = f * factor;
+            int i0 = (int)src;
+            int i1 = Math.Min(i0 + 1, frames - 1);
+            float t = src - i0;
+            for (int c = 0; c < ch; c++)
+            {
+                result[f * ch + c] = samples[i0 * ch + c] * (1 - t) + samples[i1 * ch + c] * t;
+            }
+        }
+        samples = result;
+        pitch *= factor;
+    }
     /// <summary>
     /// Eliminates silence algorithmically based on the selected region and thres
     /// </summary>
