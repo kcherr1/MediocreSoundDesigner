@@ -43,6 +43,8 @@
             menuEditReverse = new ToolStripMenuItem();
             menuEditVolume = new ToolStripMenuItem();
             menuEditEliminateSilence = new ToolStripMenuItem();
+            menuEditUndo = new ToolStripMenuItem();
+            menuEditRedo = new ToolStripMenuItem();
             menuGen = new ToolStripMenuItem();
             menuGenRecord = new ToolStripMenuItem();
             menuGenNoise = new ToolStripMenuItem();
@@ -52,8 +54,7 @@
             sfdSaveFile = new SaveFileDialog();
             trkDrawTimescale = new TrackBar();
             colorDialog = new ColorDialog();
-            menuEditUndo = new ToolStripMenuItem();
-            menuEditRedo = new ToolStripMenuItem();
+            menuEditNormalize = new ToolStripMenuItem();
             panTracks.SuspendLayout();
             menu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trkDrawTimescale).BeginInit();
@@ -136,7 +137,7 @@
             // 
             // menuEdit
             // 
-            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditVolume, menuEditEliminateSilence, menuEditUndo, menuEditRedo });
+            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditVolume, menuEditEliminateSilence, menuEditUndo, menuEditRedo, menuEditNormalize });
             menuEdit.Name = "menuEdit";
             menuEdit.Size = new Size(66, 34);
             menuEdit.Text = "E&dit";
@@ -168,6 +169,22 @@
             menuEditEliminateSilence.Size = new Size(315, 40);
             menuEditEliminateSilence.Text = "Eliminate Silence...";
             menuEditEliminateSilence.Click += menuEditEliminateSilence_Click;
+            // 
+            // menuEditUndo
+            // 
+            menuEditUndo.Name = "menuEditUndo";
+            menuEditUndo.ShortcutKeys = Keys.Control | Keys.Z;
+            menuEditUndo.Size = new Size(315, 40);
+            menuEditUndo.Text = "Undo";
+            menuEditUndo.Click += menuEditUndo_Click;
+            // 
+            // menuEditRedo
+            // 
+            menuEditRedo.Name = "menuEditRedo";
+            menuEditRedo.ShortcutKeys = Keys.Control | Keys.Y;
+            menuEditRedo.Size = new Size(315, 40);
+            menuEditRedo.Text = "Redo";
+            menuEditRedo.Click += menuEditRedo_Click;
             // 
             // menuGen
             // 
@@ -237,21 +254,12 @@
             trkDrawTimescale.Value = 500;
             trkDrawTimescale.Scroll += trkDrawTimescale_Scroll;
             // 
-            // menuEditUndo
+            // menuEditNormalize
             // 
-            menuEditUndo.Name = "menuEditUndo";
-            menuEditUndo.ShortcutKeys = Keys.Control | Keys.Z;
-            menuEditUndo.Size = new Size(315, 40);
-            menuEditUndo.Text = "Undo";
-            menuEditUndo.Click += menuEditUndo_Click;
-            // 
-            // menuEditRedo
-            // 
-            menuEditRedo.Name = "menuEditRedo";
-            menuEditRedo.ShortcutKeys = Keys.Control | Keys.Y;
-            menuEditRedo.Size = new Size(315, 40);
-            menuEditRedo.Text = "Redo";
-            menuEditRedo.Click += menuEditRedo_Click;
+            menuEditNormalize.Name = "menuEditNormalize";
+            menuEditNormalize.Size = new Size(315, 40);
+            menuEditNormalize.Text = "Normalize Audio";
+            menuEditNormalize.Click += menuEditNormalize_Click;
             // 
             // FrmMain
             // 
@@ -305,5 +313,6 @@
     private ToolStripMenuItem menuFileSettings;
         private ToolStripMenuItem menuEditUndo;
         private ToolStripMenuItem menuEditRedo;
+        private ToolStripMenuItem menuEditNormalize;
     }
 }

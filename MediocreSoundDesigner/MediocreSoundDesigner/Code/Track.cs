@@ -119,7 +119,43 @@ public class Track : IDisposable {
   public void ReplaceSamples(float[] samples) {
     this.samples = samples;
   }
-  public void Reverse() {
+
+    public void Normalize()
+    {
+        if (samples.Length == 0 || Volume == 0)
+        {
+            return;
+        }
+
+        float peak = 0;
+
+        for (int i = 0; i < samples.Length; i++)
+        {
+            float value = Math.Abs(samples[i] * Volume);
+            if (value > peak)
+            {
+                peak = value;
+            }
+        }
+
+        if (peak == 0)
+        {
+            return;
+        }
+
+        SaveState();
+
+        float gain = 0.95f / peak;
+
+        for (int i = 0; i < samples.Length; i++)
+        {
+            samples[i] *= gain;
+        }
+
+        PanDrawSamples?.Invalidate();
+    }
+
+    public void Reverse() {
     SaveState();
     for (int i = 0; i < samples.Length / 2; i++) {
       var temp = samples[i];
