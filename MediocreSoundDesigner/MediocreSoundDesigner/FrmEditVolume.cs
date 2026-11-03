@@ -1,7 +1,11 @@
-﻿namespace MediocreSoundDesigner;
+﻿using System.ComponentModel;
+
+namespace MediocreSoundDesigner;
 
 public partial class FrmEditVolume : FrmEditMaster
 {
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public List<Track> SelectedTracks { get; set; } = new();
 
     public FrmEditVolume()

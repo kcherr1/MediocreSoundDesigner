@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             panTracks = new Panel();
             lblPlayhead = new Label();
             lblDebug = new Label();
@@ -47,14 +48,16 @@
             menuGenRecord = new ToolStripMenuItem();
             menuGenNoise = new ToolStripMenuItem();
             menuGenGradientNoise = new ToolStripMenuItem();
-            btnPlay = new Button();
+            bttnPlay = new Button();
             tmrUpdate = new System.Windows.Forms.Timer(components);
             sfdSaveFile = new SaveFileDialog();
             colorDialog = new ColorDialog();
             BottomPanel = new Panel();
-            trkDrawTimescale = new TrackBar();
             lblCurrTime = new Label();
+            trkDrawTimescale = new TrackBar();
             pnlTopActions = new Panel();
+            bttnMicOptions = new Button();
+            bttnRecord = new Button();
             panTracks.SuspendLayout();
             menu.SuspendLayout();
             BottomPanel.SuspendLayout();
@@ -195,23 +198,23 @@
             menuGenGradientNoise.Text = "Gradient Noise";
             menuGenGradientNoise.Click += menuGenGradientNoise_Click;
             // 
-            // btnPlay
+            // bttnPlay
             // 
-            btnPlay.AutoSize = true;
-            btnPlay.BackColor = Color.Transparent;
-            btnPlay.BackgroundImage = Properties.Resources.play;
-            btnPlay.BackgroundImageLayout = ImageLayout.Stretch;
-            btnPlay.FlatAppearance.BorderSize = 0;
-            btnPlay.FlatAppearance.MouseDownBackColor = Color.Transparent;
-            btnPlay.FlatAppearance.MouseOverBackColor = Color.Transparent;
-            btnPlay.FlatStyle = FlatStyle.Flat;
-            btnPlay.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnPlay.Location = new Point(15, 18);
-            btnPlay.Name = "btnPlay";
-            btnPlay.Size = new Size(41, 28);
-            btnPlay.TabIndex = 6;
-            btnPlay.UseVisualStyleBackColor = false;
-            btnPlay.Click += btnPlay_Click;
+            bttnPlay.AutoSize = true;
+            bttnPlay.BackColor = Color.Transparent;
+            bttnPlay.BackgroundImage = (Image)resources.GetObject("bttnPlay.BackgroundImage");
+            bttnPlay.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnPlay.FlatAppearance.BorderSize = 0;
+            bttnPlay.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnPlay.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnPlay.FlatStyle = FlatStyle.Flat;
+            bttnPlay.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnPlay.Location = new Point(70, 4);
+            bttnPlay.Name = "bttnPlay";
+            bttnPlay.Size = new Size(41, 41);
+            bttnPlay.TabIndex = 6;
+            bttnPlay.UseVisualStyleBackColor = false;
+            bttnPlay.Click += btnPlay_Click;
             // 
             // tmrUpdate
             // 
@@ -221,6 +224,7 @@
             // 
             // BottomPanel
             // 
+            BottomPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             BottomPanel.BackColor = Color.DarkGray;
             BottomPanel.Controls.Add(lblCurrTime);
             BottomPanel.Controls.Add(trkDrawTimescale);
@@ -229,20 +233,6 @@
             BottomPanel.Name = "BottomPanel";
             BottomPanel.Size = new Size(1604, 72);
             BottomPanel.TabIndex = 8;
-            // 
-            // trkDrawTimescale
-            // 
-            trkDrawTimescale.LargeChange = 50;
-            trkDrawTimescale.Location = new Point(1120, 15);
-            trkDrawTimescale.Maximum = 1000;
-            trkDrawTimescale.Minimum = 1;
-            trkDrawTimescale.Name = "trkDrawTimescale";
-            trkDrawTimescale.Size = new Size(470, 45);
-            trkDrawTimescale.SmallChange = 10;
-            trkDrawTimescale.TabIndex = 8;
-            trkDrawTimescale.TickFrequency = 40;
-            trkDrawTimescale.Value = 500;
-            trkDrawTimescale.Scroll += this.trkDrawTimescale_Scroll;
             // 
             // lblCurrTime
             // 
@@ -257,15 +247,66 @@
             lblCurrTime.Text = "Current Time / Total Time";
             lblCurrTime.Click += label1_Click;
             // 
+            // trkDrawTimescale
+            // 
+            trkDrawTimescale.LargeChange = 50;
+            trkDrawTimescale.Location = new Point(1120, 15);
+            trkDrawTimescale.Maximum = 1000;
+            trkDrawTimescale.Minimum = 1;
+            trkDrawTimescale.Name = "trkDrawTimescale";
+            trkDrawTimescale.Size = new Size(470, 45);
+            trkDrawTimescale.SmallChange = 10;
+            trkDrawTimescale.TabIndex = 8;
+            trkDrawTimescale.TickFrequency = 40;
+            trkDrawTimescale.Value = 500;
+            trkDrawTimescale.Scroll += trkDrawTimescale_Scroll;
+            // 
             // pnlTopActions
             // 
+            pnlTopActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             pnlTopActions.BackColor = Color.DarkGray;
-            pnlTopActions.Controls.Add(btnPlay);
+            pnlTopActions.Controls.Add(bttnMicOptions);
+            pnlTopActions.Controls.Add(bttnRecord);
+            pnlTopActions.Controls.Add(bttnPlay);
             pnlTopActions.ForeColor = Color.White;
             pnlTopActions.Location = new Point(0, 24);
             pnlTopActions.Name = "pnlTopActions";
             pnlTopActions.Size = new Size(1604, 49);
             pnlTopActions.TabIndex = 10;
+            // 
+            // bttnMicOptions
+            // 
+            bttnMicOptions.AutoSize = true;
+            bttnMicOptions.BackColor = Color.Transparent;
+            bttnMicOptions.BackgroundImage = (Image)resources.GetObject("bttnMicOptions.BackgroundImage");
+            bttnMicOptions.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnMicOptions.FlatAppearance.BorderSize = 0;
+            bttnMicOptions.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnMicOptions.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnMicOptions.FlatStyle = FlatStyle.Flat;
+            bttnMicOptions.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnMicOptions.Location = new Point(136, 5);
+            bttnMicOptions.Name = "bttnMicOptions";
+            bttnMicOptions.Size = new Size(38, 38);
+            bttnMicOptions.TabIndex = 8;
+            bttnMicOptions.UseVisualStyleBackColor = false;
+            // 
+            // bttnRecord
+            // 
+            bttnRecord.AutoSize = true;
+            bttnRecord.BackColor = Color.Transparent;
+            bttnRecord.BackgroundImage = (Image)resources.GetObject("bttnRecord.BackgroundImage");
+            bttnRecord.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnRecord.FlatAppearance.BorderSize = 0;
+            bttnRecord.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnRecord.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnRecord.FlatStyle = FlatStyle.Flat;
+            bttnRecord.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnRecord.Location = new Point(10, 5);
+            bttnRecord.Name = "bttnRecord";
+            bttnRecord.Size = new Size(41, 41);
+            bttnRecord.TabIndex = 7;
+            bttnRecord.UseVisualStyleBackColor = false;
             // 
             // FrmMain
             // 
@@ -302,7 +343,7 @@
     private OpenFileDialog ofdLoadFile;
     private MenuStrip menu;
     private ToolStripMenuItem menuEdit;
-    private Button btnPlay;
+    private Button bttnPlay;
     private ToolStripMenuItem menuEditVolume;
     private ToolStripMenuItem menuEditReverse;
     private ToolStripMenuItem menuFile;
@@ -323,7 +364,8 @@
     private ToolStripMenuItem menuGenRecord;
     private ToolStripMenuItem menuFileSettings;
         private Panel BottomPanel;
-        private TrackBar trkDrawTimescale;
         private TextBox textBox1;
+        private Button bttnRecord;
+        private Button bttnMicOptions;
     }
 }

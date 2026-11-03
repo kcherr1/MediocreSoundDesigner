@@ -1,7 +1,11 @@
-﻿namespace MediocreSoundDesigner;
+﻿using System.ComponentModel;
+
+namespace MediocreSoundDesigner;
 
 public partial class FrmEditEliminateSilence : FrmEditMaster
 {
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // added to avoid runtime variable serialization error in designer
     public List<Track> SelectedTracks { get; set; } = new();
 
     public FrmEditEliminateSilence()

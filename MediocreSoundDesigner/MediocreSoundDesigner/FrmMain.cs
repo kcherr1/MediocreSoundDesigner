@@ -28,7 +28,7 @@ public partial class FrmMain : Form
             null, panTracks, new object[] { true });
 
         trackManager = new(panTracks);
-        btnPlay.BackgroundImage = Resources.play;
+        bttnPlay.BackgroundImage = Resources.play;
         trackManager.DrawTimescale = trkDrawTimescale.Value;
         UpdateSizes();
         ApplySettings();
@@ -94,12 +94,12 @@ public partial class FrmMain : Form
         if (trackManager.State is NAudio.Wave.PlaybackState.Stopped or NAudio.Wave.PlaybackState.Paused)
         {
             trackManager.PlayAll();
-            btnPlay.BackgroundImage = Resources.pause;
+            bttnPlay.BackgroundImage = Resources.pause;
         }
         else
         {
             trackManager.PauseAll();
-            btnPlay.BackgroundImage = Resources.play;
+            bttnPlay.BackgroundImage = Resources.play;
         }
     }
 
@@ -245,15 +245,15 @@ public partial class FrmMain : Form
     {
         if (trackManager.Tracks.Count > 0)
         {
-            btnPlay.BackgroundImage = trackManager.State == NAudio.Wave.PlaybackState.Playing ? Resources.pause : Resources.play;
-            btnPlay.Visible = true;
+            bttnPlay.BackgroundImage = trackManager.State == NAudio.Wave.PlaybackState.Playing ? Resources.pause : Resources.play;
+            bttnPlay.Visible = true;
             lblPlayhead.Left = trackManager.GetPlayheadPos();
             lblPlayhead.Visible = true;
         }
         else
         {
-            btnPlay.BackgroundImage = null;
-            btnPlay.Visible = false;
+            bttnPlay.BackgroundImage = null;
+            bttnPlay.Visible = false;
             lblPlayhead.Visible = false;
         }
     }
