@@ -8,7 +8,6 @@ public partial class FrmGenRecord : FrmEditMaster
     private WaveIn waveSource = null;
     private List<float> recordedSamples;
     private bool isRecording;
-    private int targetChannels = 1;
 
     public FrmGenRecord()
     {
@@ -25,7 +24,28 @@ public partial class FrmGenRecord : FrmEditMaster
 
     protected override void Apply()
     {
+        StopIfRecording();
         track.ReplaceSamples(recordedSamples.ToArray());
+    }
+
+    protected override void Cancel()
+    {
+        StopIfRecording();
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        StopIfRecording();
+        base.OnFormClosing(e);
+    }
+
+    private void StopIfRecording()
+    {
+        if (isRecording)
+        {
+            waveSource?.StopRecording();
+            isRecording = false;
+        }
     }
 
     private void btnRecord_Click(object sender, EventArgs e)
@@ -44,13 +64,10 @@ public partial class FrmGenRecord : FrmEditMaster
                 recordedSamples.Clear();
                 btnRecord.BackgroundImage = Resources.stop;
 
-                // Default to standard 44.1 kHz mono
-                int sampleRate = 44100;
-                int inputChannels = 1;
-
+                // Always record in the app's internal format
                 waveSource = new WaveIn
                 {
-                    WaveFormat = new WaveFormat(sampleRate, 16, inputChannels)
+                    WaveFormat = new WaveFormat(Track.INTERNAL_SAMPLE_RATE, 16, Track.INTERNAL_CHANNELS)
                 };
 
                 waveSource.DataAvailable += WaveSource_DataAvailable;
@@ -72,21 +89,17 @@ public partial class FrmGenRecord : FrmEditMaster
         int bytesPerSample = waveSource.WaveFormat.BitsPerSample / 8;
         int channels = waveSource.WaveFormat.Channels;
         int frameSize = bytesPerSample * channels;
-        int sampleCount = e.BytesRecorded / frameSize;
+        int frameCount = e.BytesRecorded / frameSize;
 
-        for (int i = 0; i < sampleCount; i++)
+        for (int i = 0; i < frameCount; i++)
         {
-            int offset = i * frameSize;
-            short sample16 = BitConverter.ToInt16(e.Buffer, offset);
-            float floatSample = sample16 / 32768f;
-
-            recordedSamples.Add(floatSample);
-
-            // If the target playback track is stereo, duplicate sample to prevent 2x playback speed
-            if (targetChannels == 2)
+            float sum = 0;
+            for (int c = 0; c < channels; c++)
             {
-                recordedSamples.Add(floatSample);
+                int offset = (i * frameSize) + (c * bytesPerSample);
+                sum += BitConverter.ToInt16(e.Buffer, offset) / 32768f;
             }
+            recordedSamples.Add(sum / channels);
         }
     }
 
