@@ -30,6 +30,8 @@ public class Track : IDisposable
     private int drawTimescale;
     private WaveFormat overrideFormat;
 
+    private float[] samplesBeforeEffect;
+
    // properties
     public int DrawOffset { get; set; }
     public bool IsDisabled { get; private set; }
@@ -179,14 +181,172 @@ public class Track : IDisposable
     g.FillRectangle(brush, startPx, 0, endPx - startPx, PanDrawSamples.Height);
   }
 
-  public void AlterTimeScale(float scale) {
+
+	public void AlterTimeScale(float scale) {
   }
 
   public void SetVolume(float newVolume) {
     Volume = newVolume;
   }
 
-  public void SetTrackColor(System.Drawing.Color color) {
+
+
+	// effect = "Deep", "Chipmunk", "VoiceOnly" or "RemoveVoice"
+	public void ApplyEffect(string effect)
+	{
+		int rate = sampleRate > 0 ? sampleRate : Format.SampleRate;
+		int ch = channels > 0 ? channels : Format.Channels;
+
+		samplesBeforeEffect = CloneSamples();      // save the old sound so Undo works
+		float[] result = CloneSamples();           // work on a copy
+                                                   //   int fadeLength = rate * 2;
+        float fadeSeconds = 5;
+        int fadeLength = (int)(rate * fadeSeconds);
+		switch (effect)
+		{
+			case "Deep":
+				result = ChangePitch(result, rate, ch, 0.75f);    // lower voice
+				break;
+
+			case "Chipmunk":
+				result = ChangePitch(result, rate, ch, 1.5f);     // higher voice
+				break;
+
+			case "VoiceOnly":
+				result = KeepVoiceOnly(result, rate, ch);         // quiet the music
+				break;
+
+            case "FadeIn":
+                {
+                    int totalFames = result.Length / ch;
+                    fadeLength = Math.Min(fadeLength, totalFames);
+
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        int frame = i / ch;
+                        if (frame >= fadeLength) break;
+                        result[i] *= (float)frame / fadeLength;
+
+                    }
+                    break;
+                }
+
+            case "FadeOut":
+                {
+                    int totalFrames = result.Length / ch;
+                    fadeLength = Math.Min(fadeLength, totalFrames);
+
+                    
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        int framesLeft = totalFrames - i / ch;
+                        if (framesLeft < fadeLength)
+                            result[i] *= (float)framesLeft / fadeLength;
+                    }
+                    break;
+                }
+                
+			case "RemoveVoice":
+                if (ch != 2)                                      // needs left + right channels
+                {
+                    MessageBox.Show("vocice removal need a stero track (left + right).");
+                    break;
+                }
+                float biggestDifference = 0;
+                for (int i = 0; i + 1 < result.Length; i += 2)
+                    biggestDifference = Math.Max(biggestDifference, Math.Abs(result[i] - result[i + 1]));
+                if (biggestDifference < 0.01f)
+                {
+                    MessageBox.Show("left and right ");
+                    break;
+                }
+                for (int i =0; i +1 < result.Length; i += 2)
+                {
+                    float difference = (result[i] - result[i + 1]) / 2;
+                    result[i] = difference;
+                    result[i + 1] = difference;
+                }
+                break;
+				
+		}
+
+		samples = result;
+	}
+
+	// Changes the pitch with NAudio's built-in pitch shifter.
+	// pitch 1.0 = same, below 1 = deeper, above 1 = higher. The length stays the same.
+	private float[] ChangePitch(float[] input, int rate, int ch, float pitch)
+	{
+		// turn our float array into something NAudio can read
+		byte[] bytes = new byte[input.Length * 4];
+		Buffer.BlockCopy(input, 0, bytes, 0, bytes.Length);
+		var raw = new RawSourceWaveStream(new MemoryStream(bytes), WaveFormat.CreateIeeeFloatWaveFormat(rate, ch));
+
+		var shifter = new SmbPitchShiftingSampleProvider(raw.ToSampleProvider(), 4096, 4, pitch);
+
+		// read everything back out into a new array
+		float[] output = new float[input.Length];
+		int total = 0;
+		while (total < output.Length)
+		{
+			int read = shifter.Read(output.AsSpan(total));
+			if (read == 0) break;
+			total += read;
+		}
+		return output;
+	}
+
+	// Keeps the human voice and quiets the music (a rough method, not AI).
+	private float[] KeepVoiceOnly(float[] input, int rate, int ch)
+	{
+		float[] output = new float[input.Length];
+
+		// STEP 1: singers are usually mixed in the CENTER, so left and right both contain the voice.
+		// Averaging the channels keeps the center and weakens sounds placed at the sides.
+		for (int i = 0; i + ch - 1 < input.Length; i += ch)
+		{
+			float sum = 0;
+			for (int c = 0; c < ch; c++)
+				sum += input[i + c];
+
+			float middle = sum / ch;
+			for (int c = 0; c < ch; c++)
+				output[i + c] = middle;
+		}
+
+		// STEP 2: speech mostly lives between 200 Hz and 4000 Hz.
+		// Cut the deep bass below it and the sharp cymbals above it.
+		var highPass = new NAudio.Dsp.BiQuadFilter[ch];
+		var lowPass = new NAudio.Dsp.BiQuadFilter[ch];
+		for (int c = 0; c < ch; c++)
+		{
+			highPass[c] = NAudio.Dsp.BiQuadFilter.HighPassFilter(rate, 200, 1);
+			lowPass[c] = NAudio.Dsp.BiQuadFilter.LowPassFilter(rate, 4000, 1);
+		}
+		for (int i = 0; i < output.Length; i++)
+			output[i] = lowPass[i % ch].Transform(highPass[i % ch].Transform(output[i]));
+
+		// STEP 3: filtering made it quieter, so scale it back up (loudest sample = 0.9)
+		float peak = 0;
+		foreach (float s in output)
+			peak = Math.Max(peak, Math.Abs(s));
+		if (peak > 0)
+			for (int i = 0; i < output.Length; i++)
+				output[i] = output[i] / peak * 0.9f;
+
+		return output;
+	}
+
+	public bool CanUndoEffect => samplesBeforeEffect != null;
+
+	public void UndoEffect()
+	{
+		if (samplesBeforeEffect == null) return;
+		samples = samplesBeforeEffect;
+		samplesBeforeEffect = null;
+	}
+
+	public void SetTrackColor(System.Drawing.Color color) {
     TrackColor = color;
 
     if (PanDrawSamples is not null) {
@@ -448,7 +608,7 @@ public class Track : IDisposable
       );
 
       using SolidBrush headerBrush = new(headerColor);
-      using Pen divider = new(System.Drawing.Color.FromArgb(70, 0, 0, 0));
+      using Pen divider = new(System.Drawing.Color.FromArgb(20, 0, 0, 0));
       using System.Drawing.Font nameFont = new("Arial", 10f, System.Drawing.FontStyle.Bold);
 
       int headerX = horizontalScrollOffset;
