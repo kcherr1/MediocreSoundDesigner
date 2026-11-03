@@ -67,7 +67,9 @@ public class Track : IDisposable
         List<float> loaded = new();
         float[] buffer = new float[INTERNAL_SAMPLE_RATE];
         int read;
-        while ((read = ((ISampleProvider)reader).Read(buffer)) > 0)
+
+        // translate from mono -> stereo and vice versa
+        while ((read = provider.Read(buffer)) > 0)
         {
             loaded.AddRange(new ArraySegment<float>(buffer, 0, read));
         }
