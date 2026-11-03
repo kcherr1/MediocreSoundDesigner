@@ -71,15 +71,16 @@
             panTracks.BackColor = Color.DimGray;
             panTracks.BorderStyle = BorderStyle.Fixed3D;
             panTracks.Controls.Add(lblPlayhead);
-            panTracks.Location = new Point(10, 102);
+            panTracks.Location = new Point(-8, 73);
             panTracks.Name = "panTracks";
-            panTracks.Size = new Size(1580, 541);
+            panTracks.Size = new Size(1612, 647);
             panTracks.TabIndex = 0;
+            panTracks.Paint += panTracks_Paint;
             // 
             // lblPlayhead
             // 
             lblPlayhead.BackColor = Color.White;
-            lblPlayhead.Location = new Point(39, -2);
+            lblPlayhead.Location = new Point(154, 1);
             lblPlayhead.Name = "lblPlayhead";
             lblPlayhead.Size = new Size(5, 385);
             lblPlayhead.TabIndex = 9;
@@ -224,14 +225,13 @@
             // 
             // BottomPanel
             // 
-            BottomPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             BottomPanel.BackColor = Color.DarkGray;
             BottomPanel.Controls.Add(lblCurrTime);
             BottomPanel.Controls.Add(trkDrawTimescale);
             BottomPanel.ForeColor = Color.White;
-            BottomPanel.Location = new Point(0, 711);
+            BottomPanel.Location = new Point(0, 718);
             BottomPanel.Name = "BottomPanel";
-            BottomPanel.Size = new Size(1604, 72);
+            BottomPanel.Size = new Size(1604, 65);
             BottomPanel.TabIndex = 8;
             // 
             // lblCurrTime

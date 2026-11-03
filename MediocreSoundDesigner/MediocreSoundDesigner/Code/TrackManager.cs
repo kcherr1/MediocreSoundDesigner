@@ -5,6 +5,8 @@ namespace MediocreSoundDesigner;
 public class TrackManager
 {
     private Track pseudoCombinedTrack;
+    private Track pnlHeader;
+    private Track pnlWaveForm;
     private Panel panContainer;
     public List<Track> Tracks { get; private set; }
     public List<Track> SelectedTracks { get; } = new();

@@ -267,18 +267,74 @@ public partial class FrmMain : Form
     // Helper methods
     private Panel CreateTrackPanel(Track track)
     {
-        DoubleBufferedPanel pan = new()
+        Panel panTrackContainer = new()
         {
             BackColor = Settings.Color.TrackBg_Unselected,
             Width = panTracks.Width,
             Left = 0,
             Top = 0,
+            BorderStyle = BorderStyle.FixedSingle
         };
+        Button bttnMute = new()
+        {
+            BackColor = Color.Transparent,
+            BackgroundImage = Resources.volume,
+            BackgroundImageLayout = ImageLayout.Stretch,
+            FlatStyle = FlatStyle.Flat,
+            FlatAppearance = { BorderSize = 0, MouseDownBackColor = Color.Transparent, MouseOverBackColor = Color.Transparent },
+            Size = new Size(34, 35),
+            Location = new Point(43, 6),
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+        };
+        Button bttnDelete = new()
+        {
+            BackColor = Color.Transparent,
+            BackgroundImage = Resources.close,
+            BackgroundImageLayout = ImageLayout.Stretch,
+            FlatStyle = FlatStyle.Flat,
+            FlatAppearance = { BorderSize = 0, MouseDownBackColor = Color.Transparent, MouseOverBackColor = Color.Transparent },
+            Size = new Size(34, 35),
+            Location = new Point(3, 6),
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+        };
+        DoubleBufferedPanel panTrack = new()
+        {
+            BackColor = Color.LightGray,
+            Width = panTracks.Width,
+            Left = 0,
+            Location = new Point(0, 45),
+            BorderStyle = BorderStyle.FixedSingle
+        };
+
+        // add inner elements to the track container panel
+        panTrackContainer.Controls.Add(bttnMute);
+        panTrackContainer.Controls.Add(panTrack);
+        panTrackContainer.Controls.Add(bttnDelete);
 
         int dragStartX = 0;
         bool isDragging = false;
 
-        pan.MouseDown += (sender, e) =>
+        bttnMute.Click += (sender, e) =>
+        {
+            track.ToggleDisabled();
+            bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
+            track.PanDrawSamples.Invalidate();
+        };
+
+        bttnDelete.Click += (sender, e) =>
+        {
+            if (MessageBox.Show("Are you sure you want to delete this track? This is NOT undoable!", "Are You Sure?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+            {
+                panTracks.Controls.Remove(panTrackContainer);
+                panTrackContainer.Dispose();
+                track.PanDrawSamples.Dispose();
+                track.Dispose();
+                trackManager.RemTrack(track);
+                UpdateSizes();
+            }
+        };
+
+        panTrackContainer.MouseDown += (sender, e) =>
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -304,7 +360,7 @@ public partial class FrmMain : Form
             }
         };
 
-        pan.MouseMove += (sender, e) =>
+        panTrackContainer.MouseMove += (sender, e) =>
         {
             if (isDragging)
             {
@@ -312,7 +368,7 @@ public partial class FrmMain : Form
             }
         };
 
-        pan.MouseUp += (sender, e) =>
+        panTrackContainer.MouseUp += (sender, e) =>
         {
             if (e.Button == MouseButtons.Left && isDragging)
             {
@@ -336,14 +392,14 @@ public partial class FrmMain : Form
             }
         };
 
-        pan.DoubleClick += (sender, e) =>
+        panTrackContainer.DoubleClick += (sender, e) =>
         {
             track.ToggleDisabled();
             track.PanDrawSamples.Invalidate();
         };
 
         // Only render the selection box if THIS track is currently selected
-        pan.Paint += (sender, e) =>
+        panTrack.Paint += (sender, e) =>
         {
             bool isSelected = trackManager.SelectedTracks.Contains(track);
             int? selStart = isSelected ? trackManager.SelectionStartX : null;
@@ -352,36 +408,58 @@ public partial class FrmMain : Form
             track.DrawSamples(e.Graphics, trackManager.DrawTimescale, selStart, selEnd);
         };
 
-        panTracks.Controls.Add(pan);
-        track.LinkPanels(pan, panTracks);
+        panTracks.Controls.Add(panTrackContainer);
+        track.LinkPanels(panTrack, panTracks);
         trackManager.SelectTrack(track);
 
-        return pan;
+        return panTrackContainer;
     }
 
     private void UpdateSizes()
+{
+    const int PADDING = 15;
+
+    panTracks.Left = PADDING;
+    panTracks.Width = ClientSize.Width - (PADDING * 2);
+
+    if (trackManager.Tracks.Count == 0) return;
+
+    int trackCount = trackManager.Tracks.Count;
+    int containerHeight = Math.Max(100, (panTracks.Height / trackCount) - 4);
+    int top = 0;
+
+    foreach (Control ctrl in panTracks.Controls)
     {
-        const int PADDING = 15;
-
-        panTracks.Left = PADDING;
-        panTracks.Width = ClientSize.Width - (PADDING * 2);
-
-        int top = 0;
-        foreach (Track track in trackManager.Tracks)
+        // track outer panel (holding buttons and track panel)
+        if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
         {
-            track.PanDrawSamples.Left = 0;
-            track.PanDrawSamples.Width = panTracks.Width;
-            track.PanDrawSamples.Height = (panTracks.Height / trackManager.Tracks.Count) - 1;
-            track.PanDrawSamples.Top = top;
-            track.PanDrawSamples.Invalidate();
-            top += track.PanDrawSamples.Height;
+            panTrackContainer.Left = 0;
+            panTrackContainer.Width = panTracks.Width;
+            panTrackContainer.Height = containerHeight;
+            panTrackContainer.Top = top;
+            top += containerHeight + 4;
+
+            // handle inner panel (track)
+            foreach (Control child in panTrackContainer.Controls)
+            {
+                if (child is DoubleBufferedPanel panTrack)
+                {
+                    panTrack.Left = 0;
+                    panTrack.Top = 45; // Positioned below bttnMute and bttnDelete
+                    panTrack.Width = panTrackContainer.Width;
+                    panTrack.Height = Math.Max(10, panTrackContainer.Height - 45);
+                    panTrack.Invalidate();
+                }
+            }
         }
-        trkDrawTimescale.Width = panTracks.Width;
-        trkDrawTimescale.Left = PADDING;
-        lblPlayhead.Left = 0;
-        lblPlayhead.Height = panTracks.Height;
-        lblPlayhead.BringToFront();
     }
+
+    trkDrawTimescale.Width = panTracks.Width;
+    trkDrawTimescale.Left = PADDING;
+    lblPlayhead.Left = 0;
+    lblPlayhead.Height = panTracks.Height;
+    lblPlayhead.BringToFront();
+}
 
     private void trackDrawTimeScale_Scroll(object sender, EventArgs e)
     {
@@ -394,6 +472,21 @@ public partial class FrmMain : Form
     }
 
     private void label1_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void panTracks_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void pnlWaveform_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void pnlTrackContainer_Paint(object sender, PaintEventArgs e)
     {
 
     }
