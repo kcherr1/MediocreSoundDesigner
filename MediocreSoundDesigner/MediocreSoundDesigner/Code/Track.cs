@@ -37,6 +37,7 @@ public class Track : IDisposable {
     public bool HasSelection => SelectionStartSample.HasValue && SelectionEndSample.HasValue;
     public TimeSpan CurrentTime => fileReader?.CurrentTime ?? TimeSpan.Zero;
     public TimeSpan TotalTime => fileReader?.TotalTime ?? TimeSpan.Zero;
+    public String GetFileName() => Path.GetFileName(file);
 
     // ctor
     public Track(string file) {

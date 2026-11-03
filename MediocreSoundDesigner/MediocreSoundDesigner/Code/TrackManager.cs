@@ -7,6 +7,7 @@ public class TrackManager
     private Track pseudoCombinedTrack;
     private Panel panContainer;
     public List<Track> Tracks { get; private set; }
+    public int TrackCounter { get; private set; }
     public List<Track> SelectedTracks { get; } = new();
     public Track SelectedTrack => SelectedTracks.FirstOrDefault();
     public int? SelectionStartX { get; private set; }
@@ -19,6 +20,7 @@ public class TrackManager
 
     public TrackManager(Panel panContainer)
     {
+        TrackCounter = 0;
         Tracks = new();
         pseudoCombinedTrack = null;
         this.panContainer = panContainer;
@@ -26,6 +28,7 @@ public class TrackManager
 
     public void AddTrack(Track track)
     {
+        TrackCounter++;
         Tracks.Add(track);
     }
 

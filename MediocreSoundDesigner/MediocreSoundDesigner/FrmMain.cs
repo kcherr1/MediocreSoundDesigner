@@ -306,6 +306,16 @@ public partial class FrmMain : Form
             Location = new Point(3, 6),
             Font = new Font("Segoe UI", 12, FontStyle.Bold),
         };
+
+        string fileName = track.GetFileName();
+        Label lblTrackName = new()
+        {
+            Text = string.IsNullOrWhiteSpace(fileName) ? $"Track {trackManager.TrackCounter}" : fileName,
+            AutoSize = true,
+            Location = new Point(100, 6),
+            Font = new Font("Segoe UI", 20, FontStyle.Bold),
+            ForeColor = Color.Black
+        };
         DoubleBufferedPanel panTrack = new()
         {
             BackColor = Settings.Color.TrackBg_Unselected,
@@ -319,6 +329,7 @@ public partial class FrmMain : Form
         panTrackContainer.Controls.Add(bttnMute);
         panTrackContainer.Controls.Add(panTrack);
         panTrackContainer.Controls.Add(bttnDelete);
+        panTrackContainer.Controls.Add(lblTrackName);
 
         int dragStartX = 0;
         bool isDragging = false;
@@ -467,7 +478,7 @@ public partial class FrmMain : Form
         if (trackManager.Tracks.Count == 0) return;
 
         int trackCount = trackManager.Tracks.Count;
-        int containerHeight = Math.Max(60, (panTracks.ClientSize.Height / trackCount) - 4);
+        int containerHeight = 100;
         int top = 0;
 
         foreach (Control ctrl in panTracks.Controls)
@@ -475,7 +486,7 @@ public partial class FrmMain : Form
             if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
             {
                 panTrackContainer.Left = 0;
-                panTrackContainer.Width = panTracks.ClientSize.Width;
+                panTrackContainer.Width = panTracks.Width;
                 panTrackContainer.Height = containerHeight;
                 panTrackContainer.Top = top;
                 top += containerHeight + 4;
@@ -493,6 +504,9 @@ public partial class FrmMain : Form
                 }
             }
         }
+        lblPlayhead.Left = 0;
+        lblPlayhead.Height = Math.Max(panTracks.ClientSize.Height, top);
+        lblPlayhead.BringToFront();
     }
 }
 
