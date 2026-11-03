@@ -123,6 +123,11 @@ public partial class FrmMain : Form {
         trackManager.SelectedTrack?.PanDrawSamples?.Invalidate();
     }
 
+    private void menuEditNormalize_Click(object sender, EventArgs e)
+    {
+        trackManager.SelectedTrack?.Normalize();
+    }
+
     private void menuEditVolume_Click(object sender, EventArgs e) {
     if (trackManager.SelectedTrack is not null) {
       FrmEditVolume frm = new();
