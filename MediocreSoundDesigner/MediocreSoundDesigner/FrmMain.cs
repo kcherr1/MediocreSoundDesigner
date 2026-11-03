@@ -440,20 +440,20 @@ public partial class FrmMain : Form
         int availableWidth = panApp.ClientSize.Width;
 
         // align top action panel
-        pnlTopActions.Left = 0;
-        pnlTopActions.Top = menu.Bottom;
-        pnlTopActions.Width = availableWidth;
+        panTopActions.Left = 0;
+        panTopActions.Top = menu.Bottom;
+        panTopActions.Width = availableWidth;
 
         // align bottom action panel
-        BottomPanel.Left = 0;
-        BottomPanel.Top = panApp.ClientSize.Height - BottomPanel.Height;
-        BottomPanel.Width = availableWidth;
+        panBottomActions.Left = 0;
+        panBottomActions.Top = panApp.ClientSize.Height - panBottomActions.Height;
+        panBottomActions.Width = availableWidth;
 
         // align middle area holding tracks
         panTracks.Left = 0;
-        panTracks.Top = pnlTopActions.Bottom;
+        panTracks.Top = panTopActions.Bottom;
         panTracks.Width = availableWidth;
-        panTracks.Height = Math.Max(50, BottomPanel.Top - panTracks.Top);
+        panTracks.Height = Math.Max(50, panBottomActions.Top - panTracks.Top);
 
         // align playhead label
         lblPlayhead.Left = 0;
@@ -462,17 +462,17 @@ public partial class FrmMain : Form
 
         // align timer with center of screen
         lblCurrTime.AutoSize = true;
-        lblCurrTime.Left = (BottomPanel.ClientSize.Width - lblCurrTime.Width) / 2;
-        lblCurrTime.Top = (BottomPanel.ClientSize.Height - lblCurrTime.Height) / 2;
+        lblCurrTime.Left = (panBottomActions.ClientSize.Width - lblCurrTime.Width) / 2;
+        lblCurrTime.Top = (panBottomActions.ClientSize.Height - lblCurrTime.Height) / 2;
 
         // align timescale trackbar with icon
         picSoundWave.Left = lblCurrTime.Right + 350;
-        picSoundWave.Top = (BottomPanel.ClientSize.Height - picSoundWave.Height) / 2;
+        picSoundWave.Top = (panBottomActions.ClientSize.Height - picSoundWave.Height) / 2;
 
         // 4. Position Timescale Slider directly to the right of the Icon
         trkDrawTimescale.Left = picSoundWave.Right + 8;
-        trkDrawTimescale.Top = (BottomPanel.ClientSize.Height - trkDrawTimescale.Height) / 2;
-        trkDrawTimescale.Width = (BottomPanel.ClientSize.Width - 15) - trkDrawTimescale.Left;
+        trkDrawTimescale.Top = (panBottomActions.ClientSize.Height - trkDrawTimescale.Height) / 2;
+        trkDrawTimescale.Width = (panBottomActions.ClientSize.Width - 15) - trkDrawTimescale.Left;
 
         // adjust track sizing
         if (trackManager.Tracks.Count == 0) return;

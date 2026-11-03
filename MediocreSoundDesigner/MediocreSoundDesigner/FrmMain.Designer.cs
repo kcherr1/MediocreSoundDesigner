@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             panTracks = new Panel();
             lblPlayhead = new Label();
-            pnlTopActions = new Panel();
+            panTopActions = new Panel();
             bttnMicOptions = new Button();
             bttnRecord = new Button();
             bttnPlay = new Button();
@@ -55,15 +55,15 @@
             tmrUpdate = new System.Windows.Forms.Timer(components);
             sfdSaveFile = new SaveFileDialog();
             colorDialog = new ColorDialog();
-            BottomPanel = new Panel();
+            panBottomActions = new Panel();
             picSoundWave = new PictureBox();
             lblCurrTime = new Label();
             trkDrawTimescale = new TrackBar();
             panApp = new Panel();
             panTracks.SuspendLayout();
-            pnlTopActions.SuspendLayout();
+            panTopActions.SuspendLayout();
             menu.SuspendLayout();
-            BottomPanel.SuspendLayout();
+            panBottomActions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picSoundWave).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkDrawTimescale).BeginInit();
             panApp.SuspendLayout();
@@ -88,18 +88,18 @@
             lblPlayhead.Size = new Size(5, 385);
             lblPlayhead.TabIndex = 9;
             // 
-            // pnlTopActions
+            // panTopActions
             // 
-            pnlTopActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            pnlTopActions.BackColor = Color.DarkGray;
-            pnlTopActions.Controls.Add(bttnMicOptions);
-            pnlTopActions.Controls.Add(bttnRecord);
-            pnlTopActions.Controls.Add(bttnPlay);
-            pnlTopActions.ForeColor = Color.White;
-            pnlTopActions.Location = new Point(0, 0);
-            pnlTopActions.Name = "pnlTopActions";
-            pnlTopActions.Size = new Size(1604, 49);
-            pnlTopActions.TabIndex = 10;
+            panTopActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            panTopActions.BackColor = Color.DarkGray;
+            panTopActions.Controls.Add(bttnMicOptions);
+            panTopActions.Controls.Add(bttnRecord);
+            panTopActions.Controls.Add(bttnPlay);
+            panTopActions.ForeColor = Color.White;
+            panTopActions.Location = new Point(0, 0);
+            panTopActions.Name = "panTopActions";
+            panTopActions.Size = new Size(1604, 49);
+            panTopActions.TabIndex = 10;
             // 
             // bttnMicOptions
             // 
@@ -274,17 +274,17 @@
             tmrUpdate.Interval = 20;
             tmrUpdate.Tick += tmrUpdatePlaybackState_Tick;
             // 
-            // BottomPanel
+            // panBottomActions
             // 
-            BottomPanel.BackColor = Color.DarkGray;
-            BottomPanel.Controls.Add(picSoundWave);
-            BottomPanel.Controls.Add(lblCurrTime);
-            BottomPanel.Controls.Add(trkDrawTimescale);
-            BottomPanel.ForeColor = Color.White;
-            BottomPanel.Location = new Point(0, 666);
-            BottomPanel.Name = "BottomPanel";
-            BottomPanel.Size = new Size(1604, 65);
-            BottomPanel.TabIndex = 8;
+            panBottomActions.BackColor = Color.DarkGray;
+            panBottomActions.Controls.Add(picSoundWave);
+            panBottomActions.Controls.Add(lblCurrTime);
+            panBottomActions.Controls.Add(trkDrawTimescale);
+            panBottomActions.ForeColor = Color.White;
+            panBottomActions.Location = new Point(0, 666);
+            panBottomActions.Name = "panBottomActions";
+            panBottomActions.Size = new Size(1604, 65);
+            panBottomActions.TabIndex = 8;
             // 
             // picSoundWave
             // 
@@ -326,8 +326,8 @@
             // 
             // panApp
             // 
-            panApp.Controls.Add(pnlTopActions);
-            panApp.Controls.Add(BottomPanel);
+            panApp.Controls.Add(panTopActions);
+            panApp.Controls.Add(panBottomActions);
             panApp.Controls.Add(panTracks);
             panApp.Dock = DockStyle.Fill;
             panApp.Location = new Point(0, 0);
@@ -350,12 +350,12 @@
             Text = "Mediocre Sound Designer";
             SizeChanged += FrmMain_SizeChanged;
             panTracks.ResumeLayout(false);
-            pnlTopActions.ResumeLayout(false);
-            pnlTopActions.PerformLayout();
+            panTopActions.ResumeLayout(false);
+            panTopActions.PerformLayout();
             menu.ResumeLayout(false);
             menu.PerformLayout();
-            BottomPanel.ResumeLayout(false);
-            BottomPanel.PerformLayout();
+            panBottomActions.ResumeLayout(false);
+            panBottomActions.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picSoundWave).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkDrawTimescale).EndInit();
             panApp.ResumeLayout(false);
@@ -384,13 +384,13 @@
         private SaveFileDialog sfdSaveFile;
         private TrackBar trkDrawTimescale;
         private Label lblCurrTime;
-        private Panel pnlTopActions;
+        private Panel panTopActions;
         private ColorDialog colorDialog;
         private ToolStripMenuItem menuEditEliminateSilence;
         private Label lblPlayhead;
         private ToolStripMenuItem menuGenRecord;
         private ToolStripMenuItem menuFileSettings;
-        private Panel BottomPanel;
+        private Panel panBottomActions;
         private TextBox textBox1;
         private Button bttnRecord;
         private Button bttnMicOptions;
