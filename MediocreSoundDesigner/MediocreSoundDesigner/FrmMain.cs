@@ -95,11 +95,14 @@ public partial class FrmMain : Form
         {
             trackManager.PlayAll();
             bttnPlay.BackgroundImage = Resources.pause;
+            tmrUpdatePlaybackState_Tick(sender, e);
+            tmrUpdate.Start();
         }
         else
         {
             trackManager.PauseAll();
             bttnPlay.BackgroundImage = Resources.play;
+            tmrUpdate.Stop();
         }
     }
 
@@ -249,12 +252,17 @@ public partial class FrmMain : Form
             bttnPlay.Visible = true;
             lblPlayhead.Left = trackManager.GetPlayheadPos();
             lblPlayhead.Visible = true;
+            lblCurrTime.Visible = true;
+            lblCurrTime.Text = $"{trackManager.CurrentTime:mm\\:ss\\.fff} / {trackManager.TotalTime:mm\\:ss\\.fff}";
+            lblCurrTime.Update();
         }
         else
         {
-            bttnPlay.BackgroundImage = null;
-            bttnPlay.Visible = false;
-            lblPlayhead.Visible = false;
+            bttnPlay.BackgroundImage = Resources.pause;
+            bttnPlay.Visible = true;
+            tmrUpdate.Stop();
+            lblPlayhead.Left = 0; // Reset playhead to start
+            lblCurrTime.Update();
         }
     }
 
@@ -299,7 +307,7 @@ public partial class FrmMain : Form
         };
         DoubleBufferedPanel panTrack = new()
         {
-            BackColor = Color.LightGray,
+            BackColor = Settings.Color.TrackBg_Unselected,
             Width = panTracks.Width,
             Left = 0,
             Location = new Point(0, 45),
@@ -416,79 +424,49 @@ public partial class FrmMain : Form
     }
 
     private void UpdateSizes()
-{
-    const int PADDING = 15;
-
-    panTracks.Left = PADDING;
-    panTracks.Width = ClientSize.Width - (PADDING * 2);
-
-    if (trackManager.Tracks.Count == 0) return;
-
-    int trackCount = trackManager.Tracks.Count;
-    int containerHeight = Math.Max(100, (panTracks.Height / trackCount) - 4);
-    int top = 0;
-
-    foreach (Control ctrl in panTracks.Controls)
     {
-        // track outer panel (holding buttons and track panel)
-        if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
-        {
-            panTrackContainer.Left = 0;
-            panTrackContainer.Width = panTracks.Width;
-            panTrackContainer.Height = containerHeight;
-            panTrackContainer.Top = top;
-            top += containerHeight + 4;
+        const int PADDING = 15;
 
-            // handle inner panel (track)
-            foreach (Control child in panTrackContainer.Controls)
+        panTracks.Left = PADDING;
+        panTracks.Width = ClientSize.Width - (PADDING * 2);
+
+        if (trackManager.Tracks.Count == 0) return;
+
+        int trackCount = trackManager.Tracks.Count;
+        int containerHeight = Math.Max(100, (panTracks.Height / trackCount) - 4);
+        int top = 0;
+
+        foreach (Control ctrl in panTracks.Controls)
+        {
+            // track outer panel (holding buttons and track panel)
+            if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
             {
-                if (child is DoubleBufferedPanel panTrack)
+                panTrackContainer.Left = 0;
+                panTrackContainer.Width = panTracks.Width;
+                panTrackContainer.Height = containerHeight;
+                panTrackContainer.Top = top;
+                top += containerHeight + 4;
+
+                // handle inner panel (track)
+                foreach (Control child in panTrackContainer.Controls)
                 {
-                    panTrack.Left = 0;
-                    panTrack.Top = 45; // Positioned below bttnMute and bttnDelete
-                    panTrack.Width = panTrackContainer.Width;
-                    panTrack.Height = Math.Max(10, panTrackContainer.Height - 45);
-                    panTrack.Invalidate();
+                    if (child is DoubleBufferedPanel panTrack)
+                    {
+                        panTrack.Left = 0;
+                        panTrack.Top = 45;
+                        panTrack.Width = panTrackContainer.Width;
+                        panTrack.Height = Math.Max(10, panTrackContainer.Height - 45);
+                        panTrack.Invalidate();
+                    }
                 }
             }
         }
-    }
 
-    trkDrawTimescale.Width = panTracks.Width;
-    trkDrawTimescale.Left = PADDING;
-    lblPlayhead.Left = 0;
-    lblPlayhead.Height = panTracks.Height;
-    lblPlayhead.BringToFront();
-}
-
-    private void trackDrawTimeScale_Scroll(object sender, EventArgs e)
-    {
-
-    }
-
-    private void textBox1_TextChanged(object sender, EventArgs e)
-    {
-
-    }
-
-    private void label1_Click(object sender, EventArgs e)
-    {
-
-    }
-
-    private void panTracks_Paint(object sender, PaintEventArgs e)
-    {
-
-    }
-
-    private void pnlWaveform_Paint(object sender, PaintEventArgs e)
-    {
-
-    }
-
-    private void pnlTrackContainer_Paint(object sender, PaintEventArgs e)
-    {
-
+        trkDrawTimescale.Width = panTracks.Width;
+        trkDrawTimescale.Left = PADDING;
+        lblPlayhead.Left = 0;
+        lblPlayhead.Height = panTracks.Height;
+        lblPlayhead.BringToFront();
     }
 }
 

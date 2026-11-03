@@ -5,8 +5,6 @@ namespace MediocreSoundDesigner;
 public class TrackManager
 {
     private Track pseudoCombinedTrack;
-    private Track pnlHeader;
-    private Track pnlWaveForm;
     private Panel panContainer;
     public List<Track> Tracks { get; private set; }
     public List<Track> SelectedTracks { get; } = new();
@@ -16,6 +14,8 @@ public class TrackManager
     public bool HasSelection => SelectionStartX.HasValue && SelectionEndX.HasValue;
     public int DrawTimescale { get; set; }
     public PlaybackState State => pseudoCombinedTrack?.State ?? PlaybackState.Stopped;
+    public TimeSpan CurrentTime => pseudoCombinedTrack?.CurrentTime ?? TimeSpan.Zero;
+    public TimeSpan TotalTime => pseudoCombinedTrack?.TotalTime ?? TimeSpan.Zero;
 
     public TrackManager(Panel panContainer)
     {

@@ -71,11 +71,10 @@
             panTracks.BackColor = Color.DimGray;
             panTracks.BorderStyle = BorderStyle.Fixed3D;
             panTracks.Controls.Add(lblPlayhead);
-            panTracks.Location = new Point(-8, 73);
+            panTracks.Location = new Point(0, 73);
             panTracks.Name = "panTracks";
             panTracks.Size = new Size(1612, 647);
             panTracks.TabIndex = 0;
-            panTracks.Paint += panTracks_Paint;
             // 
             // lblPlayhead
             // 
@@ -240,12 +239,12 @@
             lblCurrTime.BackColor = Color.Transparent;
             lblCurrTime.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
             lblCurrTime.ForeColor = Color.Black;
-            lblCurrTime.Location = new Point(619, 15);
+            lblCurrTime.Location = new Point(634, 15);
             lblCurrTime.Name = "lblCurrTime";
-            lblCurrTime.Size = new Size(347, 37);
+            lblCurrTime.Size = new Size(270, 37);
             lblCurrTime.TabIndex = 9;
-            lblCurrTime.Text = "Current Time / Total Time";
-            lblCurrTime.Click += label1_Click;
+            lblCurrTime.Text = "00:00.00  / 00:00.00";
+            lblCurrTime.Visible = false;
             // 
             // trkDrawTimescale
             // 

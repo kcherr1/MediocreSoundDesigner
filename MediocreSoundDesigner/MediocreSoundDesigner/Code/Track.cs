@@ -35,45 +35,47 @@ public class Track : IDisposable {
     public int? SelectionStartSample { get; set; } = null;
     public int? SelectionEndSample { get; set; } = null;
     public bool HasSelection => SelectionStartSample.HasValue && SelectionEndSample.HasValue;
+    public TimeSpan CurrentTime => fileReader?.CurrentTime ?? TimeSpan.Zero;
+    public TimeSpan TotalTime => fileReader?.TotalTime ?? TimeSpan.Zero;
 
     // ctor
     public Track(string file) {
-    fileReader = new AudioFileReader(file);
-    int sampleCount = (int)(fileReader.Length / 4);
-    this.samples = new float[sampleCount];
-    int samplesRead = ((ISampleProvider)fileReader).Read(samples);
-    if (samplesRead < sampleCount) {
-        Array.Resize(ref samples, samplesRead);
-    }
+        fileReader = new AudioFileReader(file);
+        int sampleCount = (int)(fileReader.Length / 4);
+        this.samples = new float[sampleCount];
+        int samplesRead = ((ISampleProvider)fileReader).Read(samples);
+        if (samplesRead < sampleCount) {
+            Array.Resize(ref samples, samplesRead);
+        }
 
-    this.file = file;
-    this.duration = fileReader.TotalTime;
-    this.offset = 0;
-    this.timeScale = 1.0f;
-    this.Volume = 1.0f;
-    this.pitch = 1.0f;
-    this.bits = fileReader.WaveFormat.BitsPerSample;
-    this.channels = fileReader.WaveFormat.Channels;
-    this.sampleRate = fileReader.WaveFormat.SampleRate;
-    IsDisabled = false;
+        this.file = file;
+        this.duration = fileReader.TotalTime;
+        this.offset = 0;
+        this.timeScale = 1.0f;
+        this.Volume = 1.0f;
+        this.pitch = 1.0f;
+        this.bits = fileReader.WaveFormat.BitsPerSample;
+        this.channels = fileReader.WaveFormat.Channels;
+        this.sampleRate = fileReader.WaveFormat.SampleRate;
+        IsDisabled = false;
     }
     public Track(float[] samples) {
-    this.samples = samples;
+        this.samples = samples;
 
-    this.file = "";
-    this.duration = TimeSpan.Zero;
-    this.offset = 0;
-    this.timeScale = 1.0f;
-    this.Volume = 1.0f;
-    this.pitch = 1.0f;
-    this.bits = 32;
-    this.channels = 1;
-    this.sampleRate = 44100;
-    IsDisabled = false;
+        this.file = "";
+        this.duration = TimeSpan.Zero;
+        this.offset = 0;
+        this.timeScale = 1.0f;
+        this.Volume = 1.0f;
+        this.pitch = 1.0f;
+        this.bits = 32;
+        this.channels = 1;
+        this.sampleRate = 44100;
+        IsDisabled = false;
     }
     public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
-    this.PanDrawSamples = panDrawSamples;
-    this.panContainer = panContainer;
+        this.PanDrawSamples = panDrawSamples;
+        this.panContainer = panContainer;
     }
 
     // edits
@@ -227,13 +229,13 @@ public class Track : IDisposable {
 
     // play
     public void Play() {
-    outputDevice?.Dispose();
-    fileReader?.Dispose();
-    SaveToTempFile();
-    fileReader = new AudioFileReader(tempFilePath);
-    outputDevice = new WaveOut();
-    outputDevice.Init(fileReader);
-    outputDevice.Play();
+        outputDevice?.Dispose();
+        fileReader?.Dispose();
+        SaveToTempFile();
+        fileReader = new AudioFileReader(tempFilePath);
+        outputDevice = new WaveOut();
+        outputDevice.Init(fileReader);
+        outputDevice.Play();
     }
     public void Pause() {
     outputDevice?.Pause();
