@@ -62,9 +62,9 @@
       panTracks.BackColor = Color.DimGray;
       panTracks.BorderStyle = BorderStyle.Fixed3D;
       panTracks.Controls.Add(lblPlayhead);
-      panTracks.Location = new Point(10, 102);
+      panTracks.Location = new Point(10, 150);
       panTracks.Name = "panTracks";
-      panTracks.Size = new Size(1580, 541);
+      panTracks.Size = new Size(1580, 520);
       panTracks.TabIndex = 0;
       // 
       // lblPlayhead
@@ -184,18 +184,18 @@
       // 
       // btnPlay
       // 
-      btnPlay.AutoSize = true;
+      btnPlay.AutoSize = false;
       btnPlay.BackColor = Color.Transparent;
       btnPlay.BackgroundImage = Properties.Resources.play;
-      btnPlay.BackgroundImageLayout = ImageLayout.Stretch;
+      btnPlay.BackgroundImageLayout = ImageLayout.Zoom;
       btnPlay.FlatAppearance.BorderSize = 0;
       btnPlay.FlatAppearance.MouseDownBackColor = Color.Transparent;
       btnPlay.FlatAppearance.MouseOverBackColor = Color.Transparent;
       btnPlay.FlatStyle = FlatStyle.Flat;
       btnPlay.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-      btnPlay.Location = new Point(717, 661);
+      btnPlay.Location = new Point(15, 30);
       btnPlay.Name = "btnPlay";
-      btnPlay.Size = new Size(100, 100);
+      btnPlay.Size = new Size(110, 110);
       btnPlay.TabIndex = 6;
       btnPlay.UseVisualStyleBackColor = false;
       btnPlay.Click += btnPlay_Click;

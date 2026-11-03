@@ -13,8 +13,9 @@ public partial class FrmMain : Form {
     Setup();
   }
 
-  // setup
-  private void Setup() {
+
+    // setup
+    private void Setup() {
     DoubleBuffered = true;
     trackManager = new(panTracks);
     btnPlay.BackgroundImage = Resources.play;
@@ -57,12 +58,15 @@ public partial class FrmMain : Form {
     }
     return base.ProcessCmdKey(ref msg, keyData);
   }
+    
+    // bug change here 
+    private void FrmMain_SizeChanged(object sender, EventArgs e)
+    {
+        if (trackManager is null) return;  
+        UpdateSizes();
+    }
 
-  private void FrmMain_SizeChanged(object sender, EventArgs e) {
-    UpdateSizes();
-  }
-
-  private void btnPlay_Click(object sender, EventArgs e) {
+    private void btnPlay_Click(object sender, EventArgs e) {
     if (trackManager.State is NAudio.Wave.PlaybackState.Stopped or NAudio.Wave.PlaybackState.Paused) {
       trackManager.PlayAll();
       btnPlay.BackgroundImage = Resources.pause;
@@ -179,10 +183,11 @@ public partial class FrmMain : Form {
       lblPlayhead.Visible = true;
     }
     else {
-      btnPlay.BackgroundImage = null;
-      btnPlay.Visible = false;
+      btnPlay.BackgroundImage = Resources.play;
       lblPlayhead.Visible = false;
     }
+    btnPlay.Visible = true;
+    btnPlay.Enabled = trackManager.Tracks.Count > 0;
   }
 
   private void trkDrawTimescale_Scroll(object sender, EventArgs e) {
@@ -230,8 +235,10 @@ public partial class FrmMain : Form {
       track.PanDrawSamples.Invalidate();
       top += track.PanDrawSamples.Height;
     }
-    trkDrawTimescale.Width = panTracks.Width;
-    trkDrawTimescale.Left = PADDING;
+    // transport bar: play button at the top-left, timescale slider beside it
+    trkDrawTimescale.Left = btnPlay.Right + PADDING;
+    trkDrawTimescale.Width = panTracks.Right - trkDrawTimescale.Left;
+    trkDrawTimescale.Top = btnPlay.Top + (btnPlay.Height - trkDrawTimescale.Height) / 2;
     lblPlayhead.Left = 0;
     lblPlayhead.Height = panTracks.Height;
     lblPlayhead.BringToFront();
