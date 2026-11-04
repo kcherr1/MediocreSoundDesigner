@@ -2,6 +2,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+using NAudio.Wave.SampleProviders;
 
 namespace MediocreSoundDesigner;
 /// <summary>
@@ -72,26 +73,33 @@ public class Track : IDisposable {
     /// <summary>
     /// The file that stores the audio
     /// </summary>
-    public Track(string file) {
-    fileReader = new AudioFileReader(file);
-    int sampleCount = (int)(fileReader.Length / 4);
-    this.samples = new float[sampleCount];
-    int samplesRead = ((ISampleProvider)fileReader).Read(samples);
-    if (samplesRead < sampleCount) {
-      Array.Resize(ref samples, samplesRead);
-    }
+    public Track(string file)
+    {
+        fileReader = new AudioFileReader(file);
+        ISampleProvider provider = fileReader;
+        if (provider.WaveFormat.Channels == 2)
+            provider = new StereoToMonoSampleProvider(provider);
+        if (provider.WaveFormat.SampleRate != 44100)
+            provider = new WdlResamplingSampleProvider(provider, 44100);
 
-    this.file = file;
-    this.duration = fileReader.TotalTime;
-    this.offset = 0;
-    this.timeScale = 1.0f;
-    this.Volume = 1.0f;
-    this.pitch = 1.0f;
-    this.bits = fileReader.WaveFormat.BitsPerSample;
-    this.channels = fileReader.WaveFormat.Channels;
-    this.sampleRate = fileReader.WaveFormat.SampleRate;
-    IsDisabled = false;
-  }
+        List<float> all = new();
+        float[] buf = new float[44100];
+        int n;
+        while ((n = provider.Read(buf)) > 0)
+            all.AddRange(buf.AsSpan(0, n).ToArray());
+        samples = all.ToArray();
+
+        this.file = file;
+        this.duration = fileReader.TotalTime;
+        this.offset = 0;
+        this.timeScale = 1.0f;
+        this.Volume = 1.0f;
+        this.pitch = 1.0f;
+        this.bits = 32;
+        this.channels = 1;
+        this.sampleRate = 44100;
+        IsDisabled = false;
+    }
     /// <summary>
     /// Generates audio instead of pulling it from an external source
     /// </summary>

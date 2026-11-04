@@ -1,5 +1,8 @@
 namespace MediocreSoundDesigner
 {
+    /// <summary>
+    /// Allows the pitch to be edited up or down
+    /// </summary>
     partial class FrmEditPitch
     {
         private System.ComponentModel.IContainer components = null;
@@ -45,7 +48,7 @@ namespace MediocreSoundDesigner
             label1.Name = "label1";
             label1.Size = new Size(170, 37);
             label1.TabIndex = 1;
-            label1.Text = "Semitones:";
+            label1.Text = "Pitch:";
             // 
             // btnApply
             // 
