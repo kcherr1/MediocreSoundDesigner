@@ -579,7 +579,7 @@ public class Track : IDisposable
         DrawOffset += amount;
         DrawOffset = Math.Max(0, DrawOffset);
     }
-    public void DrawSamples(Graphics g, int drawTimescale, int horizontalScrollOffset = 0)
+    public void DrawSamples(Graphics g, int drawTimescale)
     {
       if (PanDrawSamples is null)
       {
@@ -607,6 +607,15 @@ public class Track : IDisposable
         pen.Dispose();
       }
 
+    }
+
+    public void DrawTrackHeader(Graphics g)
+    {
+      if (PanDrawSamples is null)
+      {
+        return;
+      }
+
       System.Drawing.Color trackColor = PanDrawSamples.BackColor;
       System.Drawing.Color headerColor = System.Drawing.Color.FromArgb(
         (int)(trackColor.R * 0.90),
@@ -618,20 +627,18 @@ public class Track : IDisposable
       using Pen divider = new(System.Drawing.Color.FromArgb(20, 0, 0, 0));
       using System.Drawing.Font nameFont = new("Arial", 10f, System.Drawing.FontStyle.Bold);
 
-      int headerX = horizontalScrollOffset;
-      int headerWidth = PanDrawSamples.Width + horizontalScrollOffset;
-
-      g.FillRectangle(headerBrush, headerX, 0, headerWidth, 30);
-      g.DrawLine(divider, headerX, 29, headerWidth, 29);
+      g.FillRectangle(headerBrush, 0, 0, PanDrawSamples.Width, 30);
+      g.DrawLine(divider, 0, 29, PanDrawSamples.Width, 29);
 
       TextRenderer.DrawText(
         g,
         DisplayName,
         nameFont,
-        new Rectangle(headerX + 10, 0, Math.Max(0, PanDrawSamples.Width - 20), 30),
+        new Rectangle(10, 0, Math.Max(0, PanDrawSamples.Width - 20), 30),
         System.Drawing.Color.Black,
         TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
     }
+
     // dispose
     public void Dispose()
       {
