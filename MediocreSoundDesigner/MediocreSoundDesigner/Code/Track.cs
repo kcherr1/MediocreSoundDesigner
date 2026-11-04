@@ -108,6 +108,13 @@ public class Track : IDisposable
 
   public Track(float[] samples, WaveFormat format) : this(samples) {
       overrideFormat = format;
+      sampleRate = format.SampleRate;
+      channels = format.Channels;
+      bits = format.BitsPerSample;
+
+      if (sampleRate > 0 && channels > 0) {
+          duration = TimeSpan.FromSeconds((double)samples.Length / sampleRate / channels);
+      }
   }
 
   public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
