@@ -79,6 +79,7 @@
             panTracks.Name = "panTracks";
             panTracks.Size = new Size(1598, 617);
             panTracks.TabIndex = 0;
+            panTracks.Paint += panTracks_Paint;
             // 
             // lblPlayhead
             // 
