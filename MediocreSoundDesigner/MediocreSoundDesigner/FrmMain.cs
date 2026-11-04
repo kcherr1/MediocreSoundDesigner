@@ -593,12 +593,13 @@ public partial class FrmMain : Form
     {
       GraphicsState state = e.Graphics.Save();
       e.Graphics.TranslateTransform(-firstVisiblePixel, 0);
-      track.DrawSamples(e.Graphics, trackManager.DrawTimescale, firstVisiblePixel);
+      track.DrawSamples(e.Graphics, trackManager.DrawTimescale);
       if (track == GetSelectedTrack() && selectionStart != selectionEnd)
       {
         track.ShowSelection(e.Graphics, Math.Min(selectionStart, selectionEnd), Math.Max(selectionStart, selectionEnd));
       }
       e.Graphics.Restore(state);
+      track.DrawTrackHeader(e.Graphics);
     };
 
     ContextMenuStrip colorMenu = new() { ShowImageMargin = false };
