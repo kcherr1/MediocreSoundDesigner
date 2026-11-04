@@ -148,6 +148,7 @@ public static class SoundFontGenerator
     synthesizer.Render(left.AsSpan(0, frameCount), right.AsSpan(0, frameCount));
     synthesizer.NoteOff(0, midiNote);
     synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
+    ApplyReleaseFade(left, right, frameCount, releaseFrames);
 
     float[] samples = new float[left.Length * 2];
 
