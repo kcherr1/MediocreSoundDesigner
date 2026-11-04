@@ -23,6 +23,7 @@ public class Track : IDisposable
     private float timeScale;
     private int sampleRate;
     private float[] samples;
+    private float waveformDisplayScale;
     private float pitch;
     private AudioFileReader fileReader; // playback only
     private WaveOut outputDevice;
@@ -77,6 +78,7 @@ public class Track : IDisposable
         }
 
         this.samples = loaded.ToArray();
+        waveformDisplayScale = CalculateWaveformDisplayScale();
         this.file = file;
         this.duration = TimeSpan.FromSeconds((double)samples.Length / INTERNAL_SAMPLE_RATE);
         this.offset = 0;
@@ -89,6 +91,7 @@ public class Track : IDisposable
     public Track(float[] samples)
     {
         this.samples = samples;
+        waveformDisplayScale = CalculateWaveformDisplayScale();
 
         this.file = "";
         this.duration = TimeSpan.Zero;
@@ -137,6 +140,7 @@ public class Track : IDisposable
     }
     public void ReplaceSamples(float[] samples) {
     this.samples = samples;
+    waveformDisplayScale = CalculateWaveformDisplayScale();
     }
     public void Trim() {
     }
@@ -250,7 +254,19 @@ public class Track : IDisposable
 
         // Splice altered slice back into track buffer
         samples = [.. samples[0..start], .. targetSlice, .. samples[end..]];
+        waveformDisplayScale = CalculateWaveformDisplayScale();
         ClearSelection();
+    }
+
+    private float CalculateWaveformDisplayScale()
+    {
+        float peak = 0.0f;
+        foreach (float sample in samples)
+        {
+            peak = Math.Max(peak, Math.Abs(sample));
+        }
+
+        return peak > 0.0f ? 1.0f / peak : 1.0f;
     }
 
     // play
@@ -326,7 +342,7 @@ public class Track : IDisposable
             List<Point> points = new();
             for (int s = 0; s < samples.Length; s += drawTimescale)
             {
-                var sample = (int)(samples[s] * heightAdj * Volume);
+                var sample = (int)(samples[s] * waveformDisplayScale * heightAdj * Volume);
                 points.Add(new(x, height / 2));
                 points.Add(new(x, height / 2 - sample));
                 x++;
