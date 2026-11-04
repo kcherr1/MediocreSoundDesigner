@@ -24,6 +24,13 @@ public class TrackManager {
 
 	public void RemTrack(Track track) {
 		Tracks.Remove(track);
+    if (SelectedTrack == track) {
+      // don't leave a removed track selected
+      SelectedTrack = null;
+      if (Tracks.Count > 0) {
+        SelectTrack(Tracks[^1]);
+      }
+    }
 	}
 
 	public void SelectTrack(Track track) {

@@ -132,7 +132,12 @@ public partial class FrmMain : Form {
     FrmGenRecord frm = new();
     frm.SetSound(trackManager.SelectedTrack);
     if (frm.ShowDialog() == DialogResult.Cancel) {
+      // fully remove the cancelled track including its on-screen panel
       trackManager.RemTrack(newTrack);
+      panTracks.Controls.Remove(newTrack.PanDrawSamples);
+      newTrack.PanDrawSamples.Dispose();
+      newTrack.Dispose();
+      UpdateSizes();
     }
   }
   private void menuGenNoise_Click(object sender, EventArgs e) {
@@ -191,7 +196,8 @@ public partial class FrmMain : Form {
   }
 
   private void trkDrawTimescale_Scroll(object sender, EventArgs e) {
-    trackManager.DrawTimescale = trkDrawTimescale.Maximum - trkDrawTimescale.Value;
+    // fixes drawsamples from letting it loop forever and freezing
+    trackManager.DrawTimescale = Math.Max(1, trkDrawTimescale.Maximum - trkDrawTimescale.Value);
     trackManager.RedrawAll();
   }
 
