@@ -74,9 +74,9 @@ public static class SoundFontGenerator
 
     Synthesizer synthesizer = new(soundFontPath, SampleRate);
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
-    float[] left = new float[frameCount + releaseFrames];
-    float[] right = new float[frameCount + releaseFrames];
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * ReleaseSeconds));
+    float[] left = new float[frameCount];
+    float[] right = new float[frameCount];
 
     int rootMidiNote = 12 * (octave + 1) + rootIndex;
     int[] notes = intervals.Select(interval => rootMidiNote + interval).ToArray();
@@ -93,8 +93,7 @@ public static class SoundFontGenerator
       synthesizer.NoteOff(0, note);
     }
 
-    synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
-    ApplyReleaseFade(left, right, frameCount, releaseFrames);
+    ApplyReleaseFade(left, right, frameCount - fadeFrames, fadeFrames);
 
     float[] samples = new float[left.Length * 2];
 
@@ -138,17 +137,16 @@ public static class SoundFontGenerator
     synthesizer.ProcessMidiMessage(0, 0xC0, program, 0);
 
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
-    float[] left = new float[frameCount + releaseFrames];
-    float[] right = new float[frameCount + releaseFrames];
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * ReleaseSeconds));
+    float[] left = new float[frameCount];
+    float[] right = new float[frameCount];
 
     int midiNote = 12 * (octave + 1) + noteIndex;
 
     synthesizer.NoteOn(0, midiNote, 90);
     synthesizer.Render(left.AsSpan(0, frameCount), right.AsSpan(0, frameCount));
     synthesizer.NoteOff(0, midiNote);
-    synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
-    ApplyReleaseFade(left, right, frameCount, releaseFrames);
+    ApplyReleaseFade(left, right, frameCount - fadeFrames, fadeFrames);
 
     float[] samples = new float[left.Length * 2];
 
