@@ -42,8 +42,10 @@ public class Track : IDisposable
     public int SampleCount => samples?.Length ?? 0;
 
     private static WaveFormat OutputFormat => WaveFormat.CreateIeeeFloatWaveFormat(INTERNAL_SAMPLE_RATE, INTERNAL_CHANNELS);
-
-    // ctor
+    public TimeSpan CurrentTime => fileReader?.CurrentTime ?? TimeSpan.Zero;
+    public TimeSpan TotalTime => fileReader?.TotalTime ?? TimeSpan.Zero;
+    public String GetFileName() => Path.GetFileName(file);
+    
     // ctor
     public Track(string file)
     {
@@ -98,8 +100,8 @@ public class Track : IDisposable
         IsDisabled = false;
     }
     public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
-    this.PanDrawSamples = panDrawSamples;
-    this.panContainer = panContainer;
+        this.PanDrawSamples = panDrawSamples;
+        this.panContainer = panContainer;
     }
 
     // edits
@@ -253,13 +255,13 @@ public class Track : IDisposable
 
     // play
     public void Play() {
-    outputDevice?.Dispose();
-    fileReader?.Dispose();
-    SaveToTempFile();
-    fileReader = new AudioFileReader(tempFilePath);
-    outputDevice = new WaveOut();
-    outputDevice.Init(fileReader);
-    outputDevice.Play();
+        outputDevice?.Dispose();
+        fileReader?.Dispose();
+        SaveToTempFile();
+        fileReader = new AudioFileReader(tempFilePath);
+        outputDevice = new WaveOut();
+        outputDevice.Init(fileReader);
+        outputDevice.Play();
     }
     public void Pause() {
     outputDevice?.Pause();
