@@ -6,6 +6,7 @@ namespace MediocreSoundDesigner;
 public static class SoundFontGenerator
 {
   private const int SampleRate = 44100;
+  private const double ReleaseSeconds = 0.75;
 
   public static Track CreateTestTrack()
   {
@@ -73,7 +74,7 @@ public static class SoundFontGenerator
 
     Synthesizer synthesizer = new(soundFontPath, SampleRate);
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = SampleRate / 4;
+    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
     float[] left = new float[frameCount + releaseFrames];
     float[] right = new float[frameCount + releaseFrames];
 
@@ -93,6 +94,7 @@ public static class SoundFontGenerator
     }
 
     synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
+    ApplyReleaseFade(left, right, frameCount, releaseFrames);
 
     float[] samples = new float[left.Length * 2];
 
@@ -136,7 +138,7 @@ public static class SoundFontGenerator
     synthesizer.ProcessMidiMessage(0, 0xC0, program, 0);
 
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = SampleRate / 2;
+    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
     float[] left = new float[frameCount + releaseFrames];
     float[] right = new float[frameCount + releaseFrames];
 
@@ -146,6 +148,7 @@ public static class SoundFontGenerator
     synthesizer.Render(left.AsSpan(0, frameCount), right.AsSpan(0, frameCount));
     synthesizer.NoteOff(0, midiNote);
     synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
+    ApplyReleaseFade(left, right, frameCount, releaseFrames);
 
     float[] samples = new float[left.Length * 2];
 
@@ -187,7 +190,7 @@ public static class SoundFontGenerator
     int totalSteps = bars * 8;
     int stepFrames = (int)Math.Round(SampleRate * 60d / tempo / 2d);
     int musicFrames = totalSteps * stepFrames;
-    int releaseFrames = SampleRate / 2;
+    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
 
     float[] left = new float[musicFrames + releaseFrames];
     float[] right = new float[musicFrames + releaseFrames];
@@ -226,6 +229,7 @@ public static class SoundFontGenerator
     }
 
     synthesizer.Render(left.AsSpan(musicFrames, releaseFrames), right.AsSpan(musicFrames, releaseFrames));
+    ApplyReleaseFade(left, right, musicFrames, releaseFrames);
 
     float[] samples = new float[left.Length * 2];
 
@@ -236,6 +240,27 @@ public static class SoundFontGenerator
     }
 
     return new Track(samples, WaveFormat.CreateIeeeFloatWaveFormat(SampleRate, 2));
+  }
+
+  private static void ApplyReleaseFade(float[] left, float[] right, int startFrame, int releaseFrames)
+  {
+    if (releaseFrames <= 1)
+    {
+      if (releaseFrames == 1)
+      {
+        left[startFrame] = 0f;
+        right[startFrame] = 0f;
+      }
+      return;
+    }
+
+    for (int frame = 0; frame < releaseFrames; frame++)
+    {
+      float gain = 1f - frame / (float)(releaseFrames - 1);
+      int index = startFrame + frame;
+      left[index] *= gain;
+      right[index] *= gain;
+    }
   }
 
   private static List<(int Note, int Velocity)> GetBeatHits(string rhythm, int step)
