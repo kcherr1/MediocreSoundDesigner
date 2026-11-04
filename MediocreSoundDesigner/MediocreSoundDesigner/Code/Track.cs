@@ -17,11 +17,11 @@ public class Track : IDisposable
     // Fields
     private string file;
     private TimeSpan duration;
-    private float offset;
-    private float timeScale;
+    //private float offset;
+    //private float timeScale;
     private int sampleRate;
     private float[] samples;
-    private float pitch;
+    //private float pitch;
     private int bits;
     private int channels;
     private AudioFileReader fileReader;
@@ -66,10 +66,10 @@ public class Track : IDisposable
   this.file = file;
   DisplayName = Path.GetFileNameWithoutExtension(file);
   this.duration = fileReader.TotalTime;
-  this.offset = 0;
-  this.timeScale = 1.0f;
+  //this.offset = 0;
+  //this.timeScale = 1.0f;
   Volume = 1.0f;
-  this.pitch = 1.0f;
+  //this.pitch = 1.0f;
   this.bits = fileReader.WaveFormat.BitsPerSample;
   this.channels = fileReader.WaveFormat.Channels;
   this.sampleRate = fileReader.WaveFormat.SampleRate;
@@ -81,10 +81,10 @@ public class Track : IDisposable
     this.file = "";
     DisplayName = "Generated Track";
     this.duration = TimeSpan.Zero;
-    this.offset = 0;
-    this.timeScale = 1.0f;
+   // this.offset = 0;
+   // this.timeScale = 1.0f;
     Volume = 1.0f;
-    this.pitch = 1.0f;
+   // this.pitch = 1.0f;
     this.bits = 32;
     this.channels = 1;
     this.sampleRate = 0;
