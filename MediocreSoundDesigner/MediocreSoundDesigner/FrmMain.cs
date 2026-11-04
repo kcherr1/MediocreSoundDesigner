@@ -20,7 +20,7 @@ public partial class FrmMain : Form
     private void Setup()
     {
         DoubleBuffered = true;
-        panTracks.AutoScroll = false;
+        panTracks.AutoScroll = true;
 
         // Enable double-buffering on panTracks container to prevent child clipping flicker
         typeof(Panel).InvokeMember("DoubleBuffered",
@@ -52,6 +52,13 @@ public partial class FrmMain : Form
     {
         // far right = most zoomed in = 1 sample per pixel, never 0
         return trkDrawTimescale.Maximum - trkDrawTimescale.Value + trkDrawTimescale.Minimum;
+    }
+
+    private void SetDefaultZoom()
+    {
+        trkDrawTimescale.Value = trkDrawTimescale.Minimum +
+            (trkDrawTimescale.Maximum - trkDrawTimescale.Minimum) / 2;
+        trackManager.DrawTimescale = GetTimescaleFromSlider();
     }
 
     private void FitToWindow()
@@ -145,7 +152,7 @@ public partial class FrmMain : Form
                 Track newTrack = new(file);
                 CreateTrackPanel(newTrack);
                 trackManager.AddTrack(newTrack);
-                FitToWindow();
+                SetDefaultZoom();
                 UpdateSizes();
                 newTrack.PanDrawSamples.Invalidate();
             }
@@ -226,8 +233,9 @@ public partial class FrmMain : Form
             newTrack.PanDrawSamples.Dispose();
             newTrack.Dispose();
             trackManager.RemTrack(newTrack);
-            UpdateSizes();
         }
+
+        UpdateSizes();
     }
     private void menuGenNoise_Click(object sender, EventArgs e)
     {
@@ -294,6 +302,7 @@ public partial class FrmMain : Form
     private void trkDrawTimescale_Scroll(object sender, EventArgs e)
     {
         trackManager.DrawTimescale = GetTimescaleFromSlider();
+        UpdateSizes();
         trackManager.RedrawAll();
     }
 
@@ -479,6 +488,8 @@ public partial class FrmMain : Form
         panTracks.Width = availableWidth;
         panTracks.Height = Math.Max(50, panBottomActions.Top - panTracks.Top);
 
+        int contentWidth = GetTrackContentWidth();
+
         // align playhead label
         lblPlayhead.Left = 0;
         lblPlayhead.Height = panTracks.ClientSize.Height;
@@ -502,7 +513,7 @@ public partial class FrmMain : Form
         if (trackManager.Tracks.Count == 0) return;
 
         int trackCount = trackManager.Tracks.Count;
-        int containerHeight = 100;
+        int containerHeight = 256;
         int top = 0;
 
         foreach (Control ctrl in panTracks.Controls)
@@ -510,7 +521,7 @@ public partial class FrmMain : Form
             if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
             {
                 panTrackContainer.Left = 0;
-                panTrackContainer.Width = panTracks.Width;
+                panTrackContainer.Width = contentWidth;
                 panTrackContainer.Height = containerHeight;
                 panTrackContainer.Top = top;
                 top += containerHeight + 4;
@@ -521,7 +532,7 @@ public partial class FrmMain : Form
                     {
                         panTrack.Left = 0;
                         panTrack.Top = 45;
-                        panTrack.Width = panTrackContainer.Width;
+                        panTrack.Width = contentWidth;
                         panTrack.Height = Math.Max(10, panTrackContainer.Height - 45);
                         panTrack.Invalidate();
                     }
@@ -531,6 +542,20 @@ public partial class FrmMain : Form
         lblPlayhead.Left = 0;
         lblPlayhead.Height = Math.Max(panTracks.ClientSize.Height, top);
         lblPlayhead.BringToFront();
+    }
+
+    private int GetTrackContentWidth()
+    {
+        int viewportWidth = Math.Max(1, panTracks.ClientSize.Width);
+        int contentWidth = viewportWidth;
+
+        foreach (Track track in trackManager.Tracks)
+        {
+            int waveformWidth = (int)Math.Ceiling((double)track.SampleCount / Math.Max(1, trackManager.DrawTimescale));
+            contentWidth = Math.Max(contentWidth, waveformWidth + track.DrawOffset + 1);
+        }
+
+        return contentWidth;
     }
 
     private void panTracks_Paint(object sender, PaintEventArgs e)
