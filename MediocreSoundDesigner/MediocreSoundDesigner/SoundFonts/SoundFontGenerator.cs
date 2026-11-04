@@ -7,6 +7,7 @@ public static class SoundFontGenerator
 {
   private const int SampleRate = 44100;
   private const double ReleaseSeconds = 0.75;
+  private const double InstrumentFadeSeconds = 0.25;
 
   public static Track CreateTestTrack()
   {
@@ -74,7 +75,7 @@ public static class SoundFontGenerator
 
     Synthesizer synthesizer = new(soundFontPath, SampleRate);
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * ReleaseSeconds));
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * InstrumentFadeSeconds));
     float[] left = new float[frameCount];
     float[] right = new float[frameCount];
 
@@ -137,7 +138,7 @@ public static class SoundFontGenerator
     synthesizer.ProcessMidiMessage(0, 0xC0, program, 0);
 
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * ReleaseSeconds));
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * InstrumentFadeSeconds));
     float[] left = new float[frameCount];
     float[] right = new float[frameCount];
 
