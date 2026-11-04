@@ -18,7 +18,13 @@ public partial class FrmMain : Form
   private int playheadPixel;
   private HScrollBar hsbTimeline;
 
-  private sealed class DrawingPanel : Panel
+	
+  private Button buttonSynth => buttonTone;
+
+	// Use the existing generator heading.
+  private TextBox lbInstPanel => lbGeneratorPanel;
+
+	private sealed class DrawingPanel : Panel
   {
     public DrawingPanel()
     {
@@ -906,27 +912,176 @@ public partial class FrmMain : Form
 
   }
 
-  private void buttonSynth_Click(object sender, EventArgs e)
-  {
 
-  }
+private void buttonSynth_Click(object sender, EventArgs e)
+{
+		using GenerateTone dialog = new();
 
-  private void buttonGuitar_Click(object sender, EventArgs e)
-  {
+		if (dialog.ShowDialog(this) != DialogResult.OK)
+			return;
 
-  }
+		Track newTrack = new(
+			dialog.GeneratedSamples,
+			dialog.GeneratedFormat
+		);
 
-  private void buttonPiano_Click(object sender, EventArgs e)
-  {
+		newTrack.DrawOffset = (int)Math.Round(
+			dialog.StartTimeSeconds *
+			newTrack.SampleValuesPerSecond /
+			Math.Max(1, trackManager.DrawTimescale)
+		);
 
-  }
+		newTrack.SetDisplayName(
+			$"Synth {dialog.WaveformName} {dialog.FrequencyHz} Hz"
+		);
 
-  private void buttonDrums_Click(object sender, EventArgs e)
-  {
+		CreateTrackPanel(newTrack);
+		trackManager.AddTrack(newTrack);
+		SelectTrack(newTrack);
+		UpdateSizes();
+		newTrack.PanDrawSamples.Invalidate();
+}
 
-  }
+	// Keep the existing Designer click connection.
+	private void buttonTone_Click(object sender, EventArgs e)
+	{
+		buttonSynth_Click(sender, e);
+	}
 
-  private void lbInstPanel_TextChanged(object sender, EventArgs e)
+
+
+	private void buttonGuitar_Click(object sender, EventArgs e)
+	{
+		using FrmGeneratePluck dialog = new();
+
+		if (dialog.ShowDialog(this) != DialogResult.OK)
+			return;
+
+		try
+		{
+			Track newTrack = SoundFontGenerator.CreatePluckTrack(
+				dialog.Instrument,
+				dialog.Note,
+				dialog.Octave,
+				dialog.DurationSeconds
+			);
+
+			newTrack.SetDisplayName(
+				$"{dialog.Instrument} {dialog.Note}{dialog.Octave}"
+			);
+
+			newTrack.DrawOffset = (int)Math.Round(
+				dialog.StartTimeSeconds *
+				newTrack.SampleValuesPerSecond /
+				Math.Max(1, trackManager.DrawTimescale)
+			);
+
+			CreateTrackPanel(newTrack);
+			trackManager.AddTrack(newTrack);
+			SelectTrack(newTrack);
+			UpdateSizes();
+			newTrack.PanDrawSamples.Invalidate();
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show(
+				ex.Message, "Pluck",
+				MessageBoxButtons.OK, MessageBoxIcon.Error
+			);
+		}
+	}
+
+
+	
+
+
+    private void buttonPiano_Click(object sender, EventArgs e)
+	{
+		using FrmGenerateChord dialog = new();
+
+		if (dialog.ShowDialog(this) != DialogResult.OK)
+			return;
+
+		try
+		{
+			Track newTrack = SoundFontGenerator.CreateChordTrack(
+				dialog.RootNote,
+				dialog.ChordType,
+				dialog.Octave,
+				dialog.DurationSeconds
+			);
+
+			newTrack.SetDisplayName(
+				$"{dialog.RootNote} {dialog.ChordType} Chord"
+			);
+
+			newTrack.DrawOffset = (int)Math.Round(
+				dialog.StartTimeSeconds *
+				newTrack.SampleValuesPerSecond /
+				Math.Max(1, trackManager.DrawTimescale)
+			);
+
+			CreateTrackPanel(newTrack);
+			trackManager.AddTrack(newTrack);
+			SelectTrack(newTrack);
+			UpdateSizes();
+			newTrack.PanDrawSamples.Invalidate();
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show(
+				ex.Message, "Chord",
+				MessageBoxButtons.OK, MessageBoxIcon.Error
+			);
+		}
+	}
+
+
+
+
+	private void buttonDrums_Click(object sender, EventArgs e)
+	{
+		using FrmGenerateBeat dialog = new();
+
+		if (dialog.ShowDialog(this) != DialogResult.OK)
+			return;
+
+		try
+		{
+			Track newTrack = SoundFontGenerator.CreateBeatTrack(
+				dialog.DrumKit,
+				dialog.Rhythm,
+				dialog.Tempo,
+				dialog.Bars
+			);
+
+			newTrack.SetDisplayName(
+				$"{dialog.DrumKit} {dialog.Rhythm}"
+			);
+
+			newTrack.DrawOffset = (int)Math.Round(
+				dialog.StartTimeSeconds *
+				newTrack.SampleValuesPerSecond /
+				Math.Max(1, trackManager.DrawTimescale)
+			);
+
+			CreateTrackPanel(newTrack);
+			trackManager.AddTrack(newTrack);
+			SelectTrack(newTrack);
+			UpdateSizes();
+			newTrack.PanDrawSamples.Invalidate();
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show(
+				ex.Message, "Beat",
+				MessageBoxButtons.OK, MessageBoxIcon.Error
+			);
+		}
+	}
+
+
+	private void lbInstPanel_TextChanged(object sender, EventArgs e)
   {
 
   }
