@@ -18,6 +18,13 @@ public static class Settings {
     public Color TrackBg_Unselected { get; set; }
     public Color TrackBg_Selected { get; set; }
     public Color Playline { get; set; }
+    public Color TrackHeader_Bg { get; set; }
+    public Color TrackHeader_Selected { get; set; }
+    public Color TrackHeader_Text { get; set; }
+    public Color MuteDot_On { get; set; }
+    public Color MuteDot_Off { get; set; }
+    public Color TopBar_Bg { get; set; }
+    public Color TopBar_Border { get; set; }
 
     public Colors() {
       WinBg = System.Drawing.Color.Black;
@@ -27,6 +34,13 @@ public static class Settings {
       TrackBg_Unselected = System.Drawing.Color.DimGray;
       TrackBg_Selected = System.Drawing.Color.Gray;
       Playline = System.Drawing.Color.White;
+      TrackHeader_Bg = System.Drawing.Color.FromArgb(58, 66, 77);
+      TrackHeader_Selected = System.Drawing.Color.FromArgb(84, 96, 112);
+      TrackHeader_Text = System.Drawing.Color.FromArgb(230, 232, 235);
+      MuteDot_On = System.Drawing.Color.FromArgb(158, 232, 36);
+      MuteDot_Off = System.Drawing.Color.FromArgb(95, 100, 106);
+      TopBar_Bg = System.Drawing.Color.FromArgb(40, 46, 54);
+      TopBar_Border = System.Drawing.Color.FromArgb(74, 84, 96);
     }
   }
 

@@ -38,13 +38,18 @@ public class TrackManager {
     Tracks.ForEach(track => {
       track.PanDrawSamples.BorderStyle = BorderStyle.None;
       track.PanDrawSamples.BackColor = Settings.Color.TrackBg_Unselected;
+      track.PanHeader?.Invalidate();
     });
     track.PanDrawSamples.BorderStyle = BorderStyle.Fixed3D;
     track.PanDrawSamples.BackColor = Settings.Color.TrackBg_Selected;
+    track.PanHeader?.Invalidate();
   }
 
   public void RedrawAll() {
-    Tracks.ForEach(track => track.PanDrawSamples.Invalidate());
+    Tracks.ForEach(track => {
+      track.PanDrawSamples.Invalidate();
+      track.PanHeader?.Invalidate();
+    });
   }
 
   public void ApplySettings() {

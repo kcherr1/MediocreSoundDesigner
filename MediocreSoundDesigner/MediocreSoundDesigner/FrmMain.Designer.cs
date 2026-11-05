@@ -62,9 +62,9 @@
       panTracks.BackColor = Color.DimGray;
       panTracks.BorderStyle = BorderStyle.Fixed3D;
       panTracks.Controls.Add(lblPlayhead);
-      panTracks.Location = new Point(10, 150);
+      panTracks.Location = new Point(10, 172);
       panTracks.Name = "panTracks";
-      panTracks.Size = new Size(1580, 520);
+      panTracks.Size = new Size(1580, 498);
       panTracks.TabIndex = 0;
       // 
       // lblPlayhead

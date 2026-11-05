@@ -29,6 +29,8 @@ public class Track : IDisposable {
   public int DrawOffset { get; set; }
   public bool IsDisabled { get; private set; }
   public Panel PanDrawSamples { get; private set; }
+  public Panel PanHeader { get; private set; }
+  public string Name { get; set; } = "";
   public float Volume { get; private set; }
   private string tempFilePath => Path.Combine(Path.GetTempPath(), "MediocreSoundDesigner", "temp.wav");
   public PlaybackState State => outputDevice?.PlaybackState ?? PlaybackState.Stopped;
@@ -71,6 +73,9 @@ public class Track : IDisposable {
   public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
     this.PanDrawSamples = panDrawSamples;
     this.panContainer = panContainer;
+  }
+  public void LinkHeader(Panel panHeader) {
+    this.PanHeader = panHeader;
   }
 
   // edits
