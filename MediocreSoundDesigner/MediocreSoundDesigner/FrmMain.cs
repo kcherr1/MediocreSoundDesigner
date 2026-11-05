@@ -16,20 +16,31 @@ public partial class FrmMain : Form
   private int selectionEnd;
   private int firstVisiblePixel;
   private int playheadPixel;
+  private int lastPlayheadScreenX = -1;
+  private bool isZooming;
+  private System.Windows.Forms.Timer zoomSettleTimer;
   private HScrollBar hsbTimeline;
 
-	
-  private Button buttonSynth => buttonTone;
 
-	// Use the existing generator heading.
+  // Use the existing generator heading.
   private TextBox lbInstPanel => lbGeneratorPanel;
 
-	private sealed class DrawingPanel : Panel
+  private sealed class DrawingPanel : Panel
   {
     public DrawingPanel()
     {
       DoubleBuffered = true;
       ResizeRedraw = true;
+    }
+  }
+
+  protected override CreateParams CreateParams
+  {
+    get
+    {
+      CreateParams createParams = base.CreateParams;
+      createParams.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+      return createParams;
     }
   }
 
@@ -45,11 +56,19 @@ public partial class FrmMain : Form
   {
     DoubleBuffered = true;
     trackManager = new(panTracks);
+    zoomSettleTimer = new System.Windows.Forms.Timer(components) { Interval = 180 };
+    zoomSettleTimer.Tick += (sender, e) =>
+    {
+      zoomSettleTimer.Stop();
+      isZooming = false;
+      trackManager.RedrawAll();
+      UpdatePlaybackView();
+    };
 
-	ofdLoadFile.InitialDirectory = Path.Combine(AppContext.BaseDirectory, "Resources");
-	ofdLoadFile.Filter = "Audio files (*.wav;*.mp3)|*.wav;*.mp3|All files (*.*)|*.*";
-	ofdLoadFile.FileName = "";
-	smallToolbarIcons = new ImageList(components)
+    ofdLoadFile.InitialDirectory = Path.Combine(AppContext.BaseDirectory, "Resources");
+    ofdLoadFile.Filter = "Audio files (*.wav;*.mp3)|*.wav;*.mp3|All files (*.*)|*.*";
+    ofdLoadFile.FileName = "";
+    smallToolbarIcons = new ImageList(components)
     {
       ColorDepth = ColorDepth.Depth32Bit,
       ImageSize = new Size(30, 30)
@@ -68,26 +87,27 @@ public partial class FrmMain : Form
     panTracks.AutoScroll = false;
     lblPlayhead.Width = 2;
     lblPlayhead.Top = 0;
+    lblPlayhead.Visible = false;
 
-		//ToolStripMenuItem menuEffects = new("Effects");
-		//menuEffects.DropDownItems.Add("Fade In", null, (s, e) => ApplyEffectToTrack("FadeIn"));
-		//menuEffects.DropDownItems.Add("Fade Out", null, (s, e) => ApplyEffectToTrack("FadeOut"));
-		//menuEffects.DropDownItems.Add("Echo", null, (s, e) => ApplyEffectToTrack("Echo"));
-		//menuEffects.DropDownItems.Add("Normalize", null, (s, e) => ApplyEffectToTrack("Normalize"));
-		//menuEffects.DropDownItems.Add("Muffle", null, (s, e) => ApplyEffectToTrack("Muffle"));
-		//menuEffects.DropDownItems.Add("Undo Effect", null, (s, e) => UndoEffectOnTrack());
-		//menuEdit.DropDownItems.Add(menuEffects);   // shows up as Edit > Effects
-		ToolStripMenuItem menuEffects = new("Voice Tools");
-		menuEffects.DropDownItems.Add("Voice Only (quiet the music)", null, (s, e) => ApplyEffectToTrack("VoiceOnly"));
-		menuEffects.DropDownItems.Add("Remove Voice (karaoke)", null, (s, e) => ApplyEffectToTrack("RemoveVoice"));
-		menuEffects.DropDownItems.Add("Deeper Voice", null, (s, e) => ApplyEffectToTrack("Deep"));
-		menuEffects.DropDownItems.Add("Higher Voice", null, (s, e) => ApplyEffectToTrack("Chipmunk"));
-		menuEffects.DropDownItems.Add("Undo Effect", null, (s, e) => UndoEffectOnTrack());
-		menuEffects.DropDownItems.Add("Fade In", null, (s, e) => ApplyEffectToTrack("FadeIn"));
-        menuEffects.DropDownItems.Add("Fade Out", null, (s, e) => ApplyEffectToTrack("FadeOut"));
-		menuEdit.DropDownItems.Add(menuEffects);    // shows up as Edit > Voice Tools
+    //ToolStripMenuItem menuEffects = new("Effects");
+    //menuEffects.DropDownItems.Add("Fade In", null, (s, e) => ApplyEffectToTrack("FadeIn"));
+    //menuEffects.DropDownItems.Add("Fade Out", null, (s, e) => ApplyEffectToTrack("FadeOut"));
+    //menuEffects.DropDownItems.Add("Echo", null, (s, e) => ApplyEffectToTrack("Echo"));
+    //menuEffects.DropDownItems.Add("Normalize", null, (s, e) => ApplyEffectToTrack("Normalize"));
+    //menuEffects.DropDownItems.Add("Muffle", null, (s, e) => ApplyEffectToTrack("Muffle"));
+    //menuEffects.DropDownItems.Add("Undo Effect", null, (s, e) => UndoEffectOnTrack());
+    //menuEdit.DropDownItems.Add(menuEffects);   // shows up as Edit > Effects
+    ToolStripMenuItem menuEffects = new("Voice Tools");
+    menuEffects.DropDownItems.Add("Voice Only (quiet the music)", null, (s, e) => ApplyEffectToTrack("VoiceOnly"));
+    menuEffects.DropDownItems.Add("Remove Voice (karaoke)", null, (s, e) => ApplyEffectToTrack("RemoveVoice"));
+    menuEffects.DropDownItems.Add("Deeper Voice", null, (s, e) => ApplyEffectToTrack("Deep"));
+    menuEffects.DropDownItems.Add("Higher Voice", null, (s, e) => ApplyEffectToTrack("Chipmunk"));
+    menuEffects.DropDownItems.Add("Undo Effect", null, (s, e) => UndoEffectOnTrack());
+    menuEffects.DropDownItems.Add("Fade In", null, (s, e) => ApplyEffectToTrack("FadeIn"));
+    menuEffects.DropDownItems.Add("Fade Out", null, (s, e) => ApplyEffectToTrack("FadeOut"));
+    menuEdit.DropDownItems.Add(menuEffects);    // shows up as Edit > Voice Tools
 
-		if (MainMenuStrip is not null)
+    if (MainMenuStrip is not null)
     {
       HideMenuImageMargins(MainMenuStrip.Items);
     }
@@ -95,7 +115,7 @@ public partial class FrmMain : Form
     panTimeRuler = new DrawingPanel
     {
       Height = 32,
-      BackColor = Color.FromArgb(10,10,10),
+      BackColor = Color.FromArgb(10, 10, 10),
       ForeColor = Color.Yellow
     };
     panTimeRuler.Paint += DrawTimeRuler;
@@ -132,17 +152,17 @@ public partial class FrmMain : Form
     buttonDrums.BackgroundImage = null;
     buttonDrums.ImageList = imageList1;
     buttonDrums.ImageIndex = 0;
-    buttonDrums.Text = "Drums";
+    buttonDrums.Text = "Beat";
 
     buttonGuitar.BackgroundImage = null;
     buttonGuitar.ImageList = imageList1;
     buttonGuitar.ImageIndex = 1;
-    buttonGuitar.Text = "Guitar";
+    buttonGuitar.Text = "Pluck";
 
     buttonPiano.BackgroundImage = null;
     buttonPiano.ImageList = imageList1;
     buttonPiano.ImageIndex = 2;
-    buttonPiano.Text = "Piano";
+    buttonPiano.Text = "Chord";
 
     buttonSynth.BackgroundImage = null;
     buttonSynth.ImageList = imageList1;
@@ -529,6 +549,14 @@ public partial class FrmMain : Form
   private void trkDrawTimescale_Scroll(object sender, EventArgs e)
   {
     if (trackManager is null) return;
+    if (!isZooming && lastPlayheadScreenX >= 0)
+    {
+      lblPlayhead.Visible = false;
+      InvalidatePlayheadColumn(lastPlayheadScreenX);
+    }
+    isZooming = true;
+    zoomSettleTimer.Stop();
+    zoomSettleTimer.Start();
     trackManager.DrawTimescale = Math.Max(1, trkDrawTimescale.Value);
     firstVisiblePixel = 0;
     trackManager.RedrawAll();
@@ -537,26 +565,26 @@ public partial class FrmMain : Form
 
   private void ApplyEffectToTrack(string effect)
   {
-		Track track = GetSelectedTrack();
-		if (track is null) return;
+    Track track = GetSelectedTrack();
+    if (track is null) return;
 
-		track.ApplyEffect(effect);
-		AfterEdit(track);          // your existing method: resets playback and repaints
+    track.ApplyEffect(effect);
+    AfterEdit(track);          // your existing method: resets playback and repaints
   }
 
-   private void UndoEffectOnTrack()
-   {
-		Track track = GetSelectedTrack();
-		if (track is null || !track.CanUndoEffect) return;
+  private void UndoEffectOnTrack()
+  {
+    Track track = GetSelectedTrack();
+    if (track is null || !track.CanUndoEffect) return;
 
-		track.UndoEffect();
-		AfterEdit(track);
-   }
+    track.UndoEffect();
+    AfterEdit(track);
+  }
 
 
 
-	// Helper methods
-	private Panel CreateTrackPanel(Track track)
+  // Helper methods
+  private Panel CreateTrackPanel(Track track)
   {
     DrawingPanel pan = new()
     {
@@ -719,7 +747,6 @@ public partial class FrmMain : Form
     buttonTrim.Enabled = hasSelection;
     buttonDeleteSelection.Enabled = hasSelection;
     btnPlay.Visible = true;
-    lblPlayhead.Visible = hasTracks;
     bool isPlaying = trackManager.State == NAudio.Wave.PlaybackState.Playing;
     btnPlay.ImageIndex = isPlaying ? 5 : 4;
     topButtonTips.SetToolTip(btnPlay, isPlaying ? "Pause" : "Play");
@@ -741,10 +768,42 @@ public partial class FrmMain : Form
 
       UpdateTimelineScrollBar();
       if (oldStart != firstVisiblePixel) trackManager.RedrawAll();
-      lblPlayhead.Left = playheadPixel - firstVisiblePixel;
+    }
+
+    if (hasTracks)
+    {
+      int currentPlayheadX = playheadPixel - firstVisiblePixel;
+      if (lastPlayheadScreenX != currentPlayheadX)
+      {
+        InvalidatePlayheadColumn(lastPlayheadScreenX);
+        InvalidatePlayheadColumn(currentPlayheadX);
+      }
+
+      lastPlayheadScreenX = currentPlayheadX;
+      lblPlayhead.Left = currentPlayheadX;
+      lblPlayhead.Visible = !isZooming;
       lblPlayhead.BringToFront();
     }
+    else
+    {
+      InvalidatePlayheadColumn(lastPlayheadScreenX);
+      lblPlayhead.Visible = false;
+      lastPlayheadScreenX = -1;
+    }
+
     panTimeRuler.Invalidate();
+  }
+
+  private void InvalidatePlayheadColumn(int x)
+  {
+    if (panTracks is null || x < 0 || x >= panTracks.ClientSize.Width)
+    {
+      return;
+    }
+
+    int left = Math.Max(0, x - 1);
+    int right = Math.Min(panTracks.ClientSize.Width, x + 2);
+    panTracks.Invalidate(new Rectangle(left, 0, right - left, panTracks.ClientSize.Height), true);
   }
 
   private void hsbTimeline_Scroll(object sender, ScrollEventArgs e)
@@ -899,9 +958,9 @@ public partial class FrmMain : Form
         TextRenderer.DrawText(e.Graphics, label, panTimeRuler.Font, new Point(labelX, 2), panTimeRuler.ForeColor, TextFormatFlags.NoPadding);
     }
 
-    if (lblPlayhead.Visible)
+    if (trackManager.Tracks.Count > 0)
     {
-      int markerX = panTimeRuler.PointToClient(lblPlayhead.PointToScreen(Point.Empty)).X;
+      int markerX = originX + playheadPixel;
       int size = 7 * DeviceDpi / 96;
       Point[] arrow = { new(markerX - size, bottom - size), new(markerX + size, bottom - size), new(markerX, bottom) };
       e.Graphics.FillPolygon(Brushes.DodgerBlue, arrow);
@@ -914,175 +973,187 @@ public partial class FrmMain : Form
   }
 
 
-private void buttonSynth_Click(object sender, EventArgs e)
-{
-		using GenerateTone dialog = new();
+  private void buttonSynth_Click(object sender, EventArgs e)
+  {
+    using FrmGenerateSynth dialog = new();
 
-		if (dialog.ShowDialog(this) != DialogResult.OK)
-			return;
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+      return;
 
-		Track newTrack = new(
-			dialog.GeneratedSamples,
-			dialog.GeneratedFormat
-		);
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreateSynthTrack(
+        dialog.Instrument,
+        dialog.Note,
+        dialog.Octave,
+        dialog.DurationSeconds
+      );
 
-		newTrack.DrawOffset = (int)Math.Round(
-			dialog.StartTimeSeconds *
-			newTrack.SampleValuesPerSecond /
-			Math.Max(1, trackManager.DrawTimescale)
-		);
+      newTrack.SetDisplayName(
+        $"{dialog.Instrument} {dialog.Note}{dialog.Octave}"
+      );
 
-		newTrack.SetDisplayName(
-			$"Synth {dialog.WaveformName} {dialog.FrequencyHz} Hz"
-		);
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds *
+        newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale)
+      );
 
-		CreateTrackPanel(newTrack);
-		trackManager.AddTrack(newTrack);
-		SelectTrack(newTrack);
-		UpdateSizes();
-		newTrack.PanDrawSamples.Invalidate();
-}
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(
+        ex.Message, "Synth",
+        MessageBoxButtons.OK, MessageBoxIcon.Error
+      );
+    }
+  }
 
-	// Keep the existing Designer click connection.
-	private void buttonTone_Click(object sender, EventArgs e)
-	{
-		buttonSynth_Click(sender, e);
-	}
-
-
-
-	private void buttonGuitar_Click(object sender, EventArgs e)
-	{
-		using FrmGeneratePluck dialog = new();
-
-		if (dialog.ShowDialog(this) != DialogResult.OK)
-			return;
-
-		try
-		{
-			Track newTrack = SoundFontGenerator.CreatePluckTrack(
-				dialog.Instrument,
-				dialog.Note,
-				dialog.Octave,
-				dialog.DurationSeconds
-			);
-
-			newTrack.SetDisplayName(
-				$"{dialog.Instrument} {dialog.Note}{dialog.Octave}"
-			);
-
-			newTrack.DrawOffset = (int)Math.Round(
-				dialog.StartTimeSeconds *
-				newTrack.SampleValuesPerSecond /
-				Math.Max(1, trackManager.DrawTimescale)
-			);
-
-			CreateTrackPanel(newTrack);
-			trackManager.AddTrack(newTrack);
-			SelectTrack(newTrack);
-			UpdateSizes();
-			newTrack.PanDrawSamples.Invalidate();
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show(
-				ex.Message, "Pluck",
-				MessageBoxButtons.OK, MessageBoxIcon.Error
-			);
-		}
-	}
+  // Keep the existing Designer click connection if it still points here.
+  private void buttonTone_Click(object sender, EventArgs e)
+  {
+    buttonSynth_Click(sender, e);
+  }
 
 
-	
 
+  private void buttonGuitar_Click(object sender, EventArgs e)
+  {
+    using FrmGeneratePluck dialog = new();
 
-    private void buttonPiano_Click(object sender, EventArgs e)
-	{
-		using FrmGenerateChord dialog = new();
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+      return;
 
-		if (dialog.ShowDialog(this) != DialogResult.OK)
-			return;
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreatePluckTrack(
+        dialog.Instrument,
+        dialog.Note,
+        dialog.Octave,
+        dialog.DurationSeconds
+      );
 
-		try
-		{
-			Track newTrack = SoundFontGenerator.CreateChordTrack(
-				dialog.RootNote,
-				dialog.ChordType,
-				dialog.Octave,
-				dialog.DurationSeconds
-			);
+      newTrack.SetDisplayName(
+        $"{dialog.Instrument} {dialog.Note}{dialog.Octave}"
+      );
 
-			newTrack.SetDisplayName(
-				$"{dialog.RootNote} {dialog.ChordType} Chord"
-			);
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds *
+        newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale)
+      );
 
-			newTrack.DrawOffset = (int)Math.Round(
-				dialog.StartTimeSeconds *
-				newTrack.SampleValuesPerSecond /
-				Math.Max(1, trackManager.DrawTimescale)
-			);
-
-			CreateTrackPanel(newTrack);
-			trackManager.AddTrack(newTrack);
-			SelectTrack(newTrack);
-			UpdateSizes();
-			newTrack.PanDrawSamples.Invalidate();
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show(
-				ex.Message, "Chord",
-				MessageBoxButtons.OK, MessageBoxIcon.Error
-			);
-		}
-	}
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(
+        ex.Message, "Pluck",
+        MessageBoxButtons.OK, MessageBoxIcon.Error
+      );
+    }
+  }
 
 
 
 
-	private void buttonDrums_Click(object sender, EventArgs e)
-	{
-		using FrmGenerateBeat dialog = new();
 
-		if (dialog.ShowDialog(this) != DialogResult.OK)
-			return;
+  private void buttonPiano_Click(object sender, EventArgs e)
+  {
+    using FrmGenerateChord dialog = new();
 
-		try
-		{
-			Track newTrack = SoundFontGenerator.CreateBeatTrack(
-				dialog.DrumKit,
-				dialog.Rhythm,
-				dialog.Tempo,
-				dialog.Bars
-			);
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+      return;
 
-			newTrack.SetDisplayName(
-				$"{dialog.DrumKit} {dialog.Rhythm}"
-			);
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreateChordTrack(
+        dialog.RootNote,
+        dialog.ChordType,
+        dialog.Octave,
+        dialog.DurationSeconds
+      );
 
-			newTrack.DrawOffset = (int)Math.Round(
-				dialog.StartTimeSeconds *
-				newTrack.SampleValuesPerSecond /
-				Math.Max(1, trackManager.DrawTimescale)
-			);
+      newTrack.SetDisplayName(
+        $"{dialog.RootNote} {dialog.ChordType} Chord"
+      );
 
-			CreateTrackPanel(newTrack);
-			trackManager.AddTrack(newTrack);
-			SelectTrack(newTrack);
-			UpdateSizes();
-			newTrack.PanDrawSamples.Invalidate();
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show(
-				ex.Message, "Beat",
-				MessageBoxButtons.OK, MessageBoxIcon.Error
-			);
-		}
-	}
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds *
+        newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale)
+      );
+
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(
+        ex.Message, "Chord",
+        MessageBoxButtons.OK, MessageBoxIcon.Error
+      );
+    }
+  }
 
 
-	private void lbInstPanel_TextChanged(object sender, EventArgs e)
+
+
+  private void buttonDrums_Click(object sender, EventArgs e)
+  {
+    using FrmGenerateBeat dialog = new();
+
+    if (dialog.ShowDialog(this) != DialogResult.OK)
+      return;
+
+    try
+    {
+      Track newTrack = SoundFontGenerator.CreateBeatTrack(
+        dialog.DrumKit,
+        dialog.Rhythm,
+        dialog.Tempo,
+        dialog.Bars
+      );
+
+      newTrack.SetDisplayName(
+        $"{dialog.DrumKit} {dialog.Rhythm}"
+      );
+
+      newTrack.DrawOffset = (int)Math.Round(
+        dialog.StartTimeSeconds *
+        newTrack.SampleValuesPerSecond /
+        Math.Max(1, trackManager.DrawTimescale)
+      );
+
+      CreateTrackPanel(newTrack);
+      trackManager.AddTrack(newTrack);
+      SelectTrack(newTrack);
+      UpdateSizes();
+      newTrack.PanDrawSamples.Invalidate();
+    }
+    catch (Exception ex)
+    {
+      MessageBox.Show(
+        ex.Message, "Beat",
+        MessageBoxButtons.OK, MessageBoxIcon.Error
+      );
+    }
+  }
+
+
+  private void lbInstPanel_TextChanged(object sender, EventArgs e)
   {
 
   }

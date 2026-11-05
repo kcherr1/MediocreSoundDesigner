@@ -579,37 +579,113 @@ public class Track : IDisposable
         DrawOffset += amount;
         DrawOffset = Math.Max(0, DrawOffset);
     }
-    public void DrawSamples(Graphics g, int drawTimescale)
+  public void DrawSamples(Graphics g, int drawTimescale, int horizontalScrollOffset = 0)
+  {
+    if (PanDrawSamples is null || samples is null || samples.Length == 0)
     {
-      if (PanDrawSamples is null)
-      {
-        return;
-      }
-
-      this.drawTimescale = drawTimescale;
-      float heightAdj = PanDrawSamples.Height / 2;
-
-      if (samples != null && samples.Length > 0)
-      {
-        int x = DrawOffset;
-        Pen pen = new(IsDisabled ? Settings.Color.TrackSamples_Disabled : Settings.Color.TrackSamples_Enabled);
-        List<Point> points = new();
-
-        for (int s = 0; s < samples.Length; s += drawTimescale)
-        {
-          var sample = (int)(samples[s] * heightAdj * Volume);
-          points.Add(new(x, PanDrawSamples.Height / 2));
-          points.Add(new(x, PanDrawSamples.Height / 2 - sample));
-          x++;
-        }
-
-        g.DrawLines(pen, points.ToArray());
-        pen.Dispose();
-      }
-
+      return;
     }
 
-    public void DrawTrackHeader(Graphics g)
+    int samplesPerPixel = Math.Max(1, drawTimescale);
+    this.drawTimescale = samplesPerPixel;
+
+    float headerHeight = 30f;
+    float waveformHeight = Math.Max(1f, PanDrawSamples.ClientSize.Height - headerHeight);
+    float centerY = headerHeight + waveformHeight / 2f;
+    float amplitude = waveformHeight / 2f * Volume;
+
+    Color waveformColor = IsDisabled
+        ? Settings.Color.TrackSamples_Disabled
+        : Settings.Color.TrackSamples_Enabled;
+
+    RectangleF baselineBounds = g.VisibleClipBounds;
+
+    using Pen baselinePen = new(Color.FromArgb(70, waveformColor));
+    g.DrawLine(
+        baselinePen,
+        baselineBounds.Left,
+        centerY,
+        baselineBounds.Right,
+        centerY);
+
+    // Keep the waveform dark, but let some of the track color show through.
+    using Pen waveformPen = new(Color.FromArgb(
+        190,
+        waveformColor.R,
+        waveformColor.G,
+        waveformColor.B));
+
+    // At maximum zoom, connect individual samples to show their shape.
+    if (samplesPerPixel == 1)
+    {
+      RectangleF sampleClip = g.VisibleClipBounds;
+
+      int firstSample = Math.Clamp(
+          (int)Math.Floor(sampleClip.Left - DrawOffset),
+          0,
+          samples.Length - 1);
+
+      int endSample = Math.Clamp(
+          (int)Math.Ceiling(sampleClip.Right - DrawOffset) + 1,
+          firstSample + 1,
+          samples.Length);
+
+      PointF[] points = new PointF[endSample - firstSample];
+
+      for (int sampleIndex = firstSample; sampleIndex < endSample; sampleIndex++)
+      {
+        float value = Math.Clamp(samples[sampleIndex] * Volume, -1f, 1f);
+        float x = DrawOffset + sampleIndex;
+        float y = centerY - value * amplitude;
+
+        points[sampleIndex - firstSample] = new PointF(x, y);
+      }
+
+      if (points.Length > 1)
+      {
+        g.DrawLines(waveformPen, points);
+      }
+
+      return;
+    }
+
+    // When zoomed out, draw the minimum-to-maximum range for each pixel.
+    int totalColumns = (samples.Length + samplesPerPixel - 1) / samplesPerPixel;
+    RectangleF waveformClip = g.VisibleClipBounds;
+
+    int firstColumn = Math.Clamp(
+        (int)Math.Floor(waveformClip.Left - DrawOffset),
+        0,
+        totalColumns);
+
+    int endColumn = Math.Clamp(
+        (int)Math.Ceiling(waveformClip.Right - DrawOffset),
+        firstColumn,
+        totalColumns);
+
+    for (int column = firstColumn; column < endColumn; column++)
+    {
+      int startIndex = column * samplesPerPixel;
+      int endIndex = Math.Min(startIndex + samplesPerPixel, samples.Length);
+
+      float minimum = 1f;
+      float maximum = -1f;
+
+      for (int i = startIndex; i < endIndex; i++)
+      {
+        float value = Math.Clamp(samples[i] * Volume, -1f, 1f);
+        minimum = Math.Min(minimum, value);
+        maximum = Math.Max(maximum, value);
+      }
+
+      float x = DrawOffset + column;
+      float topY = centerY - maximum * amplitude;
+      float bottomY = centerY - minimum * amplitude;
+
+      g.DrawLine(waveformPen, x, topY, x, bottomY);
+    }
+  }
+  public void DrawTrackHeader(Graphics g)
     {
       if (PanDrawSamples is null)
       {

@@ -58,7 +58,7 @@ namespace MediocreSoundDesigner
       buttonRecord = new Button();
       buttonTrim = new Button();
       buttonGuitar = new Button();
-      buttonTone = new Button();
+      buttonSynth = new Button();
       buttonDrums = new Button();
       buttonPiano = new Button();
       lbGeneratorPanel = new TextBox();
@@ -308,24 +308,24 @@ namespace MediocreSoundDesigner
       buttonGuitar.UseVisualStyleBackColor = false;
       buttonGuitar.Click += buttonGuitar_Click;
       // 
-      // buttonTone
+      // buttonSynth
       // 
-      buttonTone.BackColor = Color.FromArgb(52, 52, 52);
-      buttonTone.BackgroundImage = (Image)resources.GetObject("buttonTone.BackgroundImage");
-      buttonTone.BackgroundImageLayout = ImageLayout.Stretch;
-      buttonTone.Enabled = false;
-      buttonTone.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-      buttonTone.FlatStyle = FlatStyle.Flat;
-      buttonTone.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold);
-      buttonTone.ForeColor = Color.White;
-      buttonTone.Location = new Point(1041, 935);
-      buttonTone.Name = "buttonTone";
-      buttonTone.Size = new Size(100, 85);
-      buttonTone.TabIndex = 12;
-      buttonTone.TextAlign = ContentAlignment.BottomCenter;
-      buttonTone.TextImageRelation = TextImageRelation.ImageAboveText;
-      buttonTone.UseVisualStyleBackColor = false;
-      buttonTone.Click += buttonTone_Click;
+      buttonSynth.BackColor = Color.FromArgb(52, 52, 52);
+      buttonSynth.BackgroundImage = (Image)resources.GetObject("buttonSynth.BackgroundImage");
+      buttonSynth.BackgroundImageLayout = ImageLayout.Stretch;
+      buttonSynth.Enabled = false;
+      buttonSynth.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+      buttonSynth.FlatStyle = FlatStyle.Flat;
+      buttonSynth.Font = new Font("Microsoft Sans Serif", 10.2F, FontStyle.Bold);
+      buttonSynth.ForeColor = Color.White;
+      buttonSynth.Location = new Point(1041, 935);
+      buttonSynth.Name = "buttonSynth";
+      buttonSynth.Size = new Size(100, 85);
+      buttonSynth.TabIndex = 12;
+      buttonSynth.TextAlign = ContentAlignment.BottomCenter;
+      buttonSynth.TextImageRelation = TextImageRelation.ImageAboveText;
+      buttonSynth.UseVisualStyleBackColor = false;
+      buttonSynth.Click += this.buttonTone_Click;
       // 
       // buttonDrums
       // 
@@ -444,7 +444,7 @@ namespace MediocreSoundDesigner
       Controls.Add(buttonPiano);
       Controls.Add(buttonDrums);
       Controls.Add(buttonTrim);
-      Controls.Add(buttonTone);
+      Controls.Add(buttonSynth);
       Controls.Add(btnPlay);
       Controls.Add(buttonGuitar);
       Controls.Add(trkDrawTimescale);
@@ -495,7 +495,7 @@ namespace MediocreSoundDesigner
     private Button buttonRecord;
     private Button buttonTrim;
     private Button buttonGuitar;
-    private Button buttonTone;
+    private Button buttonSynth;
     private Button buttonDrums;
     private Button buttonPiano;
     private TextBox lbGeneratorPanel;
