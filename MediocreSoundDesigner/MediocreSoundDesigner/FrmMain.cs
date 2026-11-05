@@ -221,7 +221,7 @@ public partial class FrmMain : Form
         Track newTrack = new(new float[0]);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
-        FitToWindow();
+        SetDefaultZoom();
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
 
@@ -249,7 +249,7 @@ public partial class FrmMain : Form
         Track newTrack = new(samples);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
-        FitToWindow();
+        SetDefaultZoom();
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
     }
@@ -272,7 +272,7 @@ public partial class FrmMain : Form
         Track newTrack = new(samples);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
-        FitToWindow();
+        SetDefaultZoom();
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
     }

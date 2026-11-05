@@ -15,6 +15,8 @@ public class Track : IDisposable
     // Every track stored in this format, no matter where it came from
     public const int INTERNAL_SAMPLE_RATE = 44100;
     public const int INTERNAL_CHANNELS = 1;
+    private const float WAVEFORM_NOISE_FLOOR = 0.005f;
+    private const float MAX_WAVEFORM_DISPLAY_SCALE = 20.0f;
 
     // Fields
     private string file;
@@ -266,7 +268,9 @@ public class Track : IDisposable
             peak = Math.Max(peak, Math.Abs(sample));
         }
 
-        return peak > 0.0f ? 1.0f / peak : 1.0f;
+        return peak > 0.0f
+            ? Math.Min(1.0f / peak, MAX_WAVEFORM_DISPLAY_SCALE)
+            : 1.0f;
     }
 
     // play
@@ -342,12 +346,15 @@ public class Track : IDisposable
             List<Point> points = new();
             for (int s = 0; s < samples.Length; s += drawTimescale)
             {
-                var sample = (int)(samples[s] * waveformDisplayScale * heightAdj * Volume);
-                points.Add(new(x, height / 2));
+                float audioSample = Math.Abs(samples[s]) < WAVEFORM_NOISE_FLOOR ? 0.0f : samples[s];
+                var sample = (int)(audioSample * waveformDisplayScale * heightAdj * Volume);
                 points.Add(new(x, height / 2 - sample));
                 x++;
             }
-            g.DrawLines(wavePen, points.ToArray());
+            if (points.Count > 1)
+            {
+                g.DrawLines(wavePen, points.ToArray());
+            }
         }
 
         // 2. Draw Unified Selection Box across the track
