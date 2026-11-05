@@ -118,6 +118,14 @@ public partial class FrmMain : Form
         if (sfdSaveFile.ShowDialog() == DialogResult.OK)
         {
             trackManager.SaveToFile(sfdSaveFile.FileName);
+
+            // tag the file we just wrote
+            new WavMetadata
+            {
+                Title = Path.GetFileNameWithoutExtension(sfdSaveFile.FileName),
+                Artist = Microsoft.VisualBasic.Interaction.InputBox("Artist name:", "Export", "Your Name Here"),
+                Year = DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss")
+            }.AppendTo(sfdSaveFile.FileName);
         }
     }
     private void menuFileSettings_Click(object sender, EventArgs e)
