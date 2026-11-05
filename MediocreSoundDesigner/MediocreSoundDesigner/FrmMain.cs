@@ -154,6 +154,9 @@ public partial class FrmMain : Form
     private void menuFileSave_Click(object sender, EventArgs e)
     {
         sfdSaveFile.DefaultExt = "wav";
+        sfdSaveFile.Filter = "WAV Audio (*.wav)|*.wav|MP3 Audio (*.mp3)|*.mp3";
+        sfdSaveFile.FilterIndex = 1;
+        sfdSaveFile.AddExtension = true;
         if (sfdSaveFile.ShowDialog() == DialogResult.OK)
         {
             trackManager.SaveToFile(sfdSaveFile.FileName);

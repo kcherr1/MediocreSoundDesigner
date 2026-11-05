@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using NAudio.Lame;
 
 namespace MediocreSoundDesigner;
 
@@ -285,8 +286,25 @@ public class Track : IDisposable
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         float[] adjSamples = GetAdjustedSamples();
-        using var writer = new WaveFileWriter(path, OutputFormat);
-        writer.WriteSamples(adjSamples, 0, adjSamples.Length);
+
+        if (Path.GetExtension(path).Equals(".mp3", StringComparison.OrdinalIgnoreCase))
+        {
+            WaveFormat pcmFormat = new(INTERNAL_SAMPLE_RATE, 16, INTERNAL_CHANNELS);
+            using var writer = new LameMP3FileWriter(path, pcmFormat, 192);
+            byte[] buffer = new byte[adjSamples.Length * 2];
+            for (int i = 0; i < adjSamples.Length; i++)
+            {
+                short sample = (short)Math.Clamp(adjSamples[i] * short.MaxValue, short.MinValue, short.MaxValue);
+                buffer[i * 2] = (byte)(sample & 0xff);
+                buffer[i * 2 + 1] = (byte)(sample >> 8);
+            }
+            writer.Write(buffer, 0, buffer.Length);
+        }
+        else
+        {
+            using var writer = new WaveFileWriter(path, OutputFormat);
+            writer.WriteSamples(adjSamples, 0, adjSamples.Length);
+        }
     }
 
     public float[] GetAdjustedSamples() {
