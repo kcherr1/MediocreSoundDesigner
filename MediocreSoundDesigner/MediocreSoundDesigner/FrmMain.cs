@@ -83,13 +83,25 @@ public partial class FrmMain : Form {
       newTrack.PanDrawSamples.Invalidate();
     }
   }
-  private void menuFileSave_Click(object sender, EventArgs e) {
-    sfdSaveFile.DefaultExt = "wav";
-    if (sfdSaveFile.ShowDialog() == DialogResult.OK) {
-      trackManager.SaveToFile(sfdSaveFile.FileName);
+    private void menuFileSave_Click(object sender, EventArgs e)
+    { // All file types to export
+        sfdSaveFile.Filter =
+            "WAV Audio (*.wav)|*.wav|" +
+            "AIFF Audio (*.aiff)|*.aiff|" +
+            "AU Audio (*.au)|*.au|" +
+            "FLAC Audio (*.flac)|*.flac|" +
+            "OGG Vorbis Audio (*.ogg)|*.ogg|" +
+            "MP3 Audio (*.mp3)|*.mp3";
+
+        sfdSaveFile.DefaultExt = "wav";
+        sfdSaveFile.AddExtension = true;
+
+        if (sfdSaveFile.ShowDialog() == DialogResult.OK)
+        {
+            trackManager.SaveToFile(sfdSaveFile.FileName);
+        }
     }
-  }
-  private void menuFileSettings_Click(object sender, EventArgs e) {
+    private void menuFileSettings_Click(object sender, EventArgs e) {
     FrmEditSettings frm = new();
     frm.SetSound(trackManager.SelectedTrack);
     if (frm.ShowDialog() == DialogResult.OK) {
