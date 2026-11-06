@@ -7,6 +7,7 @@ public static class SoundFontGenerator
 {
   private const int SampleRate = 44100;
   private const double ReleaseSeconds = 0.75;
+  private const double InstrumentFadeSeconds = 0.25;
 
   public static Track CreateTestTrack()
   {
@@ -74,9 +75,9 @@ public static class SoundFontGenerator
 
     Synthesizer synthesizer = new(soundFontPath, SampleRate);
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
-    float[] left = new float[frameCount + releaseFrames];
-    float[] right = new float[frameCount + releaseFrames];
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * InstrumentFadeSeconds));
+    float[] left = new float[frameCount];
+    float[] right = new float[frameCount];
 
     int rootMidiNote = 12 * (octave + 1) + rootIndex;
     int[] notes = intervals.Select(interval => rootMidiNote + interval).ToArray();
@@ -93,8 +94,7 @@ public static class SoundFontGenerator
       synthesizer.NoteOff(0, note);
     }
 
-    synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
-    ApplyReleaseFade(left, right, frameCount, releaseFrames);
+    ApplyReleaseFade(left, right, frameCount - fadeFrames, fadeFrames);
 
     float[] samples = new float[left.Length * 2];
 
@@ -138,17 +138,79 @@ public static class SoundFontGenerator
     synthesizer.ProcessMidiMessage(0, 0xC0, program, 0);
 
     int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
-    int releaseFrames = (int)Math.Round(SampleRate * ReleaseSeconds);
-    float[] left = new float[frameCount + releaseFrames];
-    float[] right = new float[frameCount + releaseFrames];
+    int fadeFrames = Math.Min(frameCount, (int)Math.Round(SampleRate * InstrumentFadeSeconds));
+    float[] left = new float[frameCount];
+    float[] right = new float[frameCount];
 
     int midiNote = 12 * (octave + 1) + noteIndex;
 
     synthesizer.NoteOn(0, midiNote, 90);
     synthesizer.Render(left.AsSpan(0, frameCount), right.AsSpan(0, frameCount));
     synthesizer.NoteOff(0, midiNote);
-    synthesizer.Render(left.AsSpan(frameCount, releaseFrames), right.AsSpan(frameCount, releaseFrames));
-    ApplyReleaseFade(left, right, frameCount, releaseFrames);
+    ApplyReleaseFade(left, right, frameCount - fadeFrames, fadeFrames);
+
+    float[] samples = new float[left.Length * 2];
+
+    for (int i = 0; i < left.Length; i++)
+    {
+      samples[i * 2] = Math.Clamp(left[i], -1f, 1f);
+      samples[i * 2 + 1] = Math.Clamp(right[i], -1f, 1f);
+    }
+
+    return new Track(samples, WaveFormat.CreateIeeeFloatWaveFormat(SampleRate, 2));
+  }
+
+  public static Track CreateSynthTrack(
+  string instrument,
+  string noteName,
+  int octave,
+  double durationSeconds)
+  {
+    string soundFontPath = Path.Combine(
+      AppContext.BaseDirectory,
+      "SoundFonts",
+      "GeneralUser GS SoftSynth v1.44.sf2");
+
+    if (!File.Exists(soundFontPath))
+    {
+      throw new FileNotFoundException("The SoundFont file was not found.", soundFontPath);
+    }
+
+    string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    int noteIndex = Array.IndexOf(noteNames, noteName.Trim());
+
+    if (noteIndex < 0)
+    {
+      throw new InvalidDataException($"Unknown note: {noteName}");
+    }
+
+    int program = instrument.Trim() switch
+    {
+      "Synth Lead 1" => 80,
+      "Synth Lead 2" => 81,
+      "Warm Pad" => 89,
+      "Polysynth Pad" => 90,
+      _ => throw new InvalidDataException($"Unknown synth instrument: {instrument}")
+    };
+
+    Synthesizer synthesizer = new(soundFontPath, SampleRate);
+    synthesizer.ProcessMidiMessage(0, 0xC0, program, 0);
+
+    int frameCount = Math.Max(1, (int)Math.Round(durationSeconds * SampleRate));
+    int fadeFrames = Math.Min(
+      frameCount,
+      (int)Math.Round(SampleRate * InstrumentFadeSeconds));
+
+    float[] left = new float[frameCount];
+    float[] right = new float[frameCount];
+
+    int midiNote = 12 * (octave + 1) + noteIndex;
+
+    synthesizer.NoteOn(0, midiNote, 90);
+    synthesizer.Render(left.AsSpan(0, frameCount), right.AsSpan(0, frameCount));
+    synthesizer.NoteOff(0, midiNote);
+
+    ApplyReleaseFade(left, right, frameCount - fadeFrames, fadeFrames);
 
     float[] samples = new float[left.Length * 2];
 
