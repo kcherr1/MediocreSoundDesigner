@@ -169,6 +169,17 @@ public partial class FrmMain : Form
             trackManager.SaveToFile(sfdSaveFile.FileName);
         }
     }
+
+    private void menuIOAudioMedia_Click(object sender, EventArgs e)
+    {
+        FrmAudioMedia frm = new();
+        frm.ShowDialog();
+        if (frm.ShowDialog() == DialogResult.OK)
+        {
+            // Handle any actions needed after the dialog is closed with OK
+        }
+    }
+
     private void menuFileSettings_Click(object sender, EventArgs e)
     {
         FrmEditSettings frm = new();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.CoreAudioApi;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,31 @@ namespace MediocreSoundDesigner
         public FrmAudioMedia()
         {
             InitializeComponent();
+            LoadAudioDevices();
+        }
+
+        private void LoadAudioDevices()
+        {
+            try
+            {
+                MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+
+                MMDeviceCollection inputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                AddAudioDevicesToComboBox(comboMediaIn, inputDevices);
+                MMDeviceCollection outputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                AddAudioDevicesToComboBox(comboMediaOut, outputDevices);
+            } catch (Exception ex)
+            {
+                MessageBox.Show("Error loading audio devices: " + ex.Message);
+            }
+        }
+
+        private void AddAudioDevicesToComboBox(ComboBox comboBox, MMDeviceCollection devices)
+        {
+            foreach (var device in devices)
+            {
+                comboBox.Items.Add(device.FriendlyName);
+            }
         }
 
         private void comboMediaOut_SelectedIndexChanged(object sender, EventArgs e)

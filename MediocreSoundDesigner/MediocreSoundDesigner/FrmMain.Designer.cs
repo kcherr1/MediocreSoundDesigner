@@ -118,6 +118,7 @@
             bttnMicOptions.Size = new Size(38, 38);
             bttnMicOptions.TabIndex = 8;
             bttnMicOptions.UseVisualStyleBackColor = false;
+            bttnMicOptions.Click += menuIOAudioMedia_Click;
             // 
             // bttnRecord
             // 
