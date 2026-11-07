@@ -350,6 +350,7 @@
             MainMenuStrip = menu;
             Name = "FrmMain";
             Text = "Mediocre Sound Designer";
+            Load += FrmMain_Load;
             SizeChanged += FrmMain_SizeChanged;
             panTracks.ResumeLayout(false);
             panTopActions.ResumeLayout(false);

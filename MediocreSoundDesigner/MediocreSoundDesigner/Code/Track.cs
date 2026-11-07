@@ -280,7 +280,13 @@ public class Track : IDisposable
         fileReader?.Dispose();
         SaveToTempFile();
         fileReader = new AudioFileReader(tempFilePath);
-        outputDevice = new WaveOut();
+        int deviceNumber = Settings.AudioOutputDeviceNumber;
+        if (WaveOut.DeviceCount > 0 && (deviceNumber < 0 || deviceNumber >= WaveOut.DeviceCount))
+        {
+            deviceNumber = 0;
+            Settings.AudioOutputDeviceNumber = deviceNumber;
+        }
+        outputDevice = new WaveOut { DeviceNumber = deviceNumber };
         outputDevice.Init(fileReader);
         outputDevice.Play();
     }

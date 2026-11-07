@@ -39,6 +39,8 @@ public static class Settings {
     }
 
     public static Colors Color { get; private set; }
+    public static int AudioInputDeviceNumber { get; set; }
+    public static int AudioOutputDeviceNumber { get; set; }
 
     private const string FILENAME = "settings.json";
 

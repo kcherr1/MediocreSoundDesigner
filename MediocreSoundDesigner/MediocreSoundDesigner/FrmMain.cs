@@ -173,7 +173,6 @@ public partial class FrmMain : Form
     private void menuIOAudioMedia_Click(object sender, EventArgs e)
     {
         FrmAudioMedia frm = new();
-        frm.ShowDialog();
         if (frm.ShowDialog() == DialogResult.OK)
         {
             // Handle any actions needed after the dialog is closed with OK
@@ -573,6 +572,11 @@ public partial class FrmMain : Form
     }
 
     private void panTracks_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void FrmMain_Load(object sender, EventArgs e)
     {
 
     }
