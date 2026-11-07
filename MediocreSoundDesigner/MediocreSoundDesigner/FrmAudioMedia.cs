@@ -63,6 +63,7 @@ namespace MediocreSoundDesigner
 
             Settings.AudioInputDeviceNumber = inputDevice.Number;
             Settings.AudioOutputDeviceNumber = outputDevice.Number;
+            Settings.SaveToFile();
             DialogResult = DialogResult.OK;
             Close();
         }
