@@ -64,9 +64,22 @@ public partial class FrmGenRecord : FrmEditMaster
                 recordedSamples.Clear();
                 btnRecord.BackgroundImage = Resources.stop;
 
+                if (WaveIn.DeviceCount == 0)
+                {
+                    throw new InvalidOperationException("No audio input devices are available.");
+                }
+
+                int deviceNumber = Settings.AudioInputDeviceNumber;
+                if (deviceNumber < 0 || deviceNumber >= WaveIn.DeviceCount)
+                {
+                    deviceNumber = 0;
+                    Settings.AudioInputDeviceNumber = deviceNumber;
+                }
+
                 // Always record in the app's internal format
                 waveSource = new WaveIn
                 {
+                    DeviceNumber = deviceNumber,
                     WaveFormat = new WaveFormat(Track.INTERNAL_SAMPLE_RATE, 16, Track.INTERNAL_CHANNELS)
                 };
 

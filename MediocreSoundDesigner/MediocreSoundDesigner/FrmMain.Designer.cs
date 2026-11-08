@@ -118,6 +118,7 @@
             bttnMicOptions.Size = new Size(38, 38);
             bttnMicOptions.TabIndex = 8;
             bttnMicOptions.UseVisualStyleBackColor = false;
+            bttnMicOptions.Click += menuIOAudioMedia_Click;
             // 
             // bttnRecord
             // 
@@ -349,6 +350,7 @@
             MainMenuStrip = menu;
             Name = "FrmMain";
             Text = "Mediocre Sound Designer";
+            Load += FrmMain_Load;
             SizeChanged += FrmMain_SizeChanged;
             panTracks.ResumeLayout(false);
             panTopActions.ResumeLayout(false);
