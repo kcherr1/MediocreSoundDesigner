@@ -46,6 +46,7 @@ public class TrackManager
     {
         Tracks.Remove(track);
         SelectedTracks.Remove(track);
+        ClearSelection();
     }
 
     public void SelectTrack(Track track, bool toggle = false)
