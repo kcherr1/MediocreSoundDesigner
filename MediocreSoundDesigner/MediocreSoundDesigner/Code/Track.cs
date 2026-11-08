@@ -388,12 +388,12 @@ public class Track : IDisposable
             int endX = selEndX.Value;
             int width = Math.Max(1, endX - startX);
 
-            using (SolidBrush fillBrush = new(Settings.Color.TrackSelection))
+            using (SolidBrush fillBrush = new(Color.FromArgb(70, 0, 150, 255)))
             {
                 g.FillRectangle(fillBrush, startX, 0, width, height);
             }
 
-            using (Pen borderPen = new(Color.White, 1.5f))
+            using (Pen borderPen = new(Color.FromArgb(200, 0, 150, 255), 1.5f))
             {
                 g.DrawLine(borderPen, startX, 0, endX, 0);
                 g.DrawLine(borderPen, startX, height - 1, endX, height - 1);
