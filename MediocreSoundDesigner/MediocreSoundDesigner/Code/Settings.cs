@@ -1,12 +1,47 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Color = System.Drawing.Color;
 
 namespace MediocreSoundDesigner;
 
 public class ColorJsonConverter : JsonConverter<Color> {
-    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => ColorTranslator.FromHtml(reader.GetString());
-    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) => writer.WriteStringValue("#" + value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2").ToLower());
+    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        string hex = reader.GetString();
+        if (string.IsNullOrWhiteSpace(hex))
+        {
+            return Color.Empty;
+        }
+
+        hex = hex.Trim();
+        if (hex.StartsWith("#"))
+        {
+            hex = hex[1..];
+        }
+
+        if (hex.Length == 6)
+        {
+            return Color.FromArgb(255,
+                byte.Parse(hex.Substring(0, 2), NumberStyles.HexNumber),
+                byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber),
+                byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber));
+        }
+
+        if (hex.Length == 8)
+        {
+            return Color.FromArgb(
+                byte.Parse(hex.Substring(0, 2), NumberStyles.HexNumber),
+                byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber),
+                byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber),
+                byte.Parse(hex.Substring(6, 2), NumberStyles.HexNumber));
+        }
+
+        return ColorTranslator.FromHtml("#" + hex);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) =>
+        writer.WriteStringValue("#" + value.A.ToString("X2") + value.R.ToString("X2") + value.G.ToString("X2") + value.B.ToString("X2").ToLower());
 }
 
 public static class Settings {
@@ -37,7 +72,7 @@ public static class Settings {
             TrackBg_Unselected = System.Drawing.Color.DimGray;
             TrackBg_Selected = System.Drawing.Color.Gray;
             Playline = System.Drawing.Color.White;
-            TrackSelection = System.Drawing.Color.FromArgb(90, 0, 150, 255);
+            TrackSelection = System.Drawing.Color.FromArgb(40, 0, 150, 255);
         }
     }
 

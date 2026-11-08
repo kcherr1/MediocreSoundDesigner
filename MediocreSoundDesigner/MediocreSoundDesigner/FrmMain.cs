@@ -400,52 +400,38 @@ public partial class FrmMain : Form
             }
         };
 
-        panTrackContainer.MouseDown += (sender, e) =>
+        Action<MouseEventArgs, bool> handleSelectionDrag = (mouseArgs, isMouseUp) =>
         {
-            if (e.Button == MouseButtons.Left)
+            if (mouseArgs.Button != MouseButtons.Left)
             {
-                bool isCtrlHeld = ModifierKeys.HasFlag(Keys.Control);
+                return;
+            }
 
+            bool isCtrlHeld = ModifierKeys.HasFlag(Keys.Control);
+
+            if (!isMouseUp)
+            {
                 if (isCtrlHeld)
                 {
-                    // Toggle individual track selection
                     trackManager.SelectTrack(track, toggle: true);
                 }
-                else
+                else if (!trackManager.SelectedTracks.Contains(track))
                 {
-                    // If clicking an unselected track, select only that track
-                    // If clicking an ALREADY selected track, keep the multi-selection intact for dragging
-                    if (!trackManager.SelectedTracks.Contains(track))
-                    {
-                        trackManager.SelectTrack(track, toggle: false);
-                    }
+                    trackManager.SelectTrack(track, toggle: false);
                 }
 
-                dragStartX = e.X;
+                dragStartX = mouseArgs.X;
                 isDragging = true;
+                return;
             }
-        };
 
-        panTrackContainer.MouseMove += (sender, e) =>
-        {
             if (isDragging)
             {
-                trackManager.SetSelection(dragStartX, e.X);
-            }
-        };
-
-        panTrackContainer.MouseUp += (sender, e) =>
-        {
-            if (e.Button == MouseButtons.Left && isDragging)
-            {
                 isDragging = false;
-                bool isCtrlHeld = ModifierKeys.HasFlag(Keys.Control);
 
-                // Single click without dragging
-                if (Math.Abs(e.X - dragStartX) < 3)
+                if (Math.Abs(mouseArgs.X - dragStartX) < 3)
                 {
                     trackManager.ClearSelection();
-                    // If Ctrl wasn't held, collapse multi-selection down to this single clicked track
                     if (!isCtrlHeld)
                     {
                         trackManager.SelectTrack(track, toggle: false);
@@ -453,10 +439,41 @@ public partial class FrmMain : Form
                 }
                 else
                 {
-                    trackManager.SetSelection(dragStartX, e.X);
+                    trackManager.SetSelection(dragStartX, mouseArgs.X);
                 }
             }
         };
+
+        panTrack.MouseDown += (sender, e) => handleSelectionDrag(e, false);
+        panTrack.MouseMove += (sender, e) =>
+        {
+            if (isDragging)
+            {
+                trackManager.SetSelection(dragStartX, e.X);
+            }
+        };
+        panTrack.MouseUp += (sender, e) => handleSelectionDrag(e, true);    
+        panTrackContainer.MouseDown += (sender, e) =>
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), false);
+            }
+        }; 
+        panTrackContainer.MouseMove += (sender, e) =>
+        {
+            if (isDragging)
+            {
+                trackManager.SetSelection(dragStartX, e.X);
+            }
+        };
+        panTrackContainer.MouseUp += (sender, e) =>
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), true);
+            }
+        }; 
 
         panTrackContainer.DoubleClick += (sender, e) =>
         {
