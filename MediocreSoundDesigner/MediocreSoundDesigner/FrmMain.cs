@@ -303,7 +303,13 @@ public partial class FrmMain : Form
         {
             e.Cancel = true;
         }
+
+        else if (choice == DialogResult.Yes && !SaveCurrentProject(false))
+        {
+            e.Cancel = true;
+        }
   }
+
 
   private bool SaveCurrentProject(bool saveAs)
   {
