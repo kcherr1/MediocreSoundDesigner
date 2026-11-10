@@ -98,9 +98,22 @@ public partial class FrmEditMaster : Form {
             {
                 Button button = new Button();
                 button.Text = names[i];
+                button.DialogResult = Enum.Parse<DialogResult>(names[i]);
+                button.Size = new Size(110, 42);
+                button.Location = new Point(270 - names.Length * 65 + i * 130, 180);
+                form.Controls.Add(button);
 
             }
+            FrmEditMaster.StyleDialog(form, 250);
+            DialogResult result = form.ShowDialog();
+            form.Dispose();
+            return result;
 
+        }
+        public static DialogResult Show(IWin32Window owner, string text, string title = "Medicore Sound Designner",
+        MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.None)
+        {
+            return Show(text, title, buttons, icon);
         }
   }
 
