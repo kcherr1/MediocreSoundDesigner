@@ -41,7 +41,7 @@
             // 
             // doubleBufferedPanel1
             // 
-            doubleBufferedPanel1.BackColor = SystemColors.ActiveBorder;
+            doubleBufferedPanel1.BackColor = Color.DarkGray;
             doubleBufferedPanel1.Controls.Add(lblTitle);
             doubleBufferedPanel1.Controls.Add(lblMediaIn);
             doubleBufferedPanel1.Controls.Add(lblMediaOut);
