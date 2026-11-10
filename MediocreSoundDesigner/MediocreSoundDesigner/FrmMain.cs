@@ -290,6 +290,14 @@ public partial class FrmMain : Form
     return base.ProcessCmdKey(ref msg, keyData);
   }
 
+  protected override void OnFormClosing(FormClosingEventArgs e)
+  {
+        base.OnFormClosing(e);
+
+        if (trackManager is null || trackManager.Tracks.Count == 0)
+            return;
+  }
+
   private bool SaveCurrentProject(bool saveAs)
   {
     string path = currentProjectPath;
