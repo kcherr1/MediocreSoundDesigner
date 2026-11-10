@@ -54,6 +54,26 @@ public partial class FrmEditMaster : Form {
         form.BackColor = Color.Black;
         form.ForeColor = Color.FromArgb(255, 255, 192);
         form.Font = new Font("Segoe UI", 12);
+
+        int width = Math.Max(form.ClientSize.Width, 520);
+        int height = Math.Max(form.ClientSize.Height, minHeight);
+        int moveX = (width - form.ClientSize.Width) / 2;
+        int moveY = (height - form.ClientSize.Height) / 2;
+        form.ClientSize = new Size(width, height);
+
+        foreach(Control c in form.Controls)
+        {
+            c.Left += moveX;
+            c.Top += moveY;
+            c.Font = form.Font;
+
+            if (c is TextBox || c is NumericUpDown || c is ComboBox || (c is Button && c.Text !=""))
+            {
+                c.BackColor = Color.DimGray;
+                c.ForeColor = Color.White;
+            }
+        }
+
   }
 
 }
