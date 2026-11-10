@@ -267,9 +267,45 @@ public partial class FrmMain : Form
     trackManager.ApplySettings();
   }
 
+  private void SetTheme(bool dark)
+  {
+        Settings.Color.WinBg = dark ? Color.FromArgb(25, 25, 25) : Color.FromArgb(240, 240, 240);
+        Settings.Color.WinFg = dark ? Color.White : Color.Black;
+        Settings.Color.TrackBg_Unselected = dark ? Color.FromArgb(60, 60, 60) : Color.White;
+        Settings.Color.TrackBg_Selected = dark ? Color.FromArgb(80, 80, 80) : Color.FromArgb(205, 205, 205);
+        Settings.Color.TrackSamples_Enabled = dark ? Color.Black : Color.FromArgb(30, 60, 120);
+        Settings.Color.TrackSamples_Disabled = dark ? Color.Gray : Color.Silver;
+        Settings.Color.Playline = dark ? Color.White : Color.Black;
+
+        panTimeRuler.BackColor = dark ? Color.FromArgb(10, 10, 10) : Color.White;
+        panTimeRuler.ForeColor = dark ? Color.Yellow : Color.Black;
+        lbInstPanel.ForeColor = dark ? Color.White : Color.Black;
+
+        ApplySettings();
+        panTimeRuler.Invalidate();
+
+
+
+
+
+  }
+
   // GUI controls
   protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
   {
+
+    if (ActiveControl is not TextBoxBase)
+    {
+            if (keyData == Keys.D)
+            {
+                SetTheme(true); return true;
+            }
+            if (keyData == Keys.L)
+            {
+                SetTheme(false); return true;
+            }
+    }
+
     Track selected = GetSelectedTrack();
     if (selected is not null)
     {
@@ -289,6 +325,27 @@ public partial class FrmMain : Form
     }
     return base.ProcessCmdKey(ref msg, keyData);
   }
+
+  protected override void OnFormClosing(FormClosingEventArgs e)
+  {
+        base.OnFormClosing(e);
+
+        if (trackManager is null || trackManager.Tracks.Count == 0)
+            return;
+
+        DialogResult choice = MessageBox.Show(this, "Do you want to save the project before closing?", "Save project", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+        if (choice == DialogResult.Cancel)
+        {
+            e.Cancel = true;
+        }
+
+        else if (choice == DialogResult.Yes && !SaveCurrentProject(false))
+        {
+            e.Cancel = true;
+        }
+  }
+
 
   private bool SaveCurrentProject(bool saveAs)
   {
