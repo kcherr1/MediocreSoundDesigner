@@ -270,6 +270,19 @@ public partial class FrmMain : Form
   // GUI controls
   protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
   {
+
+    if (ActiveControl is not TextBoxBase)
+    {
+            if (keyData == Keys.D)
+            {
+                SetTheme(true); return true;
+            }
+            if (keyData == Keys.L)
+            {
+                SetTheme(false); return true;
+            }
+    }
+
     Track selected = GetSelectedTrack();
     if (selected is not null)
     {
