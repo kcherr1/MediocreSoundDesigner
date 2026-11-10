@@ -498,6 +498,11 @@ public partial class FrmMain : Form
         return panTrackContainer;
     }
 
+    public void RefreshTrackLayout()
+    {
+        UpdateSizes();
+    }
+
     private void UpdateSizes()
     {
         int availableWidth = panApp.ClientSize.Width;

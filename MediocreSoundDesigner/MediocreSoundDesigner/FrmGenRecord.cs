@@ -7,35 +7,45 @@ public partial class FrmGenRecord : FrmEditMaster
 {
     private WaveIn waveSource = null;
     private List<float> recordedSamples;
+    private readonly object recordedSamplesLock = new();
+    private readonly System.Windows.Forms.Timer waveformUpdateTimer;
+    private int renderedSampleCount;
     private bool isRecording;
 
     public FrmGenRecord()
     {
         InitializeComponent();
+        waveformUpdateTimer = new System.Windows.Forms.Timer { Interval = 100 };
+        waveformUpdateTimer.Tick += WaveformUpdateTimer_Tick;
     }
 
     protected override void Init()
     {
         base.Init();
         recordedSamples = new();
+        renderedSampleCount = 0;
         isRecording = false;
         btnRecord.BackgroundImage = Resources.record;
+        waveformUpdateTimer.Start();
     }
 
     protected override void Apply()
     {
         StopIfRecording();
-        track.ReplaceSamples(recordedSamples.ToArray());
+        UpdateLiveWaveform(force: true);
     }
 
     protected override void Cancel()
     {
         StopIfRecording();
+        waveformUpdateTimer.Stop();
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         StopIfRecording();
+        waveformUpdateTimer.Stop();
+        waveformUpdateTimer.Dispose();
         base.OnFormClosing(e);
     }
 
@@ -61,7 +71,11 @@ public partial class FrmGenRecord : FrmEditMaster
             try
             {
                 isRecording = true;
-                recordedSamples.Clear();
+                lock (recordedSamplesLock)
+                {
+                    recordedSamples.Clear();
+                }
+                renderedSampleCount = 0;
                 btnRecord.BackgroundImage = Resources.stop;
 
                 if (WaveIn.DeviceCount == 0)
@@ -104,15 +118,46 @@ public partial class FrmGenRecord : FrmEditMaster
         int frameSize = bytesPerSample * channels;
         int frameCount = e.BytesRecorded / frameSize;
 
-        for (int i = 0; i < frameCount; i++)
+        lock (recordedSamplesLock)
         {
-            float sum = 0;
-            for (int c = 0; c < channels; c++)
+            for (int i = 0; i < frameCount; i++)
             {
-                int offset = (i * frameSize) + (c * bytesPerSample);
-                sum += BitConverter.ToInt16(e.Buffer, offset) / 32768f;
+                float sum = 0;
+                for (int c = 0; c < channels; c++)
+                {
+                    int offset = (i * frameSize) + (c * bytesPerSample);
+                    sum += BitConverter.ToInt16(e.Buffer, offset) / 32768f;
+                }
+                recordedSamples.Add(sum / channels);
             }
-            recordedSamples.Add(sum / channels);
+        }
+    }
+
+    private void WaveformUpdateTimer_Tick(object sender, EventArgs e)
+    {
+        UpdateLiveWaveform();
+    }
+
+    private void UpdateLiveWaveform(bool force = false)
+    {
+        float[] samples;
+        lock (recordedSamplesLock)
+        {
+            if (!force && recordedSamples.Count == renderedSampleCount)
+            {
+                return;
+            }
+
+            samples = recordedSamples.ToArray();
+        }
+
+        renderedSampleCount = samples.Length;
+        track?.ReplaceSamples(samples);
+        track?.PanDrawSamples?.Invalidate();
+
+        if (track?.PanDrawSamples?.FindForm() is FrmMain mainForm)
+        {
+            mainForm.RefreshTrackLayout();
         }
     }
 
