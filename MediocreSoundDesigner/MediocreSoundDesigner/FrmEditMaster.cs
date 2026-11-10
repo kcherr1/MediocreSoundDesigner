@@ -76,4 +76,32 @@ public partial class FrmEditMaster : Form {
 
   }
 
+  public static class Popup
+  {
+    public static DialogResult Show(string text, string title = "Medicore Sound Designer", 
+        MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.None)
+        {
+            Form form = new Form();
+            form.Text = title;
+            form.ClientSize = new Size(520, 250);
+            form.StartPosition = FormStartPosition.CenterScreen;
+
+            Label label = new Label();
+            label.Text = text;
+            label.Size = new Size(440, 130);
+            label.Location = new Point(40, 30);
+            form.Controls.Add(label);
+
+            string[] names = buttons == MessageBoxButtons.OK ? new[] { "OK" } : new[] { "Yes", "No", "Cancel" };
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                Button button = new Button();
+                button.Text = names[i];
+
+            }
+
+        }
+  }
+
 }
