@@ -66,7 +66,7 @@ public static class Settings {
         public Colors()
         {
             WinBg = System.Drawing.Color.DarkGray;
-            WinFg = System.Drawing.Color.White;
+            WinFg = System.Drawing.Color.Black;
             TrackSamples_Enabled = System.Drawing.Color.Cyan;
             TrackSamples_Disabled = System.Drawing.Color.LightGray;
             TrackBg_Unselected = System.Drawing.Color.DimGray;

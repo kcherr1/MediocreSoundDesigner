@@ -40,6 +40,37 @@ public partial class FrmMain : Form
     {
         bttnPlay.BackgroundImage = Resources.play;
 
+        BackColor = Settings.Color.WinBg;
+        ForeColor = Settings.Color.WinFg;
+        panTopActions.BackColor = Settings.Color.WinBg;
+        panTopActions.ForeColor = Settings.Color.WinFg;
+        panBottomActions.BackColor = Settings.Color.WinBg;
+        panBottomActions.ForeColor = Settings.Color.WinFg;
+        menu.ForeColor = Settings.Color.WinFg;
+        lblDebug.ForeColor = Settings.Color.WinFg;
+        panTracks.BackColor = Settings.Color.TrackBg_Unselected;
+        lblPlayhead.BackColor = Settings.Color.Playline;
+        lblCurrTime.ForeColor = Settings.Color.WinFg;
+        lblVolumePercent.ForeColor = Settings.Color.WinFg;
+
+        foreach (Control control in panTracks.Controls)
+        {
+            if (control is not Panel trackContainer || control == lblPlayhead) continue;
+
+            trackContainer.BackColor = Settings.Color.TrackBg_Unselected;
+            foreach (Control child in trackContainer.Controls)
+            {
+                if (child is DoubleBufferedPanel trackSurface)
+                {
+                    trackSurface.BackColor = Settings.Color.TrackBg_Unselected;
+                }
+                else if (child is Label trackName)
+                {
+                    trackName.ForeColor = Settings.Color.WinFg;
+                }
+            }
+        }
+
         // slider range comes from the same constants the clamp uses
         trkDrawTimescale.Minimum = TrackManager.MIN_DRAW_TIMESCALE;
         trkDrawTimescale.Maximum = TrackManager.MAX_DRAW_TIMESCALE;
@@ -362,7 +393,7 @@ public partial class FrmMain : Form
             AutoSize = true,
             Location = new Point(100, 6),
             Font = new Font("Segoe UI", 20, FontStyle.Bold),
-            ForeColor = Color.Black
+            ForeColor = Settings.Color.WinFg
         };
         DoubleBufferedPanel panTrack = new()
         {
