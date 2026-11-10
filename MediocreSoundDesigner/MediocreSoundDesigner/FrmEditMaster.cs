@@ -48,7 +48,12 @@ public partial class FrmEditMaster : Form {
 
   public static void StyleDialog(Form form, int minHeight = 400)
   {
-    
+        form.FormBorderStyle = FormBorderStyle.FixedDialog;
+        form.MaximizeBox = false;
+        form.MinimizeBox = false;
+        form.BackColor = Color.Black;
+        form.ForeColor = Color.FromArgb(255, 255, 192);
+        form.Font = new Font("Segoe UI", 12);
   }
 
 }
