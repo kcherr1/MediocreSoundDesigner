@@ -267,6 +267,11 @@ public partial class FrmMain : Form
     trackManager.ApplySettings();
   }
 
+  private void SetTheme(bool dark)
+  {
+
+  }
+
   // GUI controls
   protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
   {
