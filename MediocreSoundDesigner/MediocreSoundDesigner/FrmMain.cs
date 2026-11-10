@@ -275,7 +275,9 @@ public partial class FrmMain : Form
         Settings.Color.TrackBg_Selected = dark ? Color.FromArgb(80, 80, 80) : Color.FromArgb(205, 205, 205);
         Settings.Color.TrackSamples_Enabled = dark ? Color.Black : Color.FromArgb(30, 60, 120);
         Settings.Color.TrackSamples_Disabled = dark ? Color.Gray : Color.Silver;
+        Settings.Color.Playline = dark ? Color.White : Color.Black;
         
+        panTimeRuler.BackColor 
 
 
 
