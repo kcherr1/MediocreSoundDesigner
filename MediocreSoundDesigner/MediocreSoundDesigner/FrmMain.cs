@@ -31,6 +31,7 @@ public partial class FrmMain : Form
 
         trackManager = new(panTracks);
         bttnPlay.BackgroundImage = Resources.play;
+        lblVolumePercent.Text = $"{trkVolume.Value}%";
         trackManager.DrawTimescale = trkDrawTimescale.Value;
         UpdateSizes();
         ApplySettings();
@@ -207,14 +208,15 @@ public partial class FrmMain : Form
         }
     }
 
-    private void menuEditVolume_Click(object sender, EventArgs e)
+    private void trkVolume_Scroll(object sender, EventArgs e)
     {
-        if (trackManager.SelectedTrack is not null)
+        lblVolumePercent.Text = $"{trkVolume.Value}%";
+
+        float volume = trkVolume.Value / 100.0f;
+        foreach (Track track in trackManager.SelectedTracks)
         {
-            FrmEditVolume frm = new();
-            frm.SetSound(trackManager.SelectedTrack);
-            frm.SelectedTracks = trackManager.SelectedTracks.ToList();
-            frm.ShowDialog();
+            track.SetVolume(volume);
+            track.PanDrawSamples?.Invalidate();
         }
     }
 

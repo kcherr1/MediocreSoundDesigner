@@ -36,6 +36,9 @@
             bttnMicOptions = new Button();
             bttnRecord = new Button();
             bttnPlay = new Button();
+            picVolume = new PictureBox();
+            trkVolume = new TrackBar();
+            lblVolumePercent = new Label();
             lblDebug = new Label();
             ofdLoadFile = new OpenFileDialog();
             menu = new MenuStrip();
@@ -46,7 +49,6 @@
             menuEdit = new ToolStripMenuItem();
             menuEditFlip = new ToolStripMenuItem();
             menuEditReverse = new ToolStripMenuItem();
-            menuEditVolume = new ToolStripMenuItem();
             menuEditEliminateSilence = new ToolStripMenuItem();
             menuGen = new ToolStripMenuItem();
             menuGenRecord = new ToolStripMenuItem();
@@ -62,6 +64,8 @@
             panApp = new Panel();
             panTracks.SuspendLayout();
             panTopActions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)picVolume).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkVolume).BeginInit();
             menu.SuspendLayout();
             panBottomActions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picSoundWave).BeginInit();
@@ -96,8 +100,11 @@
             panTopActions.Controls.Add(bttnMicOptions);
             panTopActions.Controls.Add(bttnRecord);
             panTopActions.Controls.Add(bttnPlay);
+            panTopActions.Controls.Add(picVolume);
+            panTopActions.Controls.Add(trkVolume);
+            panTopActions.Controls.Add(lblVolumePercent);
             panTopActions.ForeColor = Color.White;
-            panTopActions.Location = new Point(0, 0);
+            panTopActions.Location = new Point(2, 27);
             panTopActions.Name = "panTopActions";
             panTopActions.Size = new Size(1604, 49);
             panTopActions.TabIndex = 10;
@@ -156,6 +163,43 @@
             bttnPlay.UseVisualStyleBackColor = false;
             bttnPlay.Click += btnPlay_Click;
             // 
+            // picVolume
+            // 
+            picVolume.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            picVolume.BackColor = Color.Transparent;
+            picVolume.BackgroundImage = Properties.Resources.volume;
+            picVolume.BackgroundImageLayout = ImageLayout.Stretch;
+            picVolume.Location = new Point(1360, 7);
+            picVolume.Name = "picVolume";
+            picVolume.Size = new Size(34, 34);
+            picVolume.TabIndex = 11;
+            picVolume.TabStop = false;
+            // 
+            // trkVolume
+            // 
+            trkVolume.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            trkVolume.AutoSize = false;
+            trkVolume.Location = new Point(1400, 7);
+            trkVolume.Maximum = 200;
+            trkVolume.Name = "trkVolume";
+            trkVolume.Size = new Size(149, 35);
+            trkVolume.TabIndex = 12;
+            trkVolume.TickFrequency = 25;
+            trkVolume.Value = 100;
+            trkVolume.Scroll += trkVolume_Scroll;
+            // 
+            // lblVolumePercent
+            // 
+            lblVolumePercent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblVolumePercent.AutoSize = true;
+            lblVolumePercent.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblVolumePercent.ForeColor = Color.Black;
+            lblVolumePercent.Location = new Point(1550, 14);
+            lblVolumePercent.Name = "lblVolumePercent";
+            lblVolumePercent.Size = new Size(35, 15);
+            lblVolumePercent.TabIndex = 13;
+            lblVolumePercent.Text = "100%";
+            // 
             // lblDebug
             // 
             lblDebug.Dock = DockStyle.Bottom;
@@ -189,27 +233,27 @@
             // menuFileOpen
             // 
             menuFileOpen.Name = "menuFileOpen";
-            menuFileOpen.Size = new Size(125, 22);
+            menuFileOpen.Size = new Size(180, 22);
             menuFileOpen.Text = "Open...";
             menuFileOpen.Click += menuFileOpen_Click;
             // 
             // menuFileSave
             // 
             menuFileSave.Name = "menuFileSave";
-            menuFileSave.Size = new Size(125, 22);
+            menuFileSave.Size = new Size(180, 22);
             menuFileSave.Text = "Save...";
             menuFileSave.Click += menuFileSave_Click;
             // 
             // menuFileSettings
             // 
             menuFileSettings.Name = "menuFileSettings";
-            menuFileSettings.Size = new Size(125, 22);
+            menuFileSettings.Size = new Size(180, 22);
             menuFileSettings.Text = "Settings...";
             menuFileSettings.Click += menuFileSettings_Click;
             // 
             // menuEdit
             // 
-            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditVolume, menuEditEliminateSilence });
+            menuEdit.DropDownItems.AddRange(new ToolStripItem[] { menuEditFlip, menuEditReverse, menuEditEliminateSilence });
             menuEdit.Name = "menuEdit";
             menuEdit.Size = new Size(39, 20);
             menuEdit.Text = "E&dit";
@@ -217,28 +261,21 @@
             // menuEditFlip
             // 
             menuEditFlip.Name = "menuEditFlip";
-            menuEditFlip.Size = new Size(172, 22);
+            menuEditFlip.Size = new Size(180, 22);
             menuEditFlip.Text = "Flip";
             menuEditFlip.Click += menuEditFlip_Click;
             // 
             // menuEditReverse
             // 
             menuEditReverse.Name = "menuEditReverse";
-            menuEditReverse.Size = new Size(172, 22);
+            menuEditReverse.Size = new Size(180, 22);
             menuEditReverse.Text = "Reverse";
             menuEditReverse.Click += menuEditReverse_Click;
-            // 
-            // menuEditVolume
-            // 
-            menuEditVolume.Name = "menuEditVolume";
-            menuEditVolume.Size = new Size(172, 22);
-            menuEditVolume.Text = "Alter Volume...";
-            menuEditVolume.Click += menuEditVolume_Click;
             // 
             // menuEditEliminateSilence
             // 
             menuEditEliminateSilence.Name = "menuEditEliminateSilence";
-            menuEditEliminateSilence.Size = new Size(172, 22);
+            menuEditEliminateSilence.Size = new Size(180, 22);
             menuEditEliminateSilence.Text = "Eliminate Silence...";
             menuEditEliminateSilence.Click += menuEditEliminateSilence_Click;
             // 
@@ -252,21 +289,21 @@
             // menuGenRecord
             // 
             menuGenRecord.Name = "menuGenRecord";
-            menuGenRecord.Size = new Size(152, 22);
+            menuGenRecord.Size = new Size(180, 22);
             menuGenRecord.Text = "Record...";
             menuGenRecord.Click += menuGenRecord_Click;
             // 
             // menuGenNoise
             // 
             menuGenNoise.Name = "menuGenNoise";
-            menuGenNoise.Size = new Size(152, 22);
+            menuGenNoise.Size = new Size(180, 22);
             menuGenNoise.Text = "Noise";
             menuGenNoise.Click += menuGenNoise_Click;
             // 
             // menuGenGradientNoise
             // 
             menuGenGradientNoise.Name = "menuGenGradientNoise";
-            menuGenGradientNoise.Size = new Size(152, 22);
+            menuGenGradientNoise.Size = new Size(180, 22);
             menuGenGradientNoise.Text = "Gradient Noise";
             menuGenGradientNoise.Click += menuGenGradientNoise_Click;
             // 
@@ -355,6 +392,8 @@
             panTracks.ResumeLayout(false);
             panTopActions.ResumeLayout(false);
             panTopActions.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)picVolume).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkVolume).EndInit();
             menu.ResumeLayout(false);
             menu.PerformLayout();
             panBottomActions.ResumeLayout(false);
@@ -374,7 +413,6 @@
         private MenuStrip menu;
         private ToolStripMenuItem menuEdit;
         private Button bttnPlay;
-        private ToolStripMenuItem menuEditVolume;
         private ToolStripMenuItem menuEditReverse;
         private ToolStripMenuItem menuFile;
         private ToolStripMenuItem menuFileOpen;
@@ -386,7 +424,9 @@
         private ToolStripMenuItem menuEditFlip;
         private SaveFileDialog sfdSaveFile;
         private TrackBar trkDrawTimescale;
+        private TrackBar trkVolume;
         private Label lblCurrTime;
+        private Label lblVolumePercent;
         private Panel panTopActions;
         private ColorDialog colorDialog;
         private ToolStripMenuItem menuEditEliminateSilence;
@@ -399,5 +439,6 @@
         private Button bttnMicOptions;
         private Panel panApp;
         private PictureBox picSoundWave;
+        private PictureBox picVolume;
     }
 }
