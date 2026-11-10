@@ -282,7 +282,7 @@ public partial class FrmMain : Form
         lbInstPanel.ForeColor = dark ? Color.White : Color.Black;
 
         ApplySettings();
-        panTimeRuler.Validated();
+        panTimeRuler.Invalidate();
 
 
 
