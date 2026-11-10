@@ -269,6 +269,7 @@ public partial class FrmMain : Form
 
   private void SetTheme(bool dark)
   {
+        Settings.Color.WinBg = dark ? Color.FromArgb(25, 25, 25) : Color.FromArgb(240, 240, 240);
 
   }
 
