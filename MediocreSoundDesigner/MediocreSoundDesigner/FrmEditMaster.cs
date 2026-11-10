@@ -38,4 +38,17 @@ public partial class FrmEditMaster : Form {
   protected virtual void Init() { ApplySettings(); }
   protected virtual void Apply() { }
   protected virtual void Cancel() { }
+
+
+  protected override void OnLoad(EventArgs e)
+  {
+        StyleDialog(this);
+		base.OnLoad(e);
+  }
+
+  public static void StyleDialog(Form form, int minHeight = 400)
+  {
+    
+  }
+
 }
