@@ -296,6 +296,13 @@ public partial class FrmMain : Form
 
         if (trackManager is null || trackManager.Tracks.Count == 0)
             return;
+
+        DialogResult choice = MessageBox.Show(this, "Do you want to save the project before closing?", "Save project", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+        if (choice == DialogResult.Cancel)
+        {
+            e.Cancel = true;
+        }
   }
 
   private bool SaveCurrentProject(bool saveAs)
