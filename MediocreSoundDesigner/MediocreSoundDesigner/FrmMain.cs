@@ -281,6 +281,8 @@ public partial class FrmMain : Form
         panTimeRuler.ForeColor = dark ? Color.Yellow : Color.Black;
         lbInstPanel.ForeColor = dark ? Color.White : Color.Black;
 
+        ApplySettings()
+
 
 
 
