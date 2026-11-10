@@ -6,6 +6,7 @@ public class TrackManager
 {
     private Track pseudoCombinedTrack;
     private Panel panContainer;
+    private int currentSample; // remembered playhead position (used while paused/stopped)
     public List<Track> Tracks { get; private set; }
     public int TrackCounter { get; private set; }
     public List<Track> SelectedTracks { get; } = new();
@@ -25,8 +26,13 @@ public class TrackManager
     }
 
     public PlaybackState State => pseudoCombinedTrack?.State ?? PlaybackState.Stopped;
-    public TimeSpan CurrentTime => pseudoCombinedTrack?.CurrentTime ?? TimeSpan.Zero;
-    public TimeSpan TotalTime => pseudoCombinedTrack?.TotalTime ?? TimeSpan.Zero;
+    public int TotalSamples => Tracks.Where(t => !t.IsDisabled)
+        .Select(t => t.AdjustedSampleCount).DefaultIfEmpty(0).Max();
+    public int PlayheadSample => Math.Clamp(
+        State == PlaybackState.Playing ? pseudoCombinedTrack.GetPlayheadPos() : currentSample,
+        0, TotalSamples);
+    public TimeSpan CurrentTime => TimeSpan.FromSeconds((double)PlayheadSample / Track.INTERNAL_SAMPLE_RATE);
+    public TimeSpan TotalTime => TimeSpan.FromSeconds((double)TotalSamples / Track.INTERNAL_SAMPLE_RATE);
 
     public TrackManager(Panel panContainer)
     {
@@ -115,7 +121,9 @@ public class TrackManager
         {
             if (track.PanDrawSamples is null) continue;
             bool isSelected = SelectedTracks.Contains(track);
-            track.PanDrawSamples.BorderStyle = isSelected ? BorderStyle.Fixed3D : BorderStyle.None;
+            // no 3D border on selection (selection is shown by the background color): the border
+            // shifted the waveform a couple of pixels and cut gaps in the playline
+            track.PanDrawSamples.BorderStyle = BorderStyle.None;
             track.PanDrawSamples.BackColor = isSelected ? Settings.Color.TrackBg_Selected : Settings.Color.TrackBg_Unselected;
         }
     }
@@ -161,8 +169,36 @@ public class TrackManager
 
     public void PlayAll()
     {
+        // always rebuild so edits made while paused are heard, but resume from where we left off
         CombineTracks();
-        pseudoCombinedTrack.Play();
+        if (currentSample >= pseudoCombinedTrack.SampleCount)
+        {
+            currentSample = 0; // previous run finished (or seeked to the end): start over
+        }
+        pseudoCombinedTrack.Play(currentSample);
+    }
+
+    // move the playhead; if audio is playing, jump there immediately
+    public void SeekToSample(int sample)
+    {
+        currentSample = Math.Clamp(sample, 0, TotalSamples);
+        if (State == PlaybackState.Playing)
+        {
+            pseudoCombinedTrack.Seek(currentSample);
+        }
+    }
+
+    // stop playback (if any) and put the playhead back at the start
+    public void ResetPlayhead()
+    {
+        pseudoCombinedTrack?.Reset();
+        currentSample = 0;
+    }
+
+    // called when playback runs off the end of the track
+    public void OnPlaybackEnded()
+    {
+        currentSample = TotalSamples;
     }
 
     private void CombineTracks()
@@ -191,11 +227,15 @@ public class TrackManager
 
     public void PauseAll()
     {
+        if (State == PlaybackState.Playing)
+        {
+            currentSample = pseudoCombinedTrack.GetPlayheadPos(); // remember where we paused
+        }
         pseudoCombinedTrack?.Pause();
     }
 
     public int GetPlayheadPos()
     {
-        return (pseudoCombinedTrack?.GetPlayheadPos() ?? 0) / DrawTimescale;
+        return PlayheadSample / DrawTimescale;
     }
 }

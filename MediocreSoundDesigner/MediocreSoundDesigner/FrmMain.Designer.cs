@@ -1,24 +1,24 @@
 ﻿namespace MediocreSoundDesigner
 {
     partial class FrmMain
-    {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+{
+    /// <summary>
+    ///  Required designer variable.
+    /// </summary>
+    private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
+    /// <summary>
+    ///  Clean up any resources being used.
+    /// </summary>
+    /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && (components != null))
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
+            components.Dispose();
         }
+        base.Dispose(disposing);
+    }
 
         #region Windows Form Designer generated code
 
@@ -36,6 +36,7 @@
             bttnMicOptions = new Button();
             bttnRecord = new Button();
             bttnPlay = new Button();
+            bttnReset = new Button();
             picVolume = new PictureBox();
             trkVolume = new TrackBar();
             lblVolumePercent = new Label();
@@ -100,6 +101,7 @@
             panTopActions.Controls.Add(bttnMicOptions);
             panTopActions.Controls.Add(bttnRecord);
             panTopActions.Controls.Add(bttnPlay);
+            panTopActions.Controls.Add(bttnReset);
             panTopActions.Controls.Add(picVolume);
             panTopActions.Controls.Add(trkVolume);
             panTopActions.Controls.Add(lblVolumePercent);
@@ -120,7 +122,7 @@
             bttnMicOptions.FlatAppearance.MouseOverBackColor = Color.Transparent;
             bttnMicOptions.FlatStyle = FlatStyle.Flat;
             bttnMicOptions.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            bttnMicOptions.Location = new Point(136, 5);
+            bttnMicOptions.Location = new Point(190, 5);
             bttnMicOptions.Name = "bttnMicOptions";
             bttnMicOptions.Size = new Size(38, 38);
             bttnMicOptions.TabIndex = 8;
@@ -138,7 +140,7 @@
             bttnRecord.FlatAppearance.MouseOverBackColor = Color.Transparent;
             bttnRecord.FlatStyle = FlatStyle.Flat;
             bttnRecord.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            bttnRecord.Location = new Point(10, 5);
+            bttnRecord.Location = new Point(130, 5);
             bttnRecord.Name = "bttnRecord";
             bttnRecord.Size = new Size(41, 41);
             bttnRecord.TabIndex = 7;
@@ -162,6 +164,24 @@
             bttnPlay.TabIndex = 6;
             bttnPlay.UseVisualStyleBackColor = false;
             bttnPlay.Click += btnPlay_Click;
+            // 
+            // bttnReset
+            // 
+            bttnReset.AutoSize = true;
+            bttnReset.BackColor = Color.Transparent;
+            bttnReset.BackgroundImageLayout = ImageLayout.Stretch;
+            bttnReset.FlatAppearance.BorderSize = 0;
+            bttnReset.FlatAppearance.MouseDownBackColor = Color.Transparent;
+            bttnReset.FlatAppearance.MouseOverBackColor = Color.Transparent;
+            bttnReset.FlatStyle = FlatStyle.Flat;
+            bttnReset.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            bttnReset.Location = new Point(10, 4);
+            bttnReset.Name = "bttnReset";
+            bttnReset.Size = new Size(41, 41);
+            bttnReset.TabIndex = 11;
+            bttnReset.TabStop = false;
+            bttnReset.UseVisualStyleBackColor = false;
+            bttnReset.Click += bttnReset_Click;
             // 
             // picVolume
             // 
@@ -233,21 +253,21 @@
             // menuFileOpen
             // 
             menuFileOpen.Name = "menuFileOpen";
-            menuFileOpen.Size = new Size(180, 22);
+            menuFileOpen.Size = new Size(125, 22);
             menuFileOpen.Text = "Open...";
             menuFileOpen.Click += menuFileOpen_Click;
             // 
             // menuFileSave
             // 
             menuFileSave.Name = "menuFileSave";
-            menuFileSave.Size = new Size(180, 22);
+            menuFileSave.Size = new Size(125, 22);
             menuFileSave.Text = "Save...";
             menuFileSave.Click += menuFileSave_Click;
             // 
             // menuFileSettings
             // 
             menuFileSettings.Name = "menuFileSettings";
-            menuFileSettings.Size = new Size(180, 22);
+            menuFileSettings.Size = new Size(125, 22);
             menuFileSettings.Text = "Settings...";
             menuFileSettings.Click += menuFileSettings_Click;
             // 
@@ -261,21 +281,21 @@
             // menuEditFlip
             // 
             menuEditFlip.Name = "menuEditFlip";
-            menuEditFlip.Size = new Size(180, 22);
+            menuEditFlip.Size = new Size(172, 22);
             menuEditFlip.Text = "Flip";
             menuEditFlip.Click += menuEditFlip_Click;
             // 
             // menuEditReverse
             // 
             menuEditReverse.Name = "menuEditReverse";
-            menuEditReverse.Size = new Size(180, 22);
+            menuEditReverse.Size = new Size(172, 22);
             menuEditReverse.Text = "Reverse";
             menuEditReverse.Click += menuEditReverse_Click;
             // 
             // menuEditEliminateSilence
             // 
             menuEditEliminateSilence.Name = "menuEditEliminateSilence";
-            menuEditEliminateSilence.Size = new Size(180, 22);
+            menuEditEliminateSilence.Size = new Size(172, 22);
             menuEditEliminateSilence.Text = "Eliminate Silence...";
             menuEditEliminateSilence.Click += menuEditEliminateSilence_Click;
             // 
@@ -289,21 +309,21 @@
             // menuGenRecord
             // 
             menuGenRecord.Name = "menuGenRecord";
-            menuGenRecord.Size = new Size(180, 22);
+            menuGenRecord.Size = new Size(152, 22);
             menuGenRecord.Text = "Record...";
             menuGenRecord.Click += menuGenRecord_Click;
             // 
             // menuGenNoise
             // 
             menuGenNoise.Name = "menuGenNoise";
-            menuGenNoise.Size = new Size(180, 22);
+            menuGenNoise.Size = new Size(152, 22);
             menuGenNoise.Text = "Noise";
             menuGenNoise.Click += menuGenNoise_Click;
             // 
             // menuGenGradientNoise
             // 
             menuGenGradientNoise.Name = "menuGenGradientNoise";
-            menuGenGradientNoise.Size = new Size(180, 22);
+            menuGenGradientNoise.Size = new Size(152, 22);
             menuGenGradientNoise.Text = "Gradient Noise";
             menuGenGradientNoise.Click += menuGenGradientNoise_Click;
             // 
@@ -408,37 +428,38 @@
         #endregion
 
         private Panel panTracks;
-        private Label lblDebug;
-        private OpenFileDialog ofdLoadFile;
-        private MenuStrip menu;
-        private ToolStripMenuItem menuEdit;
-        private Button bttnPlay;
-        private ToolStripMenuItem menuEditReverse;
-        private ToolStripMenuItem menuFile;
-        private ToolStripMenuItem menuFileOpen;
-        private ToolStripMenuItem menuFileSave;
-        private System.Windows.Forms.Timer tmrUpdate;
-        private ToolStripMenuItem menuGen;
-        private ToolStripMenuItem menuGenNoise;
-        private ToolStripMenuItem menuGenGradientNoise;
-        private ToolStripMenuItem menuEditFlip;
-        private SaveFileDialog sfdSaveFile;
-        private TrackBar trkDrawTimescale;
-        private TrackBar trkVolume;
-        private Label lblCurrTime;
-        private Label lblVolumePercent;
-        private Panel panTopActions;
-        private ColorDialog colorDialog;
-        private ToolStripMenuItem menuEditEliminateSilence;
-        private Label lblPlayhead;
-        private ToolStripMenuItem menuGenRecord;
-        private ToolStripMenuItem menuFileSettings;
-        private Panel panBottomActions;
-        private TextBox textBox1;
-        private Button bttnRecord;
-        private Button bttnMicOptions;
-        private Panel panApp;
-        private PictureBox picSoundWave;
-        private PictureBox picVolume;
-    }
+    private Label lblDebug;
+    private OpenFileDialog ofdLoadFile;
+    private MenuStrip menu;
+    private ToolStripMenuItem menuEdit;
+    private Button bttnPlay;
+    private Button bttnReset;
+    private ToolStripMenuItem menuEditReverse;
+    private ToolStripMenuItem menuFile;
+    private ToolStripMenuItem menuFileOpen;
+    private ToolStripMenuItem menuFileSave;
+    private System.Windows.Forms.Timer tmrUpdate;
+    private ToolStripMenuItem menuGen;
+    private ToolStripMenuItem menuGenNoise;
+    private ToolStripMenuItem menuGenGradientNoise;
+    private ToolStripMenuItem menuEditFlip;
+    private SaveFileDialog sfdSaveFile;
+    private TrackBar trkDrawTimescale;
+    private TrackBar trkVolume;
+    private Label lblCurrTime;
+    private Label lblVolumePercent;
+    private Panel panTopActions;
+    private ColorDialog colorDialog;
+    private ToolStripMenuItem menuEditEliminateSilence;
+    private Label lblPlayhead;
+    private ToolStripMenuItem menuGenRecord;
+    private ToolStripMenuItem menuFileSettings;
+    private Panel panBottomActions;
+    private TextBox textBox1;
+    private Button bttnRecord;
+    private Button bttnMicOptions;
+    private Panel panApp;
+    private PictureBox picSoundWave;
+    private PictureBox picVolume;
+}
 }
