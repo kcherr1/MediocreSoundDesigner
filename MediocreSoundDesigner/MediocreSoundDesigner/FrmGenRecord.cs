@@ -20,7 +20,16 @@ public partial class FrmGenRecord : FrmEditMaster {
   }
 
   protected override void Apply() {
-    track.ReplaceSamples(recordedSamples.ToArray());
+        //track.ReplaceSamples(recordedSamples.ToArray());
+        float[] mono = recordedSamples.ToArray();
+        float[] stereo = new float[mono.Length * 2];
+
+        for (int i =0; i < mono.Length; i++)
+        {
+            stereo[i * 2] = mono[i];
+            stereo[i * 2 + 1] = mono[i];
+        }
+        track.ReplaceSamples(stereo);
   }
 
   private void btnRecord_Click(object sender, EventArgs e) {
