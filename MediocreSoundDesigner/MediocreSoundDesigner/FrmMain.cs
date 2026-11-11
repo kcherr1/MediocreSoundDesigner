@@ -462,6 +462,7 @@ public partial class FrmMain : Form
         StopRecording();
         base.OnFormClosing(e);
     }
+
     private void menuGenNoise_Click(object sender, EventArgs e)
     {
         const int NUM_SAMPLES = 100_000;
@@ -814,14 +815,14 @@ public partial class FrmMain : Form
                 trackManager.SetSelection(dragStartX, e.X);
             }
         };
-        panTrack.MouseUp += (sender, e) => handleSelectionDrag(e, true);    
+        panTrack.MouseUp += (sender, e) => handleSelectionDrag(e, true);
         panTrackContainer.MouseDown += (sender, e) =>
         {
             if (e.Button == MouseButtons.Left)
             {
                 handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), false);
             }
-        }; 
+        };
         panTrackContainer.MouseMove += (sender, e) =>
         {
             if (isDragging)
@@ -835,7 +836,7 @@ public partial class FrmMain : Form
             {
                 handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), true);
             }
-        }; 
+        };
 
         panTrackContainer.DoubleClick += (sender, e) =>
         {
@@ -972,6 +973,16 @@ public partial class FrmMain : Form
     }
 
     private void FrmMain_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void panel1_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void bttnGenerate_Click(object sender, EventArgs e)
     {
 
     }

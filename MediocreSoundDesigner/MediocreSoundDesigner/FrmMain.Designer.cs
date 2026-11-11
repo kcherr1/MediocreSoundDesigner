@@ -59,6 +59,7 @@
             sfdSaveFile = new SaveFileDialog();
             colorDialog = new ColorDialog();
             panBottomActions = new Panel();
+            bttnGenerate = new Button();
             picSoundWave = new PictureBox();
             lblCurrTime = new Label();
             trkDrawTimescale = new TrackBar();
@@ -336,6 +337,7 @@
             // panBottomActions
             // 
             panBottomActions.BackColor = Color.DarkGray;
+            panBottomActions.Controls.Add(bttnGenerate);
             panBottomActions.Controls.Add(picSoundWave);
             panBottomActions.Controls.Add(lblCurrTime);
             panBottomActions.Controls.Add(trkDrawTimescale);
@@ -344,6 +346,22 @@
             panBottomActions.Name = "panBottomActions";
             panBottomActions.Size = new Size(1604, 65);
             panBottomActions.TabIndex = 8;
+            // 
+            // bttnGenerate
+            // 
+            bttnGenerate.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            bttnGenerate.ForeColor = Color.Black;
+            Size newImageSize = new Size(30, 30); 
+            bttnGenerate.Image = new Bitmap(Properties.Resources.aiGenerateIcon, newImageSize);
+            bttnGenerate.ImageAlign = ContentAlignment.MiddleLeft;
+            bttnGenerate.Location = new Point(12, 19);
+            bttnGenerate.Name = "bttnGenerate";
+            bttnGenerate.Size = new Size(176, 37);
+            bttnGenerate.TabIndex = 1;
+            bttnGenerate.Text = "Generate Sound";
+            bttnGenerate.TextImageRelation = TextImageRelation.ImageBeforeText;
+            bttnGenerate.UseVisualStyleBackColor = true;
+            bttnGenerate.Click += bttnGenerate_Click;
             // 
             // picSoundWave
             // 
@@ -363,10 +381,9 @@
             lblCurrTime.ForeColor = Color.Black;
             lblCurrTime.Location = new Point(634, 15);
             lblCurrTime.Name = "lblCurrTime";
-            lblCurrTime.Size = new Size(270, 37);
+            lblCurrTime.Size = new Size(249, 37);
             lblCurrTime.TabIndex = 9;
             lblCurrTime.Text = "00:00.00/00:00.00";
-            lblCurrTime.Visible = true;
             // 
             // trkDrawTimescale
             // 
@@ -461,5 +478,6 @@
     private Panel panApp;
     private PictureBox picSoundWave;
     private PictureBox picVolume;
-}
+        private Button bttnGenerate;
+    }
 }
