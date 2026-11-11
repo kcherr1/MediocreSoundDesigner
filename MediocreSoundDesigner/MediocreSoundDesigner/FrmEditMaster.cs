@@ -72,11 +72,63 @@ public partial class FrmEditMaster : Form {
             c.Top += moveY;
             c.Font = form.Font;
 
-            if (c is TextBox || c is NumericUpDown || c is ComboBox || (c is Button && c.Text !=""))
+            if (c is Label)
+            {
+                c.ForeColor = form.ForeColor;
+            }
+
+            else if (c is TextBox || c is NumericUpDown || c is ComboBox )
             {
                 c.BackColor = Color.DimGray;
                 c.ForeColor = Color.White;
             }
+            else if (c is Button button && button.Text ! = "")
+            {
+                buttonCount++;
+                button.FlatStyle = FlatStyle.Flat;
+                button.AutoSize = false;
+                button.Size = new Size(130, 44);
+                button.ForeColor = Color.White;
+                button.BackColor = Color.DimGray;
+
+
+                if (button.Text == "Cancel")
+                {
+                    button.BackColor = Color.SeaGreen;
+                    apply = button;
+                }
+            }
+        }
+
+        foreach (Control label in form.Controls)
+        {
+            if (label is not Label) continue;
+
+            Control nearest = null;
+            foreach(Control input in form.Controls)
+            {
+                if (input is TextBox || input is NumericUpDown || input is ComboBox)
+                {
+                    if (nearest == null || Math.Abs(input.Top - label.Top) < Math.Abs(nearest.Top - label.Top))
+                        nearest = input;
+                }
+            }
+
+            if (nearest != null)
+            {
+                label.Top = nearest.Top + (nearest.Height - label.Height) / 2;
+                if (label.Right + 10 > nearest.Left)
+                    label.Left = nearest.Left - label.Width - 15;
+            }
+
+        }
+
+        if (buttonCount == 2 && apply != null && cancel != null)
+        {
+            int left = (form.ClientSize.Width - 130 * 2 - 80) / 2;
+            int top = form.ClientSize.Height - 80;
+            apply.Location = new Point(left, top);
+            cancel.Location = new Point(left + 130 + 80, top);
         }
 
   }
@@ -105,7 +157,7 @@ public partial class FrmEditMaster : Form {
                 button.Text = names[i];
                 button.DialogResult = Enum.Parse<DialogResult>(names[i]);
                 button.Size = new Size(110, 42);
-                button.Location = new Point(270 - names.Length * 65 + i * 130, 180);
+                button.Location = new Point(270 - names.Length * 75 + i * 150, 180);
                 form.Controls.Add(button);
 
             }
