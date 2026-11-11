@@ -82,7 +82,7 @@ public partial class FrmEditMaster : Form {
                 c.BackColor = Color.DimGray;
                 c.ForeColor = Color.White;
             }
-            else if (c is Button button && button.Text ! = "")
+            else if (c is Button button && button.Text != "")
             {
                 buttonCount++;
                 button.FlatStyle = FlatStyle.Flat;
