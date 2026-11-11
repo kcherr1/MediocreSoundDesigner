@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows.Forms.VisualStyles;
 
 namespace MediocreSoundDesigner;
@@ -16,16 +17,22 @@ public class PlayheadSlider : Control
     public event EventHandler<int> Scrubbing;      // fires continuously while dragging
     public event EventHandler<int> ScrubCompleted; // fires once on mouse release
 
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int ContentX
     {
         get => contentX;
         set { if (contentX != value) { contentX = value; Invalidate(); } }
     }
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int MaxContentX { get; set; }
 
     // x (in this control's coordinates) where content pixel 0 currently is on screen;
     // takes scrolling and panel borders into account, so the thumb lines up with the playline
     private int originX;
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public int OriginX
     {
         get => originX;
