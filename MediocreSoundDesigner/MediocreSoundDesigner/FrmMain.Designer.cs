@@ -365,8 +365,8 @@
             lblCurrTime.Name = "lblCurrTime";
             lblCurrTime.Size = new Size(270, 37);
             lblCurrTime.TabIndex = 9;
-            lblCurrTime.Text = "00:00.00  / 00:00.00";
-            lblCurrTime.Visible = false;
+            lblCurrTime.Text = "00:00.00/00:00.00";
+            lblCurrTime.Visible = true;
             // 
             // trkDrawTimescale
             // 

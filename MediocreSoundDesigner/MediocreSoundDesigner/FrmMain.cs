@@ -393,6 +393,8 @@ public partial class FrmMain : Form
             bttnPlay.Visible = true;
             tmrUpdate.Stop();
             lblPlayhead.Left = 0; // Reset playhead to start
+            lblCurrTime.Visible = true;
+            lblCurrTime.Text = "00:00.00/00:00.00";
             lblCurrTime.Update();
         }
     }
