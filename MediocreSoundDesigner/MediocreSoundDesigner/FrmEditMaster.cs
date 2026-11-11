@@ -48,6 +48,7 @@ public partial class FrmEditMaster : Form {
 
   public static void StyleDialog(Form form, int minHeight = 400)
   {
+        form.AutoScaleMode = AutoScaleMode.None;
         form.FormBorderStyle = FormBorderStyle.FixedDialog;
         form.MaximizeBox = false;
         form.MinimizeBox = false;
@@ -93,6 +94,11 @@ public partial class FrmEditMaster : Form {
 
 
                 if (button.Text == "Cancel")
+                {
+                    button.BackColor = Color.Firebrick;
+                    cancel = button;
+                }
+                if (button.Text == "Apply" || button.Text == "OK" || button.Text == "Create")
                 {
                     button.BackColor = Color.SeaGreen;
                     apply = button;
