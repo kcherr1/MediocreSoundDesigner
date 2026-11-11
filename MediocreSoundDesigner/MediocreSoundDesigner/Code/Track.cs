@@ -4,7 +4,8 @@ using NAudio.Lame;
 
 namespace MediocreSoundDesigner;
 
-public enum SampleRegion {
+public enum SampleRegion
+{
     BEGINNING_ONLY,
     END_ONLY,
     BEGINNING_AND_END,
@@ -32,6 +33,7 @@ public class Track : IDisposable
     private WaveOut outputDevice;
     private Panel panContainer;
     private int drawTimescale;
+    private int startSampleOffset; // sample in the played file where playback began (for seek/resume)
 
     // properties
     public int DrawOffset { get; set; }
@@ -44,12 +46,14 @@ public class Track : IDisposable
     public int? SelectionEndSample { get; set; } = null;
     public bool HasSelection => SelectionStartSample.HasValue && SelectionEndSample.HasValue;
     public int SampleCount => samples?.Length ?? 0;
+    // length of the audio actually played/saved (includes the dead space from DrawOffset)
+    public int AdjustedSampleCount => DrawOffset * drawTimescale + SampleCount;
 
     private static WaveFormat OutputFormat => WaveFormat.CreateIeeeFloatWaveFormat(INTERNAL_SAMPLE_RATE, INTERNAL_CHANNELS);
     public TimeSpan CurrentTime => fileReader?.CurrentTime ?? TimeSpan.Zero;
     public TimeSpan TotalTime => fileReader?.TotalTime ?? TimeSpan.Zero;
     public String GetFileName() => Path.GetFileName(file);
-    
+
     // ctor
     public Track(string file)
     {
@@ -105,7 +109,8 @@ public class Track : IDisposable
         this.sampleRate = INTERNAL_SAMPLE_RATE;
         IsDisabled = false;
     }
-    public void LinkPanels(Panel panDrawSamples, Panel panContainer) {
+    public void LinkPanels(Panel panDrawSamples, Panel panContainer)
+    {
         this.PanDrawSamples = panDrawSamples;
         this.panContainer = panContainer;
     }
@@ -138,19 +143,24 @@ public class Track : IDisposable
             SelectionEndSample = end;
         }
     }
-    public float[] CloneSamples() {
-    return (float[])samples.Clone();
+    public float[] CloneSamples()
+    {
+        return (float[])samples.Clone();
     }
-    public void ReplaceSamples(float[] samples) {
-    this.samples = samples;
-    waveformDisplayScale = CalculateWaveformDisplayScale();
+    public void ReplaceSamples(float[] samples)
+    {
+        this.samples = samples;
+        waveformDisplayScale = CalculateWaveformDisplayScale();
     }
-    public void Trim() {
+    public void Trim()
+    {
     }
-    public void AlterTimeScale(float scale) {
+    public void AlterTimeScale(float scale)
+    {
     }
-    public void SetVolume(float newVolume) {
-    Volume = newVolume;
+    public void SetVolume(float newVolume)
+    {
+        Volume = newVolume;
     }
     public void Flip()
     {
@@ -275,11 +285,26 @@ public class Track : IDisposable
     }
 
     // play
-    public void Play() {
+    public void Play(int startSample = 0)
+    {
         outputDevice?.Dispose();
         fileReader?.Dispose();
         SaveToTempFile();
+        StartFrom(startSample);
+    }
+    // restart playback of the already-saved temp file at a new position (no re-save)
+    public void Seek(int sample)
+    {
+        StartFrom(sample);
+    }
+    private void StartFrom(int startSample)
+    {
+        outputDevice?.Dispose();
+        fileReader?.Dispose();
         fileReader = new AudioFileReader(tempFilePath);
+        int totalSamples = (int)(fileReader.Length / sizeof(float));
+        startSampleOffset = Math.Clamp(startSample, 0, totalSamples);
+        fileReader.Position = (long)startSampleOffset * sizeof(float);
         int deviceNumber = Settings.AudioOutputDeviceNumber;
         if (WaveOut.DeviceCount > 0 && (deviceNumber < 0 || deviceNumber >= WaveOut.DeviceCount))
         {
@@ -290,16 +315,23 @@ public class Track : IDisposable
         outputDevice.Init(fileReader);
         outputDevice.Play();
     }
-    public void Pause() {
-    outputDevice?.Pause();
+    public void Pause()
+    {
+        outputDevice?.Pause();
     }
-    public void Reset() {
+    // stop playback and rewind to the start
+    public void Reset()
+    {
+        outputDevice?.Stop();
+        startSampleOffset = 0;
     }
-    public int GetPlayheadPos() {
-    return (int)((outputDevice?.GetPosition() ?? 0) / 4);
+    public int GetPlayheadPos()
+    {
+        return startSampleOffset + (int)((outputDevice?.GetPosition() ?? 0) / sizeof(float));
     }
-    public void ToggleDisabled() {
-    IsDisabled = !IsDisabled;
+    public void ToggleDisabled()
+    {
+        IsDisabled = !IsDisabled;
     }
 
     // file i/o
@@ -333,25 +365,29 @@ public class Track : IDisposable
         }
     }
 
-    public float[] GetAdjustedSamples() {
-    float[] adjSamples = new float[samples.Length];
-    for (int s = 0; s < samples.Length; s++) {
-        adjSamples[s] = samples[s] * Volume;
-    }
-    float[] deadSpace = new float[DrawOffset * drawTimescale];
-    for (int i = 0; i < DrawOffset; i++) {
-        deadSpace[i] = 0.0f;
-    }
+    public float[] GetAdjustedSamples()
+    {
+        float[] adjSamples = new float[samples.Length];
+        for (int s = 0; s < samples.Length; s++)
+        {
+            adjSamples[s] = samples[s] * Volume;
+        }
+        float[] deadSpace = new float[DrawOffset * drawTimescale];
+        for (int i = 0; i < DrawOffset; i++)
+        {
+            deadSpace[i] = 0.0f;
+        }
 
-    return [.. deadSpace, .. adjSamples];
+        return [.. deadSpace, .. adjSamples];
     }
 
     // render
-    public void ShiftSampleOver(int amount) {
-    DrawOffset += amount;
-    DrawOffset = Math.Max(0, DrawOffset);
+    public void ShiftSampleOver(int amount)
+    {
+        DrawOffset += amount;
+        DrawOffset = Math.Max(0, DrawOffset);
     }
-    public void DrawSamples(Graphics g, int drawTimescale, int? selStartX = null, int? selEndX = null)
+    public void DrawSamples(Graphics g, int drawTimescale, int? selStartX = null, int? selEndX = null, Rectangle? clip = null)
     {
         if (PanDrawSamples is null)
         {
@@ -365,11 +401,20 @@ public class Track : IDisposable
         float heightAdj = height / 2f;
         if (samples != null && samples.Length > 0)
         {
-            int x = DrawOffset;
+            // only build points for the pixels being repainted (huge speedup for small invalidations)
+            int totalPx = (samples.Length + drawTimescale - 1) / drawTimescale;
+            int firstPx = 0, lastPx = totalPx - 1;
+            if (clip.HasValue)
+            {
+                firstPx = Math.Max(0, clip.Value.Left - DrawOffset - 2);
+                lastPx = Math.Min(totalPx - 1, clip.Value.Right - DrawOffset + 2);
+            }
+            int x = DrawOffset + firstPx;
             using Pen wavePen = new(IsDisabled ? Settings.Color.TrackSamples_Disabled : Settings.Color.TrackSamples_Enabled);
             List<Point> points = new();
-            for (int s = 0; s < samples.Length; s += drawTimescale)
+            for (int px = firstPx; px <= lastPx; px++)
             {
+                int s = px * drawTimescale;
                 float audioSample = Math.Abs(samples[s]) < WAVEFORM_NOISE_FLOOR ? 0.0f : samples[s];
                 var sample = (int)(audioSample * waveformDisplayScale * heightAdj * Volume);
                 points.Add(new(x, height / 2 - sample));
@@ -404,8 +449,9 @@ public class Track : IDisposable
     }
 
     // dispose
-    public void Dispose() {
-    outputDevice?.Dispose();
-    fileReader?.Dispose();
+    public void Dispose()
+    {
+        outputDevice?.Dispose();
+        fileReader?.Dispose();
     }
 }

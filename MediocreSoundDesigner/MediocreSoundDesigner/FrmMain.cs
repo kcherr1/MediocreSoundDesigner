@@ -8,6 +8,9 @@ public partial class FrmMain : Form
 {
     // fields
     private TrackManager trackManager;
+    private PlayheadSlider sldPlayhead;
+    private bool isScrubbing;
+    private int playlineX; // playhead position in content pixels
 
     // ctor
     public FrmMain()
@@ -30,6 +33,23 @@ public partial class FrmMain : Form
             null, panTracks, new object[] { true });
 
         trackManager = new(panTracks);
+
+        // draggable playhead slider that sits above the playline
+        sldPlayhead = new PlayheadSlider();
+        sldPlayhead.Scrubbing += SldPlayhead_Scrubbing;
+        sldPlayhead.ScrubCompleted += SldPlayhead_ScrubCompleted;
+        panApp.Controls.Add(sldPlayhead);
+
+        // the reset button itself now lives in FrmMain.Designer.cs
+        new ToolTip().SetToolTip(bttnReset, "Reset to start");
+        // the scroll event fires before the panel has actually moved, so refresh again once it has
+        panTracks.Scroll += (s, e) => { RefreshPlayheadVisuals(); BeginInvoke(new Action(RefreshPlayheadVisuals)); };
+        panTracks.MouseWheel += (s, e) => BeginInvoke(new Action(RefreshPlayheadVisuals));
+
+        // the playline is painted straight onto the track surfaces (no moving child control),
+        // so it can't leave trails and moves in the same paint pass as the waveform
+        lblPlayhead.Visible = false;
+        panTracks.Paint += (s, e) => DrawPlayline(e.Graphics, panTracks);
         bttnPlay.BackgroundImage = Resources.play;
         lblVolumePercent.Text = $"{trkVolume.Value}%";
         trackManager.DrawTimescale = trkDrawTimescale.Value;
@@ -47,6 +67,9 @@ public partial class FrmMain : Form
         panBottomActions.BackColor = Settings.Color.WinBg;
         panBottomActions.ForeColor = Settings.Color.WinFg;
         menu.ForeColor = Settings.Color.WinFg;
+        sldPlayhead.BackColor = Settings.Color.WinBg;
+        bttnReset.BackgroundImage = CreateResetIcon(Settings.Color.WinFg);
+        sldPlayhead.Invalidate();
         lblDebug.ForeColor = Settings.Color.WinFg;
         panTracks.BackColor = Settings.Color.TrackBg_Unselected;
         lblPlayhead.BackColor = Settings.Color.Playline;
@@ -169,6 +192,28 @@ public partial class FrmMain : Form
             bttnPlay.BackgroundImage = Resources.play;
             tmrUpdate.Stop();
         }
+    }
+
+    private void bttnReset_Click(object sender, EventArgs e)
+    {
+        tmrUpdate.Stop(); // stop first so the "playback ended" check doesn't move the playhead to the end
+        trackManager.ResetPlayhead();
+        bttnPlay.BackgroundImage = Resources.play;
+        panTracks.AutoScrollPosition = new Point(0, -panTracks.AutoScrollPosition.Y); // scroll back to the left
+        RefreshPlayheadVisuals();
+        BeginInvoke(new Action(RefreshPlayheadVisuals)); // again once the scroll has been applied
+    }
+
+    // "skip to start" icon: a bar and a left-pointing triangle
+    private static Bitmap CreateResetIcon(Color color)
+    {
+        Bitmap bmp = new(64, 64);
+        using Graphics g = Graphics.FromImage(bmp);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using SolidBrush brush = new(color);
+        g.FillRectangle(brush, 10, 10, 8, 44);
+        g.FillPolygon(brush, new[] { new Point(54, 10), new Point(54, 54), new Point(22, 32) });
+        return bmp;
     }
 
     private void menuFileOpen_Click(object sender, EventArgs e)
@@ -327,12 +372,19 @@ public partial class FrmMain : Form
     {
         if (trackManager.Tracks.Count > 0)
         {
+            // playback ran off the end: park the playhead at the end and stop polling
+            if (tmrUpdate.Enabled && trackManager.State == NAudio.Wave.PlaybackState.Stopped)
+            {
+                trackManager.OnPlaybackEnded();
+                tmrUpdate.Stop();
+            }
             bttnPlay.BackgroundImage = trackManager.State == NAudio.Wave.PlaybackState.Playing ? Resources.pause : Resources.play;
             bttnPlay.Visible = true;
-            lblPlayhead.Left = trackManager.GetPlayheadPos();
-            lblPlayhead.Visible = true;
             lblCurrTime.Visible = true;
-            lblCurrTime.Text = $"{trackManager.CurrentTime:mm\\:ss\\.fff} / {trackManager.TotalTime:mm\\:ss\\.fff}";
+            if (!isScrubbing)
+            {
+                RefreshPlayheadVisuals();
+            }
             lblCurrTime.Update();
         }
         else
@@ -343,6 +395,108 @@ public partial class FrmMain : Form
             lblPlayhead.Left = 0; // Reset playhead to start
             lblCurrTime.Update();
         }
+    }
+
+    // playhead slider
+    private void RefreshPlayheadVisuals() => ShowPlayheadAt(trackManager.PlayheadSample);
+
+    private void ShowPlayheadAt(int sample)
+    {
+        int total = trackManager.TotalSamples;
+        sample = Math.Clamp(sample, 0, total);
+        int scale = Math.Max(1, trackManager.DrawTimescale);
+        int x = sample / scale;
+
+        if (x != playlineX)
+        {
+            int oldX = playlineX;
+            playlineX = x;
+            InvalidatePlayline(oldX); // erase the old line
+            InvalidatePlayline(x);    // draw the new one
+        }
+
+        sldPlayhead.MaxContentX = total / scale;
+        sldPlayhead.OriginX = GetContentOriginInSlider();
+        sldPlayhead.ContentX = x;
+        sldPlayhead.Update();
+
+        TimeSpan cur = TimeSpan.FromSeconds((double)sample / Track.INTERNAL_SAMPLE_RATE);
+        TimeSpan tot = trackManager.TotalTime;
+        lblCurrTime.Text = $"{cur:mm\\:ss\\.fff} / {tot:mm\\:ss\\.fff}";
+    }
+
+    // --- playline painting helpers ---
+    private int PlaylineWidth => Math.Max(1, lblPlayhead.Width);
+
+    private Control GetReferenceSurface() =>
+        trackManager.Tracks.Select(t => t.PanDrawSamples).FirstOrDefault(p => p is { IsDisposed: false, IsHandleCreated: true });
+
+    // x of the playline's left edge in 'surface' coordinates (handles scroll offset and borders)
+    private int PlaylineLeftIn(Control surface, int contentX)
+    {
+        Control reference = GetReferenceSurface();
+        if (reference is null) return contentX;
+        int screenX = reference.PointToScreen(new Point(contentX - PlaylineWidth / 2, 0)).X;
+        return surface.PointToClient(new Point(screenX, 0)).X;
+    }
+
+    private int GetContentOriginInSlider()
+    {
+        Control reference = GetReferenceSurface();
+        if (reference is null) return 0;
+        return sldPlayhead.PointToClient(reference.PointToScreen(Point.Empty)).X;
+    }
+
+    private void DrawPlayline(Graphics g, Control surface)
+    {
+        if (trackManager is null || trackManager.Tracks.Count == 0) return;
+        using SolidBrush brush = new(Settings.Color.Playline);
+        g.FillRectangle(brush, PlaylineLeftIn(surface, playlineX), 0, PlaylineWidth, surface.ClientSize.Height);
+    }
+
+    // repaint only a thin vertical strip around the line on every surface it crosses
+    private void InvalidatePlayline(int contentX)
+    {
+        List<Control> surfaces = new() { panTracks };
+        foreach (Track t in trackManager.Tracks)
+        {
+            Control p = t.PanDrawSamples;
+            if (p is null || p.IsDisposed) continue;
+            if (p.Parent is not null)
+            {
+                surfaces.Add(p.Parent);
+                // transparent children (track name, buttons) need their own invalidation
+                foreach (Control child in p.Parent.Controls)
+                {
+                    if (child != p) surfaces.Add(child);
+                }
+            }
+            surfaces.Add(p);
+        }
+
+        foreach (Control s in surfaces)
+        {
+            Rectangle r = new(PlaylineLeftIn(s, contentX) - 1, 0, PlaylineWidth + 2, s.ClientSize.Height);
+            s.Invalidate(r);
+        }
+        foreach (Control s in surfaces)
+        {
+            s.Update();
+        }
+    }
+
+    private void SldPlayhead_Scrubbing(object sender, int contentX)
+    {
+        // just preview while dragging; the audio jumps when the mouse is released
+        isScrubbing = true;
+        ShowPlayheadAt(contentX * Math.Max(1, trackManager.DrawTimescale));
+    }
+
+    private void SldPlayhead_ScrubCompleted(object sender, int contentX)
+    {
+        trackManager.SeekToSample(contentX * Math.Max(1, trackManager.DrawTimescale));
+        isScrubbing = false;
+        RefreshPlayheadVisuals();
     }
 
     private void trkDrawTimescale_Scroll(object sender, EventArgs e)
@@ -361,7 +515,7 @@ public partial class FrmMain : Form
             Width = panTracks.Width,
             Left = 0,
             Top = 0,
-            BorderStyle = BorderStyle.FixedSingle
+            BorderStyle = BorderStyle.None // border-less so the playline is continuous across tracks
         };
         Button bttnMute = new()
         {
@@ -393,7 +547,8 @@ public partial class FrmMain : Form
             AutoSize = true,
             Location = new Point(100, 6),
             Font = new Font("Segoe UI", 20, FontStyle.Bold),
-            ForeColor = Settings.Color.WinFg
+            ForeColor = Settings.Color.WinFg,
+            BackColor = Color.Transparent // lets the playline show behind the track name
         };
         DoubleBufferedPanel panTrack = new()
         {
@@ -401,7 +556,7 @@ public partial class FrmMain : Form
             Width = panTracks.Width,
             Left = 0,
             Location = new Point(0, 45),
-            BorderStyle = BorderStyle.FixedSingle
+            BorderStyle = BorderStyle.None
         };
 
         // add inner elements to the track container panel
@@ -521,8 +676,11 @@ public partial class FrmMain : Form
             int? selStart = isSelected ? trackManager.SelectionStartX : null;
             int? selEnd = isSelected ? trackManager.SelectionEndX : null;
 
-            track.DrawSamples(e.Graphics, trackManager.DrawTimescale, selStart, selEnd);
+            track.DrawSamples(e.Graphics, trackManager.DrawTimescale, selStart, selEnd, e.ClipRectangle);
+            DrawPlayline(e.Graphics, panTrack);
         };
+
+        panTrackContainer.Paint += (sender, e) => DrawPlayline(e.Graphics, panTrackContainer);
 
         panTracks.Controls.Add(panTrackContainer);
         track.LinkPanels(panTrack, panTracks);
@@ -551,15 +709,17 @@ public partial class FrmMain : Form
         panBottomActions.Width = availableWidth;
 
         // align middle area holding tracks
+        sldPlayhead.Left = 0;
+        sldPlayhead.Top = panTopActions.Bottom;
+        sldPlayhead.Width = availableWidth;
         panTracks.Left = 0;
-        panTracks.Top = panTopActions.Bottom;
+        panTracks.Top = sldPlayhead.Bottom;
         panTracks.Width = availableWidth;
         panTracks.Height = Math.Max(50, panBottomActions.Top - panTracks.Top);
 
         int contentWidth = GetTrackContentWidth();
 
         // align playhead label
-        lblPlayhead.Left = 0;
         lblPlayhead.Height = panTracks.ClientSize.Height;
         lblPlayhead.BringToFront();
 
@@ -577,6 +737,8 @@ public partial class FrmMain : Form
         trkDrawTimescale.Top = (panBottomActions.ClientSize.Height - trkDrawTimescale.Height) / 2;
         trkDrawTimescale.Width = (panBottomActions.ClientSize.Width - 15) - trkDrawTimescale.Left;
 
+        RefreshPlayheadVisuals();
+
         // adjust track sizing
         if (trackManager.Tracks.Count == 0) return;
 
@@ -584,14 +746,18 @@ public partial class FrmMain : Form
         int containerHeight = 256;
         int top = 0;
 
+        // children of an AutoScroll panel are positioned in scrolled coordinates, so keep the
+        // current scroll offset when placing them (resetting to 0 made the scroll range grow)
+        Point scrollOffset = panTracks.AutoScrollPosition; // x/y are <= 0
+
         foreach (Control ctrl in panTracks.Controls)
         {
             if (ctrl is Panel panTrackContainer && ctrl != lblPlayhead)
             {
-                panTrackContainer.Left = 0;
+                panTrackContainer.Left = scrollOffset.X;
                 panTrackContainer.Width = contentWidth;
                 panTrackContainer.Height = containerHeight;
-                panTrackContainer.Top = top;
+                panTrackContainer.Top = scrollOffset.Y + top;
                 top += containerHeight + 4;
 
                 foreach (Control child in panTrackContainer.Controls)
@@ -607,9 +773,9 @@ public partial class FrmMain : Form
                 }
             }
         }
-        lblPlayhead.Left = 0;
         lblPlayhead.Height = Math.Max(panTracks.ClientSize.Height, top);
         lblPlayhead.BringToFront();
+        RefreshPlayheadVisuals();
     }
 
     private int GetTrackContentWidth()
