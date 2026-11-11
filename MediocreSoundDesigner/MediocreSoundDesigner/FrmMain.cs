@@ -536,7 +536,7 @@ public partial class FrmMain : Form
 
   private void menuGenRecord_Click(object sender, EventArgs e)
   {
-    Track newTrack = new(new float[0]);
+    Track newTrack = new(new float[0], new NAudio.Wave.WaveFormat(44100, 2));
 
     using FrmGenRecord frm = new();
     frm.SetSound(newTrack);
