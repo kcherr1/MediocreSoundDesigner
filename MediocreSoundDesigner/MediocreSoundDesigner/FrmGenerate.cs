@@ -1,14 +1,7 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-
-namespace MediocreSoundDesigner
+﻿namespace MediocreSoundDesigner
 {
     public partial class FrmGenerate : Form
     {
-        private static readonly HttpClient httpClient = new();
-        private const string endpoint = "https://udioapi.pro/api/v2/generate";
-
         public FrmGenerate()
         {
             InitializeComponent();
@@ -58,10 +51,9 @@ namespace MediocreSoundDesigner
                 return;
             }
 
-            string apiKey = Environment.GetEnvironmentVariable("UDIOAPI_KEY");
-            if (string.IsNullOrWhiteSpace(apiKey))
+            if (Owner is not FrmMain mainForm)
             {
-                lblUpdateText.Text = "API_KEY is not configured.";
+                lblUpdateText.Text = "Unable to access the main form.";
                 return;
             }
 
@@ -70,29 +62,13 @@ namespace MediocreSoundDesigner
 
             try
             {
-                using HttpRequestMessage request = new(HttpMethod.Post, endpoint)
-                {
-                    Content = JsonContent.Create(new
-                    {
-                        model = "chirp-v6",
-                        gpt_description_prompt = prompt,
-                        make_instrumental = checkBoxInstrumental.Checked
-                    })
-                };
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-                using HttpResponseMessage response = await httpClient.SendAsync(request);
-                if (!response.IsSuccessStatusCode)
-                {
-                    string message = await response.Content.ReadAsStringAsync();
-                    lblUpdateText.Text = FormatError(response.StatusCode, message);
-                    return;
-                }
-
+                await mainForm.GenerateAndImportUdioTrackAsync(
+                    prompt,
+                    makeInstrumental: checkBoxInstrumental.Checked);
                 DialogResult = DialogResult.OK;
                 Close();
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or TimeoutException)
             {
                 lblUpdateText.Text = ex.Message;
             }
@@ -114,12 +90,5 @@ namespace MediocreSoundDesigner
             bttnCancel.Enabled = !submitting;
         }
 
-        private static string FormatError(HttpStatusCode statusCode, string responseBody)
-        {
-            string message = responseBody.Trim();
-            return string.IsNullOrWhiteSpace(message)
-                ? $"Request failed ({(int)statusCode} {statusCode})."
-                : $"{(int)statusCode}: {message}";
-        }
     }
 }
