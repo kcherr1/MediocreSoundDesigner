@@ -585,6 +585,16 @@
   <metadata name="colorDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>222, 13</value>
   </metadata>
+  <data name="bttnGenerate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAAOJJREFUSEvFlgEKAjEMBO9r/syf+TSlYI91yF6Tcq0DAS9JM7ZK9TjW8WBiB2+J
+        rfxFrNKtcpVtE3fR6/v8lFx7fSs8Vu6QNdanqAys9A6pDqr2n3ABd8F6hz2u7wcucItcXfPpLxiFHErY
+        x+c0fVHl3o3EZUbiaEeaYy0Nxe1i4NBouMun4fAoIkb1IZRMD6rSZe4zXkZFzJPpPxBTZMWUMspkxE7g
+        8hZtrogjrmon+g4Zy8QUMWbEetlYXENFrOv1L4+lDXVNGXFD5YxLXJPLR/AeT+GaXf42eDyMpVC2VPoB
+        cB/nLMBuGPgAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>72</value>
   </metadata>
