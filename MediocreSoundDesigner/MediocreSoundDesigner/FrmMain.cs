@@ -1,4 +1,5 @@
 using MediocreSoundDesigner.Properties;
+using NAudio.Wave;
 using System.Drawing.Printing;
 using System.Text.Json;
 
@@ -11,6 +12,12 @@ public partial class FrmMain : Form
     private PlayheadSlider sldPlayhead;
     private bool isScrubbing;
     private int playlineX; // playhead position in content pixels
+    private WaveIn waveSource;
+    private Track recordingTrack;
+    private bool isRecording;
+    private List<float> recordedSamples = new();
+    private readonly object recordedSamplesLock = new();
+    private int renderedRecordingSampleCount;
 
     // ctor
     public FrmMain()
@@ -190,7 +197,10 @@ public partial class FrmMain : Form
         {
             trackManager.PauseAll();
             bttnPlay.BackgroundImage = Resources.play;
-            tmrUpdate.Stop();
+            if (!isRecording)
+            {
+                tmrUpdate.Stop();
+            }
         }
     }
 
@@ -309,25 +319,150 @@ public partial class FrmMain : Form
 
     private void menuGenRecord_Click(object sender, EventArgs e)
     {
-        Track newTrack = new(new float[0]);
-        CreateTrackPanel(newTrack);
-        trackManager.AddTrack(newTrack);
-        SetDefaultZoom();
-        UpdateSizes();
-        newTrack.PanDrawSamples.Invalidate();
-
-        FrmGenRecord frm = new();
-        frm.SetSound(newTrack);
-        if (frm.ShowDialog() == DialogResult.Cancel)
+        if (isRecording)
         {
-            panTracks.Controls.Remove(newTrack.PanDrawSamples);
-            newTrack.PanDrawSamples.Dispose();
-            newTrack.Dispose();
-            trackManager.RemTrack(newTrack);
+            StopRecording();
+        }
+        else
+        {
+            StartRecording();
+        }
+    }
+
+    private void StartRecording()
+    {
+        try
+        {
+            if (WaveIn.DeviceCount == 0)
+            {
+                throw new InvalidOperationException("No audio input devices are available.");
+            }
+
+            int deviceNumber = Settings.AudioInputDeviceNumber;
+            if (deviceNumber < 0 || deviceNumber >= WaveIn.DeviceCount)
+            {
+                deviceNumber = 0;
+                Settings.AudioInputDeviceNumber = deviceNumber;
+            }
+
+            recordingTrack = new Track(Array.Empty<float>());
+            CreateTrackPanel(recordingTrack);
+            trackManager.AddTrack(recordingTrack);
+            SetDefaultZoom();
+            UpdateSizes();
+
+            lock (recordedSamplesLock)
+            {
+                recordedSamples.Clear();
+            }
+            renderedRecordingSampleCount = 0;
+
+            waveSource = new WaveIn
+            {
+                DeviceNumber = deviceNumber,
+                WaveFormat = new WaveFormat(Track.INTERNAL_SAMPLE_RATE, 16, Track.INTERNAL_CHANNELS)
+            };
+            waveSource.DataAvailable += WaveSource_DataAvailable;
+            waveSource.RecordingStopped += WaveSource_RecordingStopped;
+            waveSource.StartRecording();
+
+            isRecording = true;
+            bttnRecord.BackgroundImage = Resources.stop;
+            tmrUpdate.Start();
+        }
+        catch (Exception ex)
+        {
+            isRecording = false;
+            bttnRecord.BackgroundImage = Resources.record;
+            waveSource?.Dispose();
+            waveSource = null;
+            RemoveRecordingTrack();
+            MessageBox.Show($"Failed to start recording: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void StopRecording()
+    {
+        if (!isRecording) return;
+
+        isRecording = false;
+        UpdateLiveRecording(force: true);
+        waveSource?.StopRecording();
+        bttnRecord.BackgroundImage = Resources.record;
+
+        if (trackManager.State != PlaybackState.Playing)
+        {
+            tmrUpdate.Stop();
+        }
+    }
+
+    private void WaveSource_DataAvailable(object sender, WaveInEventArgs e)
+    {
+        WaveFormat format = ((WaveIn)sender).WaveFormat;
+        int bytesPerSample = format.BitsPerSample / 8;
+        int channels = format.Channels;
+        int frameSize = bytesPerSample * channels;
+        int frameCount = e.BytesRecorded / frameSize;
+
+        lock (recordedSamplesLock)
+        {
+            for (int i = 0; i < frameCount; i++)
+            {
+                float sum = 0;
+                for (int c = 0; c < channels; c++)
+                {
+                    int offset = (i * frameSize) + (c * bytesPerSample);
+                    sum += BitConverter.ToInt16(e.Buffer, offset) / 32768f;
+                }
+                recordedSamples.Add(sum / channels);
+            }
+        }
+    }
+
+    private void WaveSource_RecordingStopped(object sender, StoppedEventArgs e)
+    {
+        waveSource?.Dispose();
+        waveSource = null;
+    }
+
+    private void UpdateLiveRecording(bool force = false)
+    {
+        if (recordingTrack is null) return;
+
+        float[] samples;
+        lock (recordedSamplesLock)
+        {
+            if (!force && recordedSamples.Count == renderedRecordingSampleCount) return;
+            samples = recordedSamples.ToArray();
         }
 
+        renderedRecordingSampleCount = samples.Length;
+        recordingTrack.ReplaceSamples(samples);
+        recordingTrack.PanDrawSamples?.Invalidate();
         UpdateSizes();
     }
+
+    private void RemoveRecordingTrack()
+    {
+        if (recordingTrack is null) return;
+
+        if (recordingTrack.PanDrawSamples is not null)
+        {
+            panTracks.Controls.Remove(recordingTrack.PanDrawSamples.Parent);
+            recordingTrack.PanDrawSamples.Parent?.Dispose();
+        }
+        recordingTrack.Dispose();
+        trackManager.RemTrack(recordingTrack);
+        recordingTrack = null;
+        UpdateSizes();
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        StopRecording();
+        base.OnFormClosing(e);
+    }
+
     private void menuGenNoise_Click(object sender, EventArgs e)
     {
         const int NUM_SAMPLES = 100_000;
@@ -370,10 +505,12 @@ public partial class FrmMain : Form
 
     private void tmrUpdatePlaybackState_Tick(object sender, EventArgs e)
     {
+        UpdateLiveRecording();
+
         if (trackManager.Tracks.Count > 0)
         {
             // playback ran off the end: park the playhead at the end and stop polling
-            if (tmrUpdate.Enabled && trackManager.State == NAudio.Wave.PlaybackState.Stopped)
+            if (!isRecording && tmrUpdate.Enabled && trackManager.State == NAudio.Wave.PlaybackState.Stopped)
             {
                 trackManager.OnPlaybackEnded();
                 tmrUpdate.Stop();
@@ -393,12 +530,20 @@ public partial class FrmMain : Form
             bttnPlay.Visible = true;
             tmrUpdate.Stop();
             lblPlayhead.Left = 0; // Reset playhead to start
+            lblCurrTime.Visible = true;
+            lblCurrTime.Text = "00:00.00/00:00.00";
             lblCurrTime.Update();
         }
     }
 
     // playhead slider
-    private void RefreshPlayheadVisuals() => ShowPlayheadAt(trackManager.PlayheadSample);
+    private void RefreshPlayheadVisuals()
+    {
+        int sample = trackManager.State == PlaybackState.Playing
+            ? trackManager.PlayheadSample
+            : isRecording ? recordingTrack?.AdjustedSampleCount ?? trackManager.PlayheadSample : trackManager.PlayheadSample;
+        ShowPlayheadAt(sample);
+    }
 
     private void ShowPlayheadAt(int sample)
     {
@@ -423,6 +568,36 @@ public partial class FrmMain : Form
         TimeSpan cur = TimeSpan.FromSeconds((double)sample / Track.INTERNAL_SAMPLE_RATE);
         TimeSpan tot = trackManager.TotalTime;
         lblCurrTime.Text = $"{cur:mm\\:ss\\.fff} / {tot:mm\\:ss\\.fff}";
+        FollowPlayhead(x);
+    }
+
+    private void FollowPlayhead(int playheadX)
+    {
+        if (!isRecording && trackManager.State != PlaybackState.Playing)
+        {
+            return;
+        }
+
+        int viewportWidth = panTracks.ClientSize.Width;
+        if (viewportWidth <= 0)
+        {
+            return;
+        }
+
+        int scrollX = -panTracks.AutoScrollPosition.X;
+        int margin = Math.Max(40, viewportWidth / 4);
+        int visibleLeft = scrollX + margin;
+        int visibleRight = scrollX + viewportWidth - margin;
+
+        if (playheadX >= visibleLeft && playheadX <= visibleRight)
+        {
+            return;
+        }
+
+        int maxScroll = Math.Max(0,
+            panTracks.HorizontalScroll.Maximum - panTracks.HorizontalScroll.LargeChange + 1);
+        int targetScroll = Math.Clamp(playheadX - viewportWidth / 2, 0, maxScroll);
+        panTracks.AutoScrollPosition = new Point(targetScroll, -panTracks.AutoScrollPosition.Y);
     }
 
     // --- playline painting helpers ---
@@ -640,14 +815,14 @@ public partial class FrmMain : Form
                 trackManager.SetSelection(dragStartX, e.X);
             }
         };
-        panTrack.MouseUp += (sender, e) => handleSelectionDrag(e, true);    
+        panTrack.MouseUp += (sender, e) => handleSelectionDrag(e, true);
         panTrackContainer.MouseDown += (sender, e) =>
         {
             if (e.Button == MouseButtons.Left)
             {
                 handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), false);
             }
-        }; 
+        };
         panTrackContainer.MouseMove += (sender, e) =>
         {
             if (isDragging)
@@ -661,7 +836,7 @@ public partial class FrmMain : Form
             {
                 handleSelectionDrag(new MouseEventArgs(e.Button, e.Clicks, e.X, e.Y, e.Delta), true);
             }
-        }; 
+        };
 
         panTrackContainer.DoubleClick += (sender, e) =>
         {
@@ -800,6 +975,17 @@ public partial class FrmMain : Form
     private void FrmMain_Load(object sender, EventArgs e)
     {
 
+    }
+
+    private void panel1_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void bttnGenerate_Click(object sender, EventArgs e)
+    {
+        using FrmGenerate frmGenerate = new();
+        frmGenerate.ShowDialog(this);
     }
 }
 
