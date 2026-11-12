@@ -349,18 +349,24 @@
             // 
             // bttnGenerate
             // 
+            bttnGenerate.BackColor = Color.DarkGray;
+            bttnGenerate.Cursor = Cursors.Hand;
+            bttnGenerate.FlatAppearance.BorderSize = 0;
+            bttnGenerate.FlatAppearance.MouseDownBackColor = Color.DarkGray;
+            bttnGenerate.FlatAppearance.MouseOverBackColor = Color.LightGray;
+            bttnGenerate.FlatStyle = FlatStyle.Flat;
             bttnGenerate.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             bttnGenerate.ForeColor = Color.Black;
-            Size newImageSize = new Size(30, 30); 
-            bttnGenerate.Image = new Bitmap(Properties.Resources.aiGenerateIcon, newImageSize);
+            bttnGenerate.Image = (Image)resources.GetObject("bttnGenerate.Image");
             bttnGenerate.ImageAlign = ContentAlignment.MiddleLeft;
-            bttnGenerate.Location = new Point(12, 19);
+            bttnGenerate.Location = new Point(12, 6);
             bttnGenerate.Name = "bttnGenerate";
-            bttnGenerate.Size = new Size(176, 37);
+            bttnGenerate.Padding = new Padding(10, 0, 0, 0);
+            bttnGenerate.Size = new Size(190, 50);
             bttnGenerate.TabIndex = 1;
             bttnGenerate.Text = "Generate Sound";
             bttnGenerate.TextImageRelation = TextImageRelation.ImageBeforeText;
-            bttnGenerate.UseVisualStyleBackColor = true;
+            bttnGenerate.UseVisualStyleBackColor = false;
             bttnGenerate.Click += bttnGenerate_Click;
             // 
             // picSoundWave

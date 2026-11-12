@@ -984,7 +984,8 @@ public partial class FrmMain : Form
 
     private void bttnGenerate_Click(object sender, EventArgs e)
     {
-
+        using FrmGenerate frmGenerate = new();
+        frmGenerate.ShowDialog(this);
     }
 }
 
