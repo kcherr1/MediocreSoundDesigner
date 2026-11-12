@@ -16,7 +16,7 @@
 
         private void UpdatePromptCharacterCount()
         {
-            lblPromptCharacterCount.Text = $"{txtBoxPrompt.TextLength}/80";
+            lblPromptCharacterCount.Text = $"{txtBoxPrompt.TextLength}/3000";
         }
 
         private void ApplySettings()

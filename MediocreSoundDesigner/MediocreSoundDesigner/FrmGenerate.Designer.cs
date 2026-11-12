@@ -44,7 +44,7 @@
             // txtBoxPrompt
             // 
             txtBoxPrompt.Location = new Point(192, 103);
-            txtBoxPrompt.MaxLength = 80;
+            txtBoxPrompt.MaxLength = 3000;
             txtBoxPrompt.Multiline = true;
             txtBoxPrompt.Name = "txtBoxPrompt";
             txtBoxPrompt.Size = new Size(487, 76);
@@ -125,6 +125,7 @@
             // lblPromptCharacterCount
             // 
             lblPromptCharacterCount.BackColor = SystemColors.ActiveBorder;
+            lblPromptCharacterCount.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblPromptCharacterCount.Location = new Point(579, 182);
             lblPromptCharacterCount.Name = "lblPromptCharacterCount";
             lblPromptCharacterCount.Size = new Size(100, 23);
