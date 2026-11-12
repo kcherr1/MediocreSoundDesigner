@@ -704,7 +704,7 @@ public partial class FrmMain : Form
     {
         Panel panTrackContainer = new()
         {
-            BackColor = Settings.Color.TrackBg_Unselected,
+            BackColor = Settings.Color.TrackBg_Container,
             Width = panTracks.Width,
             Left = 0,
             Top = 0,
