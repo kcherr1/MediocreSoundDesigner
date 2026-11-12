@@ -37,5 +37,10 @@ namespace MediocreSoundDesigner
     {
       // Empty handler retained because the Designer currently wires this event.
     }
+
+    private void btnCancel_Click(object sender, EventArgs e)
+    {
+
+    }
   }
 }

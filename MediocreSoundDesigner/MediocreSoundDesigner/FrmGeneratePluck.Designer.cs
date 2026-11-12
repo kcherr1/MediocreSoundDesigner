@@ -32,14 +32,14 @@
       lblNote = new Label();
       nudStartTime = new NumericUpDown();
       lblStartTime = new Label();
-      btnCancel = new Button();
-      btnCreate = new Button();
       nudDuration = new NumericUpDown();
       lblDuration = new Label();
       nudOctave = new NumericUpDown();
       lblFrequency = new Label();
       cmbInstrument = new ComboBox();
       lblInstrument = new Label();
+      btnCancel = new Button();
+      btnCreate = new Button();
       ((System.ComponentModel.ISupportInitialize)nudStartTime).BeginInit();
       ((System.ComponentModel.ISupportInitialize)nudDuration).BeginInit();
       ((System.ComponentModel.ISupportInitialize)nudOctave).BeginInit();
@@ -63,6 +63,7 @@
       // 
       lblNote.BackColor = Color.Transparent;
       lblNote.Font = new Font("Segoe UI", 10.8F);
+      lblNote.ForeColor = Color.FromArgb(255, 255, 192);
       lblNote.ImeMode = ImeMode.NoControl;
       lblNote.Location = new Point(24, 91);
       lblNote.Name = "lblNote";
@@ -89,40 +90,13 @@
       // 
       lblStartTime.BackColor = Color.Transparent;
       lblStartTime.Font = new Font("Segoe UI", 10.8F);
+      lblStartTime.ForeColor = Color.FromArgb(255, 255, 192);
       lblStartTime.ImeMode = ImeMode.NoControl;
       lblStartTime.Location = new Point(24, 211);
       lblStartTime.Name = "lblStartTime";
       lblStartTime.Size = new Size(140, 25);
       lblStartTime.TabIndex = 30;
       lblStartTime.Text = "Start Time (sec)";
-      // 
-      // btnCancel
-      // 
-      btnCancel.BackColor = Color.DimGray;
-      btnCancel.DialogResult = DialogResult.Cancel;
-      btnCancel.FlatStyle = FlatStyle.Flat;
-      btnCancel.Font = new Font("Segoe UI", 10.2F);
-      btnCancel.ImeMode = ImeMode.NoControl;
-      btnCancel.Location = new Point(310, 339);
-      btnCancel.Name = "btnCancel";
-      btnCancel.Size = new Size(90, 35);
-      btnCancel.TabIndex = 29;
-      btnCancel.Text = "Cancel";
-      btnCancel.UseVisualStyleBackColor = false;
-      // 
-      // btnCreate
-      // 
-      btnCreate.BackColor = Color.DimGray;
-      btnCreate.DialogResult = DialogResult.OK;
-      btnCreate.FlatStyle = FlatStyle.Flat;
-      btnCreate.Font = new Font("Segoe UI", 10.2F);
-      btnCreate.ImeMode = ImeMode.NoControl;
-      btnCreate.Location = new Point(100, 339);
-      btnCreate.Name = "btnCreate";
-      btnCreate.Size = new Size(90, 35);
-      btnCreate.TabIndex = 28;
-      btnCreate.Text = "Create";
-      btnCreate.UseVisualStyleBackColor = false;
       // 
       // nudDuration
       // 
@@ -144,6 +118,7 @@
       // 
       lblDuration.BackColor = Color.Transparent;
       lblDuration.Font = new Font("Segoe UI", 10.8F);
+      lblDuration.ForeColor = Color.FromArgb(255, 255, 192);
       lblDuration.ImeMode = ImeMode.NoControl;
       lblDuration.Location = new Point(24, 271);
       lblDuration.Name = "lblDuration";
@@ -169,6 +144,7 @@
       // 
       lblFrequency.BackColor = Color.Transparent;
       lblFrequency.Font = new Font("Segoe UI", 10.8F);
+      lblFrequency.ForeColor = Color.FromArgb(255, 255, 192);
       lblFrequency.ImeMode = ImeMode.NoControl;
       lblFrequency.Location = new Point(24, 151);
       lblFrequency.Name = "lblFrequency";
@@ -194,6 +170,7 @@
       // 
       lblInstrument.BackColor = Color.Transparent;
       lblInstrument.Font = new Font("Segoe UI", 10.8F);
+      lblInstrument.ForeColor = Color.FromArgb(255, 255, 192);
       lblInstrument.ImeMode = ImeMode.NoControl;
       lblInstrument.Location = new Point(24, 31);
       lblInstrument.Name = "lblInstrument";
@@ -201,18 +178,50 @@
       lblInstrument.TabIndex = 22;
       lblInstrument.Text = "Instrument";
       // 
+      // btnCancel
+      // 
+      btnCancel.BackColor = Color.FromArgb(255, 128, 128);
+      btnCancel.DialogResult = DialogResult.Cancel;
+      btnCancel.FlatStyle = FlatStyle.Flat;
+      btnCancel.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold);
+      btnCancel.ForeColor = Color.Black;
+      btnCancel.ImeMode = ImeMode.NoControl;
+      btnCancel.Location = new Point(89, 336);
+      btnCancel.Margin = new Padding(3, 2, 3, 2);
+      btnCancel.Name = "btnCancel";
+      btnCancel.Size = new Size(90, 35);
+      btnCancel.TabIndex = 35;
+      btnCancel.Text = "Cancel";
+      btnCancel.UseVisualStyleBackColor = false;
+      // 
+      // btnCreate
+      // 
+      btnCreate.BackColor = Color.FromArgb(128, 255, 128);
+      btnCreate.DialogResult = DialogResult.OK;
+      btnCreate.FlatStyle = FlatStyle.Flat;
+      btnCreate.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold);
+      btnCreate.ForeColor = Color.Black;
+      btnCreate.ImeMode = ImeMode.NoControl;
+      btnCreate.Location = new Point(299, 336);
+      btnCreate.Margin = new Padding(3, 2, 3, 2);
+      btnCreate.Name = "btnCreate";
+      btnCreate.Size = new Size(90, 35);
+      btnCreate.TabIndex = 34;
+      btnCreate.Text = "Create";
+      btnCreate.UseVisualStyleBackColor = false;
+      // 
       // FrmGeneratePluck
       // 
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       BackColor = Color.Black;
       ClientSize = new Size(482, 393);
+      Controls.Add(btnCancel);
+      Controls.Add(btnCreate);
       Controls.Add(cmbNote);
       Controls.Add(lblNote);
       Controls.Add(nudStartTime);
       Controls.Add(lblStartTime);
-      Controls.Add(btnCancel);
-      Controls.Add(btnCreate);
       Controls.Add(nudDuration);
       Controls.Add(lblDuration);
       Controls.Add(nudOctave);
@@ -239,13 +248,13 @@
     private Label lblNote;
     private NumericUpDown nudStartTime;
     private Label lblStartTime;
-    private Button btnCancel;
-    private Button btnCreate;
     private NumericUpDown nudDuration;
     private Label lblDuration;
     private NumericUpDown nudOctave;
     private Label lblFrequency;
     private ComboBox cmbInstrument;
     private Label lblInstrument;
+    private Button btnCancel;
+    private Button btnCreate;
   }
 }

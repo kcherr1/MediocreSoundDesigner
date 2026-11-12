@@ -31,8 +31,6 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmGenerateChord));
       nudStartTime = new NumericUpDown();
       lblStartTime = new Label();
-      btnCancel = new Button();
-      btnCreate = new Button();
       nudDuration = new NumericUpDown();
       lblDuration = new Label();
       nudOctave = new NumericUpDown();
@@ -41,6 +39,8 @@
       lblRootnote = new Label();
       cmbChordType = new ComboBox();
       lblChordType = new Label();
+      btnCancel = new Button();
+      btnCreate = new Button();
       ((System.ComponentModel.ISupportInitialize)nudStartTime).BeginInit();
       ((System.ComponentModel.ISupportInitialize)nudDuration).BeginInit();
       ((System.ComponentModel.ISupportInitialize)nudOctave).BeginInit();
@@ -60,23 +60,8 @@
       // 
       lblStartTime.BackColor = Color.Transparent;
       resources.ApplyResources(lblStartTime, "lblStartTime");
+      lblStartTime.ForeColor = Color.FromArgb(255, 255, 192);
       lblStartTime.Name = "lblStartTime";
-      // 
-      // btnCancel
-      // 
-      btnCancel.BackColor = Color.DimGray;
-      btnCancel.DialogResult = DialogResult.Cancel;
-      resources.ApplyResources(btnCancel, "btnCancel");
-      btnCancel.Name = "btnCancel";
-      btnCancel.UseVisualStyleBackColor = false;
-      // 
-      // btnCreate
-      // 
-      btnCreate.BackColor = Color.DimGray;
-      btnCreate.DialogResult = DialogResult.OK;
-      resources.ApplyResources(btnCreate, "btnCreate");
-      btnCreate.Name = "btnCreate";
-      btnCreate.UseVisualStyleBackColor = false;
       // 
       // nudDuration
       // 
@@ -94,6 +79,7 @@
       // 
       lblDuration.BackColor = Color.Transparent;
       resources.ApplyResources(lblDuration, "lblDuration");
+      lblDuration.ForeColor = Color.FromArgb(255, 255, 192);
       lblDuration.Name = "lblDuration";
       // 
       // nudOctave
@@ -110,6 +96,7 @@
       // 
       lblFrequency.BackColor = Color.Transparent;
       resources.ApplyResources(lblFrequency, "lblFrequency");
+      lblFrequency.ForeColor = Color.FromArgb(255, 255, 192);
       lblFrequency.Name = "lblFrequency";
       // 
       // cmbRootnote
@@ -127,6 +114,7 @@
       // 
       lblRootnote.BackColor = Color.Transparent;
       resources.ApplyResources(lblRootnote, "lblRootnote");
+      lblRootnote.ForeColor = Color.FromArgb(255, 255, 192);
       lblRootnote.Name = "lblRootnote";
       // 
       // cmbChordType
@@ -143,20 +131,39 @@
       // 
       lblChordType.BackColor = Color.Transparent;
       resources.ApplyResources(lblChordType, "lblChordType");
+      lblChordType.ForeColor = Color.FromArgb(255, 255, 192);
       lblChordType.Name = "lblChordType";
       lblChordType.Click += lblChordType_Click;
+      // 
+      // btnCancel
+      // 
+      btnCancel.BackColor = Color.FromArgb(255, 128, 128);
+      btnCancel.DialogResult = DialogResult.Cancel;
+      resources.ApplyResources(btnCancel, "btnCancel");
+      btnCancel.ForeColor = Color.Black;
+      btnCancel.Name = "btnCancel";
+      btnCancel.UseVisualStyleBackColor = false;
+      // 
+      // btnCreate
+      // 
+      btnCreate.BackColor = Color.FromArgb(128, 255, 128);
+      btnCreate.DialogResult = DialogResult.OK;
+      resources.ApplyResources(btnCreate, "btnCreate");
+      btnCreate.ForeColor = Color.Black;
+      btnCreate.Name = "btnCreate";
+      btnCreate.UseVisualStyleBackColor = false;
       // 
       // FrmGenerateChord
       // 
       resources.ApplyResources(this, "$this");
       AutoScaleMode = AutoScaleMode.Font;
       BackColor = Color.Black;
+      Controls.Add(btnCancel);
+      Controls.Add(btnCreate);
       Controls.Add(cmbChordType);
       Controls.Add(lblChordType);
       Controls.Add(nudStartTime);
       Controls.Add(lblStartTime);
-      Controls.Add(btnCancel);
-      Controls.Add(btnCreate);
       Controls.Add(nudDuration);
       Controls.Add(lblDuration);
       Controls.Add(nudOctave);
@@ -180,8 +187,6 @@
 
     private NumericUpDown nudStartTime;
     private Label lblStartTime;
-    private Button btnCancel;
-    private Button btnCreate;
     private NumericUpDown nudDuration;
     private Label lblDuration;
     private NumericUpDown nudOctave;
@@ -190,5 +195,7 @@
     private Label lblRootnote;
     private ComboBox cmbChordType;
     private Label lblChordType;
+    private Button btnCancel;
+    private Button btnCreate;
   }
 }

@@ -24,39 +24,10 @@
     /// </summary>
     private void InitializeComponent()
     {
-      btnApply = new Button();
-      btnCancel = new Button();
       btnRecord = new Button();
+      btnCancel = new Button();
+      btnApply = new Button();
       SuspendLayout();
-      // 
-      // btnApply
-      // 
-      btnApply.BackColor = Color.Black;
-      btnApply.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-      btnApply.ForeColor = Color.FromArgb(0, 192, 0);
-      btnApply.Location = new Point(292, 201);
-      btnApply.Margin = new Padding(9, 9, 9, 9);
-      btnApply.Name = "btnApply";
-      btnApply.Size = new Size(156, 58);
-      btnApply.TabIndex = 2;
-      btnApply.Text = "Apply";
-      btnApply.UseVisualStyleBackColor = false;
-      btnApply.Click += btnApply_Click;
-      // 
-      // btnCancel
-      // 
-      btnCancel.AutoSize = true;
-      btnCancel.BackColor = Color.Black;
-      btnCancel.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-      btnCancel.ForeColor = Color.FromArgb(192, 0, 0);
-      btnCancel.Location = new Point(46, 201);
-      btnCancel.Margin = new Padding(9, 9, 9, 9);
-      btnCancel.Name = "btnCancel";
-      btnCancel.Size = new Size(180, 58);
-      btnCancel.TabIndex = 3;
-      btnCancel.Text = "Cancel";
-      btnCancel.UseVisualStyleBackColor = false;
-      btnCancel.Click += btnCancel_Click;
       // 
       // btnRecord
       // 
@@ -67,25 +38,60 @@
       btnRecord.FlatStyle = FlatStyle.Popup;
       btnRecord.Font = new Font("Segoe UI", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
       btnRecord.ForeColor = Color.Red;
-      btnRecord.Location = new Point(161, 36);
-      btnRecord.Margin = new Padding(9, 9, 9, 9);
+      btnRecord.Location = new Point(136, 28);
+      btnRecord.Margin = new Padding(9);
       btnRecord.Name = "btnRecord";
-      btnRecord.Padding = new Padding(6, 6, 6, 6);
-      btnRecord.Size = new Size(156, 137);
+      btnRecord.Padding = new Padding(6);
+      btnRecord.Size = new Size(96, 91);
       btnRecord.TabIndex = 4;
       btnRecord.UseVisualStyleBackColor = false;
       btnRecord.Click += btnRecord_Click;
       // 
+      // btnCancel
+      // 
+      btnCancel.AutoSize = true;
+      btnCancel.BackColor = Color.FromArgb(255, 128, 128);
+      btnCancel.FlatStyle = FlatStyle.Flat;
+      btnCancel.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+      btnCancel.ForeColor = Color.Black;
+      btnCancel.Location = new Point(35, 151);
+      btnCancel.Margin = new Padding(7);
+      btnCancel.Name = "btnCancel";
+      btnCancel.Size = new Size(95, 42);
+      btnCancel.TabIndex = 6;
+      btnCancel.Text = "Cancel";
+      btnCancel.UseVisualStyleBackColor = false;
+      btnCancel.Click += btnCancel_Click;
+      // 
+      // btnApply
+      // 
+      btnApply.BackColor = Color.FromArgb(128, 255, 128);
+      btnApply.FlatStyle = FlatStyle.Flat;
+      btnApply.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+      btnApply.ForeColor = Color.Black;
+      btnApply.Location = new Point(229, 151);
+      btnApply.Margin = new Padding(7);
+      btnApply.Name = "btnApply";
+      btnApply.Size = new Size(95, 42);
+      btnApply.TabIndex = 5;
+      btnApply.Text = "Apply";
+      btnApply.UseVisualStyleBackColor = false;
+      btnApply.Click += btnApply_Click;
+      // 
       // FrmGenRecord
       // 
-      AutoScaleDimensions = new SizeF(20F, 46F);
-      AutoScaleMode = AutoScaleMode.Font;
+      AutoScaleMode = AutoScaleMode.None;
       BackColor = Color.Black;
-      ClientSize = new Size(476, 287);
-      Controls.Add(btnRecord);
+      ClientSize = new Size(360, 221);
       Controls.Add(btnCancel);
       Controls.Add(btnApply);
+      Controls.Add(btnRecord);
+      Font = new Font("Segoe UI", 12F);
+      ForeColor = Color.FromArgb(255, 255, 192);
+      FormBorderStyle = FormBorderStyle.FixedDialog;
       Margin = new Padding(20, 21, 20, 21);
+      MaximizeBox = false;
+      MinimizeBox = false;
       Name = "FrmGenRecord";
       Text = "Record Audio";
       ResumeLayout(false);
@@ -93,8 +99,8 @@
     }
 
     #endregion
-    private Button btnApply;
-    private Button btnCancel;
     private Button btnRecord;
+    private Button btnCancel;
+    private Button btnApply;
   }
 }

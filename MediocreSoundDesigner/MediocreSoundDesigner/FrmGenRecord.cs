@@ -3,43 +3,51 @@ using NAudio.Wave;
 
 namespace MediocreSoundDesigner;
 
-public partial class FrmGenRecord : FrmEditMaster {
+public partial class FrmGenRecord : FrmEditMaster
+{
   private WaveIn waveSource = null;
   private List<float> recordedSamples;
   private bool isRecording;
 
-  public FrmGenRecord() {
+  public FrmGenRecord()
+  {
     InitializeComponent();
   }
 
-  protected override void Init() {
+  protected override void Init()
+  {
     base.Init();
     recordedSamples = new();
     isRecording = false;
     btnRecord.BackgroundImage = Resources.record;
   }
 
-  protected override void Apply() {
-        //track.ReplaceSamples(recordedSamples.ToArray());
-        float[] mono = recordedSamples.ToArray();
-        float[] stereo = new float[mono.Length * 2];
+  protected override void Apply()
+  {
+    //track.ReplaceSamples(recordedSamples.ToArray());
+    float[] mono = recordedSamples.ToArray();
+    float[] stereo = new float[mono.Length * 2];
 
-        for (int i =0; i < mono.Length; i++)
-        {
-            stereo[i * 2] = mono[i];
-            stereo[i * 2 + 1] = mono[i];
-        }
-        track.ReplaceSamples(stereo);
+    for (int i = 0; i < mono.Length; i++)
+    {
+      stereo[i * 2] = mono[i];
+      stereo[i * 2 + 1] = mono[i];
+    }
+    track.ReplaceSamples(stereo);
   }
 
-  private void btnRecord_Click(object sender, EventArgs e) {
-    if (isRecording) {
+  private void btnRecord_Click(object sender, EventArgs e)
+  {
+    if (isRecording)
+    {
       waveSource?.StopRecording();
       isRecording = false;
       btnRecord.BackgroundImage = Resources.record;
     }
-    else {
-      try {
+    else
+    {
+      try
+      {
         isRecording = true;
         btnRecord.BackgroundImage = Resources.stop;
 
@@ -51,30 +59,40 @@ public partial class FrmGenRecord : FrmEditMaster {
 
         waveSource.StartRecording();
       }
-      catch (Exception ex) {
+      catch (Exception ex)
+      {
         MessageBox.Show($"Failed to start recording: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
     }
   }
 
-  private void WaveSource_DataAvailable(object sender, WaveInEventArgs e) {
+  private void WaveSource_DataAvailable(object sender, WaveInEventArgs e)
+  {
     // 16-bit mono audio means 2 bytes per sample
     int sampleCount = e.BytesRecorded / 2;
 
-    for (int i = 0; i < sampleCount; i++) {
+    for (int i = 0; i < sampleCount; i++)
+    {
       short sample = BitConverter.ToInt16(e.Buffer, i * 2);
       recordedSamples.Add(sample / (float)short.MaxValue);
     }
   }
 
   // Executed automatically after StopRecording() has completed
-  private void WaveSource_RecordingStopped(object sender, StoppedEventArgs e) {
+  private void WaveSource_RecordingStopped(object sender, StoppedEventArgs e)
+  {
     // Safely dispose of resources in the correct order
-    if (waveSource != null) {
+    if (waveSource != null)
+    {
       waveSource.Dispose();
       waveSource = null;
     }
 
     MessageBox.Show("Recording saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+  }
+
+  private void btnCancel_Click_1(object sender, EventArgs e)
+  {
+
   }
 }

@@ -49,6 +49,7 @@
       // 
       lblNote.BackColor = Color.Transparent;
       lblNote.Font = new Font("Segoe UI", 10.8F);
+      lblNote.ForeColor = Color.FromArgb(255, 255, 192);
       lblNote.ImeMode = ImeMode.NoControl;
       lblNote.Location = new Point(49, 86);
       lblNote.Name = "lblNote";
@@ -74,6 +75,7 @@
       // 
       lblStartTime.BackColor = Color.Transparent;
       lblStartTime.Font = new Font("Segoe UI", 10.8F);
+      lblStartTime.ForeColor = Color.FromArgb(255, 255, 192);
       lblStartTime.ImeMode = ImeMode.NoControl;
       lblStartTime.Location = new Point(49, 206);
       lblStartTime.Name = "lblStartTime";
@@ -83,26 +85,31 @@
       // 
       // btnCancel
       // 
-      btnCancel.BackColor = Color.DimGray;
+      btnCancel.BackColor = Color.FromArgb(255, 128, 128);
       btnCancel.DialogResult = DialogResult.Cancel;
       btnCancel.FlatStyle = FlatStyle.Flat;
-      btnCancel.Font = new Font("Segoe UI", 10.2F);
+      btnCancel.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold);
+      btnCancel.ForeColor = Color.Black;
       btnCancel.ImeMode = ImeMode.NoControl;
-      btnCancel.Location = new Point(335, 334);
+      btnCancel.Location = new Point(125, 336);
+      btnCancel.Margin = new Padding(3, 2, 3, 2);
       btnCancel.Name = "btnCancel";
       btnCancel.Size = new Size(90, 35);
       btnCancel.TabIndex = 29;
       btnCancel.Text = "Cancel";
       btnCancel.UseVisualStyleBackColor = false;
+      btnCancel.Click += btnCancel_Click;
       // 
       // btnCreate
       // 
-      btnCreate.BackColor = Color.DimGray;
+      btnCreate.BackColor = Color.FromArgb(128, 255, 128);
       btnCreate.DialogResult = DialogResult.OK;
       btnCreate.FlatStyle = FlatStyle.Flat;
-      btnCreate.Font = new Font("Segoe UI", 10.2F);
+      btnCreate.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold);
+      btnCreate.ForeColor = Color.Black;
       btnCreate.ImeMode = ImeMode.NoControl;
-      btnCreate.Location = new Point(125, 334);
+      btnCreate.Location = new Point(335, 336);
+      btnCreate.Margin = new Padding(3, 2, 3, 2);
       btnCreate.Name = "btnCreate";
       btnCreate.Size = new Size(90, 35);
       btnCreate.TabIndex = 28;
@@ -130,6 +137,7 @@
       // 
       lblDuration.BackColor = Color.Transparent;
       lblDuration.Font = new Font("Segoe UI", 10.8F);
+      lblDuration.ForeColor = Color.FromArgb(255, 255, 192);
       lblDuration.ImeMode = ImeMode.NoControl;
       lblDuration.Location = new Point(49, 266);
       lblDuration.Name = "lblDuration";
@@ -155,6 +163,7 @@
       // 
       lblFrequency.BackColor = Color.Transparent;
       lblFrequency.Font = new Font("Segoe UI", 10.8F);
+      lblFrequency.ForeColor = Color.FromArgb(255, 255, 192);
       lblFrequency.ImeMode = ImeMode.NoControl;
       lblFrequency.Location = new Point(49, 146);
       lblFrequency.Name = "lblFrequency";
@@ -172,6 +181,7 @@
       cmbInstrument.FormattingEnabled = true;
       cmbInstrument.Items.AddRange(new object[] { "Synth Lead 1", "Synth Lead 2", "Warm Pad", "Polysynth Pad" });
       cmbInstrument.Location = new Point(214, 24);
+      cmbInstrument.Margin = new Padding(3, 2, 3, 2);
       cmbInstrument.Name = "cmbInstrument";
       cmbInstrument.Size = new Size(270, 33);
       cmbInstrument.TabIndex = 23;
@@ -180,6 +190,7 @@
       // 
       lblInstrument.BackColor = Color.Transparent;
       lblInstrument.Font = new Font("Segoe UI", 10.8F);
+      lblInstrument.ForeColor = Color.FromArgb(255, 255, 192);
       lblInstrument.ImeMode = ImeMode.NoControl;
       lblInstrument.Location = new Point(49, 26);
       lblInstrument.Name = "lblInstrument";
@@ -198,6 +209,7 @@
       cmbNote.FormattingEnabled = true;
       cmbNote.Items.AddRange(new object[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" });
       cmbNote.Location = new Point(214, 84);
+      cmbNote.Margin = new Padding(3, 2, 3, 2);
       cmbNote.Name = "cmbNote";
       cmbNote.Size = new Size(270, 33);
       cmbNote.TabIndex = 33;
@@ -207,7 +219,7 @@
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       BackColor = Color.Black;
-      ClientSize = new Size(532, 393);
+      ClientSize = new Size(532, 392);
       Controls.Add(cmbNote);
       Controls.Add(lblNote);
       Controls.Add(nudStartTime);
@@ -220,7 +232,8 @@
       Controls.Add(lblFrequency);
       Controls.Add(cmbInstrument);
       Controls.Add(lblInstrument);
-      ForeColor = Color.White;
+      ForeColor = Color.FromArgb(255, 255, 192);
+      Margin = new Padding(3, 2, 3, 2);
       MaximizeBox = false;
       MinimizeBox = false;
       Name = "FrmGenerateSynth";
