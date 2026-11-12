@@ -17,6 +17,15 @@ public partial class FrmMain : Form {
   private void Setup() {
     DoubleBuffered = true;
     trackManager = new(panTracks);
+    menuEdit.DropDownItems.Add("Fade In", null, (sender, e) =>
+    {
+        trackManager.SelectedTrack?.FadeIn();
+    });
+
+    menuEdit.DropDownItems.Add("Fade Out", null, (sender, e) =>
+    {
+        trackManager.SelectedTrack?.FadeOut();
+    });
     btnPlay.BackgroundImage = Resources.play;
     trackManager.DrawTimescale = trkDrawTimescale.Value;
     UpdateSizes();

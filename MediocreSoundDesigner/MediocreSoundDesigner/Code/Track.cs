@@ -169,7 +169,49 @@ public class Track : IDisposable {
       samples[i] *= -1;
     }
   }
-  public void Trim() {
+
+public void FadeIn()
+{
+    ApplyFade(true);
+}
+
+public void FadeOut()
+{
+    ApplyFade(false);
+}
+
+private void ApplyFade(bool fadeIn)
+{
+    if (channels <= 0)
+    {
+    return;
+    }
+
+    int frameCount = samples.Length / channels;
+
+    if (frameCount < 2)
+    {
+        return;
+    }
+
+    SaveState();
+
+    for (int frame = 0; frame < frameCount; frame++)
+    {
+        float progress = (float)frame / (frameCount - 1);
+        float gain = fadeIn ? progress : 1.0f - progress;
+
+        for (int channel = 0; channel < channels; channel++)
+        {
+            int index = frame * channels + channel;
+            samples[index] *= gain;
+        }
+    }
+
+    PanDrawSamples?.Invalidate();
+}
+
+    public void Trim() {
   }
   public void AlterTimeScale(float scale) {
   }
