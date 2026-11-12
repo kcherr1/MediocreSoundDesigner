@@ -226,15 +226,44 @@ public partial class FrmMain : Form
         {
             foreach (string file in ofdLoadFile.FileNames)
             { // iterate through array of selected files
-                Track newTrack = new(file);
-                CreateTrackPanel(newTrack);
-                trackManager.AddTrack(newTrack);
-                SetDefaultZoom();
-                UpdateSizes();
-                newTrack.PanDrawSamples.Invalidate();
+                ImportTrackFile(file);
             }
         }
     }
+
+    public async Task<Track> GenerateAndImportUdioTrackAsync(
+        string prompt,
+        bool makeInstrumental = true,
+        CancellationToken cancellationToken = default)
+    {
+        using UdioApiClient udio = new();
+        string filePath = await udio.GenerateAndDownloadAsync(
+            prompt,
+            makeInstrumental,
+            cancellationToken: cancellationToken);
+
+        try
+        {
+            return ImportTrackFile(filePath);
+        }
+        catch
+        {
+            File.Delete(filePath);
+            throw;
+        }
+    }
+
+    private Track ImportTrackFile(string filePath)
+    {
+        Track newTrack = new(filePath);
+        CreateTrackPanel(newTrack);
+        trackManager.AddTrack(newTrack);
+        SetDefaultZoom();
+        UpdateSizes();
+        newTrack.PanDrawSamples.Invalidate();
+        return newTrack;
+    }
+
     private void menuFileSave_Click(object sender, EventArgs e)
     {
         sfdSaveFile.DefaultExt = "wav";
