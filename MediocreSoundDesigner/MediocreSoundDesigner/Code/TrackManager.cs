@@ -178,6 +178,24 @@ public class TrackManager
         pseudoCombinedTrack.Play(currentSample);
     }
 
+    public void SetSelectedVolume(float volume)
+    {
+        foreach (Track track in SelectedTracks)
+        {
+            track.SetVolume(volume);
+        }
+
+        if (State == PlaybackState.Playing)
+        {
+            int sample = PlayheadSample;
+            CombineTracks();
+            currentSample = sample;
+            pseudoCombinedTrack.Play(sample);
+        }
+
+        RedrawSelected();
+    }
+
     // move the playhead; if audio is playing, jump there immediately
     public void SeekToSample(int sample)
     {

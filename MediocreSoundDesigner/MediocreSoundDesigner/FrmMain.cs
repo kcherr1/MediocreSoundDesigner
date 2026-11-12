@@ -317,11 +317,7 @@ public partial class FrmMain : Form
         lblVolumePercent.Text = $"{trkVolume.Value}%";
 
         float volume = trkVolume.Value / 100.0f;
-        foreach (Track track in trackManager.SelectedTracks)
-        {
-            track.SetVolume(volume);
-            track.PanDrawSamples?.Invalidate();
-        }
+        trackManager.SetSelectedVolume(volume);
     }
 
     private void menuEditEliminateSilence_Click(object sender, EventArgs e)
