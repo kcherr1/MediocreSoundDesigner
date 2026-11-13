@@ -28,6 +28,20 @@ public partial class FrmMain : Form
         Setup();
     }
 
+    private bool RequirePausedForEdit()
+    {
+        if (trackManager.State != PlaybackState.Playing)
+        {
+            return true;
+        }
+
+        trackManager.PauseAll();
+        bttnPlay.BackgroundImage = Resources.play;
+        tmrUpdate.Stop();
+        MessageBox.Show("Pause track before making audio changes", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
+    }
+
     // setup
     private void Setup()
     {
@@ -145,6 +159,8 @@ public partial class FrmMain : Form
         {
             if (keyData == Keys.Left)
             {
+                if (!RequirePausedForEdit()) return true;
+
                 foreach (Track t in trackManager.SelectedTracks)
                 {
                     t.ShiftSampleOver(-5);
@@ -154,6 +170,8 @@ public partial class FrmMain : Form
             }
             else if (keyData == Keys.Right)
             {
+                if (!RequirePausedForEdit()) return true;
+
                 foreach (Track t in trackManager.SelectedTracks)
                 {
                     t.ShiftSampleOver(+5);
@@ -240,6 +258,8 @@ public partial class FrmMain : Form
 
     private void menuFileOpen_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         ofdLoadFile.DefaultExt = "wav";
         ofdLoadFile.Multiselect = true;
         // applies optional filter types in file explorer, Audio Files (both wav and mp3), MP3 Audio, WAV Audio
@@ -258,6 +278,8 @@ public partial class FrmMain : Form
         bool makeInstrumental = true,
         CancellationToken cancellationToken = default)
     {
+        if (!RequirePausedForEdit()) return null;
+
         using UdioApiClient udio = new();
         string filePath = await udio.GenerateAndDownloadAsync(
             prompt,
@@ -277,6 +299,8 @@ public partial class FrmMain : Form
 
     private Track ImportTrackFile(string filePath)
     {
+        if (!RequirePausedForEdit()) return null;
+
         Track newTrack = new(filePath);
         CreateTrackPanel(newTrack);
         trackManager.AddTrack(newTrack);
@@ -319,6 +343,8 @@ public partial class FrmMain : Form
 
     private void menuEditFlip_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         foreach (Track t in trackManager.SelectedTracks)
         {
             t.Flip();
@@ -328,6 +354,8 @@ public partial class FrmMain : Form
 
     private void menuEditReverse_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         foreach (Track t in trackManager.SelectedTracks)
         {
             t.Reverse();
@@ -337,6 +365,8 @@ public partial class FrmMain : Form
 
     private void trkVolume_Scroll(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         lblVolumePercent.Text = $"{trkVolume.Value}%";
 
         float volume = trkVolume.Value / 100.0f;
@@ -345,6 +375,8 @@ public partial class FrmMain : Form
 
     private void menuEditEliminateSilence_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         if (trackManager.SelectedTrack is not null)
         {
             FrmEditEliminateSilence frm = new();
@@ -543,6 +575,8 @@ public partial class FrmMain : Form
 
     private void menuGenNoise_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         const int NUM_SAMPLES = 100_000;
         float[] samples = new float[NUM_SAMPLES];
         Random rand = new();
@@ -559,6 +593,8 @@ public partial class FrmMain : Form
     }
     private void menuGenGradientNoise_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         const int NUM_SAMPLES = 250_000;
         float[] samples = new float[NUM_SAMPLES];
         Random rand = new();
@@ -823,12 +859,16 @@ public partial class FrmMain : Form
 
         bttnMute.Click += (sender, e) =>
         {
+            if (!RequirePausedForEdit()) return;
+
             track.ToggleDisabled();
             bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
             track.PanDrawSamples.Invalidate();
         };
         panTrack.DoubleClick += (sender, e) =>
         {
+            if (!RequirePausedForEdit()) return;
+
             track.ToggleDisabled();
             bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
             track.PanDrawSamples.Invalidate();
@@ -848,6 +888,8 @@ public partial class FrmMain : Form
             {
                 return;
             }
+
+        if (!RequirePausedForEdit()) return;
 
             bool isCtrlHeld = ModifierKeys.HasFlag(Keys.Control);
 
@@ -1101,6 +1143,8 @@ public partial class FrmMain : Form
 
     private void bttnGenerate_Click(object sender, EventArgs e)
     {
+        if (!RequirePausedForEdit()) return;
+
         using FrmGenerate frmGenerate = new();
         frmGenerate.ShowDialog(this);
     }
