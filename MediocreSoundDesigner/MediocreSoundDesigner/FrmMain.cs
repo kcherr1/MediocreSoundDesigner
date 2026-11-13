@@ -373,16 +373,13 @@ public partial class FrmMain : Form
                 throw new InvalidOperationException("No audio input devices are available.");
             }
 
-            if (trackManager.Tracks.Count > 0)
+            bool hasExistingTracks = trackManager.Tracks.Count > 0;
+            if (hasExistingTracks && MessageBox.Show("Wear headphones while listening to the tracks to prevent the output from being fed back into the microphone.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
             {
-                if (MessageBox.Show("Wear headphones while listening to the tracks to prevent the output from being fed back into the microphone.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
-                {
-                    return;
-                }
-
-                trackManager.PlayAll();
-                bttnPlay.BackgroundImage = Resources.pause;
+                return;
             }
+
+            ResetPlayheadToStart();
 
             int deviceNumber = Settings.AudioInputDeviceNumber;
             if (deviceNumber < 0 || deviceNumber >= WaveIn.DeviceCount)
@@ -414,6 +411,13 @@ public partial class FrmMain : Form
 
             isRecording = true;
             bttnRecord.BackgroundImage = Resources.stop;
+
+            if (hasExistingTracks)
+            {
+                trackManager.PlayAll();
+                bttnPlay.BackgroundImage = Resources.pause;
+            }
+
             tmrUpdate.Start();
         }
         catch (Exception ex)
