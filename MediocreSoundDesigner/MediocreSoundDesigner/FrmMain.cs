@@ -1187,9 +1187,27 @@ public partial class FrmMain : Form
 
     }
 
+    protected override void OnLocationChanged(EventArgs e)
+    {
+        base.OnLocationChanged(e);
+        if (IsHandleCreated)
+        {
+            MaximizedBounds = Screen.FromHandle(Handle).WorkingArea;
+        }
+    }
+
     private void FrmMain_Load(object sender, EventArgs e)
     {
+        Rectangle workArea = Screen.FromHandle(Handle).WorkingArea;
+        MaximizedBounds = workArea;
 
+        if (WindowState != FormWindowState.Normal) return;
+
+        int width = Math.Min(Bounds.Width, workArea.Width);
+        int height = Math.Min(Bounds.Height, workArea.Height);
+        int left = Math.Clamp(Bounds.Left, workArea.Left, workArea.Right - width);
+        int top = Math.Clamp(Bounds.Top, workArea.Top, workArea.Bottom - height);
+        Bounds = new Rectangle(left, top, width, height);
     }
 
     private void panel1_Paint(object sender, PaintEventArgs e)
