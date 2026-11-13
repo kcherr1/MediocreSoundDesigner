@@ -436,6 +436,7 @@
             Controls.Add(panApp);
             KeyPreview = true;
             MainMenuStrip = menu;
+            MinimumSize = new Size(1604, 783);
             Name = "FrmMain";
             Text = "Mediocre Sound Designer";
             Load += FrmMain_Load;
