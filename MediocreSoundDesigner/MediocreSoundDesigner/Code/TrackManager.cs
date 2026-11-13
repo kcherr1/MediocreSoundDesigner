@@ -11,6 +11,7 @@ public class TrackManager
     private int volumeChangeVersion;
     public List<Track> Tracks { get; private set; }
     public int TrackCounter { get; private set; }
+    public float Volume { get; private set; } = 1.0f;
     public List<Track> SelectedTracks { get; } = new();
     public Track SelectedTrack => SelectedTracks.FirstOrDefault();
     public int? SelectionStartX { get; private set; }
@@ -47,6 +48,7 @@ public class TrackManager
     public void AddTrack(Track track)
     {
         TrackCounter++;
+        track.SetVolume(Volume);
         Tracks.Add(track);
     }
 
@@ -180,14 +182,16 @@ public class TrackManager
         pseudoCombinedTrack.Play(currentSample);
     }
 
-    public async void SetSelectedVolume(float volume)
+    public async void SetVolume(float volume)
     {
-        foreach (Track track in SelectedTracks)
+        Volume = volume;
+
+        foreach (Track track in Tracks)
         {
             track.SetVolume(volume);
         }
 
-        RedrawSelected();
+        RedrawAll();
 
         if (State == PlaybackState.Playing)
         {
