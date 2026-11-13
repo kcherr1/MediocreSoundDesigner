@@ -919,6 +919,16 @@ public partial class FrmMain : Form
         panTopActions.Top = menu.Bottom;
         panTopActions.Width = availableWidth;
 
+        int volumeWidth = Math.Clamp(availableWidth / 8, 160, 220);
+        trkVolume.Size = new Size(volumeWidth, 40);
+        lblVolumePercent.Left = availableWidth - 15 - lblVolumePercent.Width;
+        trkVolume.Left = lblVolumePercent.Left - 8 - trkVolume.Width;
+        picVolume.Left = trkVolume.Left - 8 - picVolume.Width;
+        int topControlTop = (panTopActions.ClientSize.Height - trkVolume.Height) / 2;
+        trkVolume.Top = topControlTop;
+        picVolume.Top = (panTopActions.ClientSize.Height - picVolume.Height) / 2;
+        lblVolumePercent.Top = (panTopActions.ClientSize.Height - lblVolumePercent.Height) / 2;
+
         // align bottom action panel
         panBottomActions.Left = 0;
         panBottomActions.Top = panApp.ClientSize.Height - panBottomActions.Height;
@@ -944,14 +954,14 @@ public partial class FrmMain : Form
         lblCurrTime.Left = (panBottomActions.ClientSize.Width - lblCurrTime.Width) / 2;
         lblCurrTime.Top = (panBottomActions.ClientSize.Height - lblCurrTime.Height) / 2;
 
-        // align timescale trackbar with icon
-        picSoundWave.Left = lblCurrTime.Right + 350;
+        // keep the timescale controls on the right while scaling their widths with the window
+        int timescaleWidth = Math.Clamp(availableWidth / 6, 220, 300);
+        trkDrawTimescale.Width = timescaleWidth;
+        trkDrawTimescale.Left = panBottomActions.ClientSize.Width - timescaleWidth - 15;
+        picSoundWave.Left = trkDrawTimescale.Left - picSoundWave.Width - 8;
         picSoundWave.Top = (panBottomActions.ClientSize.Height - picSoundWave.Height) / 2;
 
-        // position timescale trackbar with left edge aligned to right edge of icon, and right edge aligned to right edge of panel
-        trkDrawTimescale.Left = picSoundWave.Right + 8;
         trkDrawTimescale.Top = (panBottomActions.ClientSize.Height - trkDrawTimescale.Height) / 2;
-        trkDrawTimescale.Width = (panBottomActions.ClientSize.Width - 15) - trkDrawTimescale.Left;
 
         RefreshPlayheadVisuals();
 
