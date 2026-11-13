@@ -60,6 +60,7 @@ public static class Settings {
         public Color TrackSamples_Disabled { get; set; }
         public Color TrackBg_Unselected { get; set; }
         public Color TrackBg_Selected { get; set; }
+        public Color TrackBg_Container { get; set; }
         public Color Playline { get; set; }
         public Color TrackSelection { get; set; }
 
@@ -70,6 +71,7 @@ public static class Settings {
             TrackSamples_Enabled = System.Drawing.Color.Cyan;
             TrackSamples_Disabled = System.Drawing.Color.LightGray;
             TrackBg_Unselected = System.Drawing.Color.DimGray;
+            TrackBg_Container = System.Drawing.Color.LightGray;
             TrackBg_Selected = System.Drawing.Color.Gray;
             Playline = System.Drawing.Color.White;
             TrackSelection = System.Drawing.Color.FromArgb(40, 0, 150, 255);

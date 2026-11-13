@@ -7,6 +7,8 @@ public class TrackManager
     private Track pseudoCombinedTrack;
     private Panel panContainer;
     private int currentSample; // remembered playhead position (used while paused/stopped)
+    private CancellationTokenSource volumeChangeCancellation;
+    private int volumeChangeVersion;
     public List<Track> Tracks { get; private set; }
     public int TrackCounter { get; private set; }
     public List<Track> SelectedTracks { get; } = new();
@@ -178,6 +180,57 @@ public class TrackManager
         pseudoCombinedTrack.Play(currentSample);
     }
 
+    public async void SetSelectedVolume(float volume)
+    {
+        foreach (Track track in SelectedTracks)
+        {
+            track.SetVolume(volume);
+        }
+
+        RedrawSelected();
+
+        if (State == PlaybackState.Playing)
+        {
+            int requestedVersion = ++volumeChangeVersion;
+            volumeChangeCancellation?.Cancel();
+            volumeChangeCancellation?.Dispose();
+            volumeChangeCancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = volumeChangeCancellation.Token;
+
+            Track combinedTrack;
+            try
+            {
+                combinedTrack = await Task.Run(() =>
+                {
+                    Track result = BuildCombinedTrack(cancellationToken);
+                    result.PrepareForPlayback();
+                    return result;
+                }, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (cancellationToken.IsCancellationRequested || requestedVersion != volumeChangeVersion ||
+                State != PlaybackState.Playing)
+            {
+                combinedTrack.Dispose();
+            }
+            else
+            {
+                Track previousTrack = pseudoCombinedTrack;
+                int liveSample = previousTrack.GetPlayheadPos();
+                pseudoCombinedTrack = combinedTrack;
+                pseudoCombinedTrack.LinkPanels(null, panContainer);
+                currentSample = Math.Min(liveSample, pseudoCombinedTrack.SampleCount);
+                pseudoCombinedTrack.PlayPrepared(currentSample);
+                previousTrack?.Dispose();
+            }
+        }
+
+    }
+
     // move the playhead; if audio is playing, jump there immediately
     public void SeekToSample(int sample)
     {
@@ -204,9 +257,16 @@ public class TrackManager
     private void CombineTracks()
     {
         pseudoCombinedTrack?.Dispose();
+        pseudoCombinedTrack = BuildCombinedTrack(CancellationToken.None);
+        pseudoCombinedTrack.LinkPanels(null, panContainer);
+    }
+
+    private Track BuildCombinedTrack(CancellationToken cancellationToken)
+    {
         List<float> combinedSamples = new();
         foreach (Track track in Tracks)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (track.IsDisabled)
             {
                 continue;
@@ -221,8 +281,7 @@ public class TrackManager
                 combinedSamples[i] += trackSamples[i];
             }
         }
-        pseudoCombinedTrack = new(combinedSamples.ToArray());
-        pseudoCombinedTrack.LinkPanels(null, panContainer);
+        return new(combinedSamples.ToArray());
     }
 
     public void PauseAll()

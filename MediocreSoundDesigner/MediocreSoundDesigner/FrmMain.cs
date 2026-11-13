@@ -161,25 +161,8 @@ public partial class FrmMain : Form
             }
             else if (keyData == Keys.Delete)
             {
-                if (MessageBox.Show("This will delete the selected track(s). This is NOT undoable!", "Are You Sure?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation) == DialogResult.Yes)
-                {
-                    var toDelete = trackManager.SelectedTracks.ToList();
-                    foreach (Track t in toDelete)
-                    {
-                        panTracks.Controls.Remove(t.PanDrawSamples);
-                        t.PanDrawSamples.Dispose();
-                        t.Dispose();
-                        trackManager.RemTrack(t);
-                    }
-
-                    if (trackManager.Tracks.Count == 0)
-                    {
-                        ResetPlayheadToStart();
-                    }
-
-                    UpdateSizes();
-                    return true;
-                }
+                DeleteTracks(trackManager.SelectedTracks);
+                return true;
             }
         }
         return base.ProcessCmdKey(ref msg, keyData);
@@ -352,11 +335,7 @@ public partial class FrmMain : Form
         lblVolumePercent.Text = $"{trkVolume.Value}%";
 
         float volume = trkVolume.Value / 100.0f;
-        foreach (Track track in trackManager.SelectedTracks)
-        {
-            track.SetVolume(volume);
-            track.PanDrawSamples?.Invalidate();
-        }
+        trackManager.SetSelectedVolume(volume);
     }
 
     private void menuEditEliminateSilence_Click(object sender, EventArgs e)
@@ -751,7 +730,7 @@ public partial class FrmMain : Form
     {
         Panel panTrackContainer = new()
         {
-            BackColor = Settings.Color.TrackBg_Unselected,
+            BackColor = Settings.Color.TrackBg_Container,
             Width = panTracks.Width,
             Left = 0,
             Top = 0,
@@ -814,24 +793,19 @@ public partial class FrmMain : Form
             bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
             track.PanDrawSamples.Invalidate();
         };
+        panTrack.DoubleClick += (sender, e) =>
+        {
+            track.ToggleDisabled();
+            bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
+            track.PanDrawSamples.Invalidate();
+        };
 
         bttnDelete.Click += (sender, e) =>
         {
-            if (MessageBox.Show("Are you sure you want to delete this track? This is NOT undoable!", "Are You Sure?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation) == DialogResult.Yes)
-            {
-                panTracks.Controls.Remove(panTrackContainer);
-                panTrackContainer.Dispose();
-                track.PanDrawSamples.Dispose();
-                track.Dispose();
-                trackManager.RemTrack(track);
-
-                if (trackManager.Tracks.Count == 0)
-                {
-                    ResetPlayheadToStart();
-                }
-
-                UpdateSizes();
-            }
+            IEnumerable<Track> tracksToDelete = trackManager.SelectedTracks.Contains(track)
+                ? trackManager.SelectedTracks
+                : new[] { track };
+            DeleteTracks(tracksToDelete);
         };
 
         Action<MouseEventArgs, bool> handleSelectionDrag = (mouseArgs, isMouseUp) =>
@@ -909,12 +883,6 @@ public partial class FrmMain : Form
             }
         };
 
-        panTrackContainer.DoubleClick += (sender, e) =>
-        {
-            track.ToggleDisabled();
-            track.PanDrawSamples.Invalidate();
-        };
-
         // Only render the selection box if THIS track is currently selected
         panTrack.Paint += (sender, e) =>
         {
@@ -935,6 +903,39 @@ public partial class FrmMain : Form
         return panTrackContainer;
     }
 
+    private void DeleteTracks(IEnumerable<Track> tracks)
+    {
+        List<Track> tracksToDelete = tracks.Distinct().ToList();
+        if (tracksToDelete.Count == 0)
+        {
+            ResetPlayheadToStart();
+            return;
+        }
+        
+        string message = tracksToDelete.Count == 1
+            ? "Are you sure you want to delete this track? This is NOT undoable!"
+            : "Are you sure you want to delete the selected tracks? This is NOT undoable!";
+        if (MessageBox.Show(message, "Are You Sure?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        foreach (Track track in tracksToDelete)
+        {
+            Control trackContainer = track.PanDrawSamples?.Parent;
+            if (trackContainer is not null)
+            {
+                panTracks.Controls.Remove(trackContainer);
+                trackContainer.Dispose();
+            }
+
+            track.Dispose();
+            trackManager.RemTrack(track);
+        }
+
+        UpdateSizes();
+    }
+
     public void RefreshTrackLayout()
     {
         UpdateSizes();
@@ -948,6 +949,16 @@ public partial class FrmMain : Form
         panTopActions.Left = 0;
         panTopActions.Top = menu.Bottom;
         panTopActions.Width = availableWidth;
+
+        int volumeWidth = Math.Clamp(availableWidth / 8, 160, 220);
+        trkVolume.Size = new Size(volumeWidth, 40);
+        lblVolumePercent.Left = availableWidth - 15 - lblVolumePercent.Width;
+        trkVolume.Left = lblVolumePercent.Left - 8 - trkVolume.Width;
+        picVolume.Left = trkVolume.Left - 8 - picVolume.Width;
+        int topControlTop = (panTopActions.ClientSize.Height - trkVolume.Height) / 2;
+        trkVolume.Top = topControlTop;
+        picVolume.Top = (panTopActions.ClientSize.Height - picVolume.Height) / 2;
+        lblVolumePercent.Top = (panTopActions.ClientSize.Height - lblVolumePercent.Height) / 2;
 
         // align bottom action panel
         panBottomActions.Left = 0;
@@ -974,14 +985,14 @@ public partial class FrmMain : Form
         lblCurrTime.Left = (panBottomActions.ClientSize.Width - lblCurrTime.Width) / 2;
         lblCurrTime.Top = (panBottomActions.ClientSize.Height - lblCurrTime.Height) / 2;
 
-        // align timescale trackbar with icon
-        picSoundWave.Left = lblCurrTime.Right + 350;
+        // keep the timescale controls on the right while scaling their widths with the window
+        int timescaleWidth = Math.Clamp(availableWidth / 6, 220, 300);
+        trkDrawTimescale.Width = timescaleWidth;
+        trkDrawTimescale.Left = panBottomActions.ClientSize.Width - timescaleWidth - 15;
+        picSoundWave.Left = trkDrawTimescale.Left - picSoundWave.Width - 8;
         picSoundWave.Top = (panBottomActions.ClientSize.Height - picSoundWave.Height) / 2;
 
-        // 4. Position Timescale Slider directly to the right of the Icon
-        trkDrawTimescale.Left = picSoundWave.Right + 8;
         trkDrawTimescale.Top = (panBottomActions.ClientSize.Height - trkDrawTimescale.Height) / 2;
-        trkDrawTimescale.Width = (panBottomActions.ClientSize.Width - 15) - trkDrawTimescale.Left;
 
         RefreshPlayheadVisuals();
 
