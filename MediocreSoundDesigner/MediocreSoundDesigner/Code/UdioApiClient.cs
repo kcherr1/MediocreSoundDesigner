@@ -34,7 +34,7 @@ public sealed class UdioApiClient : IDisposable
         bool makeInstrumental,
         CancellationToken cancellationToken = default)
     {
-        string model = "chirp-v6-mini";
+        string model = "chirp-v6";
         if (string.IsNullOrWhiteSpace(prompt))
         {
             throw new ArgumentException("A generation prompt is required.", nameof(prompt));
