@@ -365,7 +365,6 @@ public partial class FrmMain : Form
 
     private void trkVolume_Scroll(object sender, EventArgs e)
     {
-        if (!RequirePausedForEdit()) return;
 
         lblVolumePercent.Text = $"{trkVolume.Value}%";
 
