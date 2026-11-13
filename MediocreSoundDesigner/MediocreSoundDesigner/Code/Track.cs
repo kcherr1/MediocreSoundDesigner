@@ -40,7 +40,8 @@ public class Track : IDisposable
     public bool IsDisabled { get; private set; }
     public Panel PanDrawSamples { get; private set; }
     public float Volume { get; private set; }
-    private string tempFilePath => Path.Combine(Path.GetTempPath(), "MediocreSoundDesigner", "temp.wav");
+    private readonly string tempFilePath = Path.Combine(
+        Path.GetTempPath(), "MediocreSoundDesigner", $"temp-{Guid.NewGuid():N}.wav");
     public PlaybackState State => outputDevice?.PlaybackState ?? PlaybackState.Stopped;
     public int? SelectionStartSample { get; set; } = null;
     public int? SelectionEndSample { get; set; } = null;
@@ -289,7 +290,17 @@ public class Track : IDisposable
     {
         outputDevice?.Dispose();
         fileReader?.Dispose();
+        PrepareForPlayback();
+        StartFrom(startSample);
+    }
+    public void PrepareForPlayback()
+    {
         SaveToTempFile();
+    }
+    public void PlayPrepared(int startSample = 0)
+    {
+        outputDevice?.Dispose();
+        fileReader?.Dispose();
         StartFrom(startSample);
     }
     // restart playback of the already-saved temp file at a new position (no re-save)
@@ -453,5 +464,15 @@ public class Track : IDisposable
     {
         outputDevice?.Dispose();
         fileReader?.Dispose();
+        try
+        {
+            if (File.Exists(tempFilePath))
+            {
+                File.Delete(tempFilePath);
+            }
+        }
+        catch (IOException)
+        {
+        }
     }
 }
