@@ -408,7 +408,7 @@ public class Track : IDisposable
         this.drawTimescale = drawTimescale;
         int height = PanDrawSamples.Height;
 
-        // 1. Draw Waveform
+        // draw waveform
         float heightAdj = height / 2f;
         if (samples != null && samples.Length > 0)
         {

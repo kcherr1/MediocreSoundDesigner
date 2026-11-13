@@ -190,7 +190,7 @@
             picVolume.BackColor = Color.Transparent;
             picVolume.BackgroundImage = Properties.Resources.volume;
             picVolume.BackgroundImageLayout = ImageLayout.Stretch;
-            picVolume.Location = new Point(1360, 7);
+            picVolume.Location = new Point(1326, 9);
             picVolume.Name = "picVolume";
             picVolume.Size = new Size(34, 34);
             picVolume.TabIndex = 11;
@@ -200,7 +200,7 @@
             // 
             trkVolume.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             trkVolume.AutoSize = false;
-            trkVolume.Location = new Point(1400, 7);
+            trkVolume.Location = new Point(1366, 8);
             trkVolume.Maximum = 200;
             trkVolume.Name = "trkVolume";
             trkVolume.Size = new Size(149, 35);
@@ -213,11 +213,11 @@
             // 
             lblVolumePercent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblVolumePercent.AutoSize = true;
-            lblVolumePercent.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblVolumePercent.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblVolumePercent.ForeColor = Color.Black;
-            lblVolumePercent.Location = new Point(1550, 14);
+            lblVolumePercent.Location = new Point(1521, 9);
             lblVolumePercent.Name = "lblVolumePercent";
-            lblVolumePercent.Size = new Size(35, 15);
+            lblVolumePercent.Size = new Size(67, 30);
             lblVolumePercent.TabIndex = 13;
             lblVolumePercent.Text = "100%";
             // 

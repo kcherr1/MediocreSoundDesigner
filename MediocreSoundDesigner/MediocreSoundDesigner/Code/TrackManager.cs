@@ -191,7 +191,6 @@ public class TrackManager
 
         if (State == PlaybackState.Playing)
         {
-            int sample = PlayheadSample;
             int requestedVersion = ++volumeChangeVersion;
             volumeChangeCancellation?.Cancel();
             volumeChangeCancellation?.Dispose();
@@ -221,11 +220,12 @@ public class TrackManager
             else
             {
                 Track previousTrack = pseudoCombinedTrack;
+                int liveSample = previousTrack.GetPlayheadPos();
                 pseudoCombinedTrack = combinedTrack;
                 pseudoCombinedTrack.LinkPanels(null, panContainer);
-                previousTrack?.Dispose();
-                currentSample = Math.Min(sample, pseudoCombinedTrack.SampleCount);
+                currentSample = Math.Min(liveSample, pseudoCombinedTrack.SampleCount);
                 pseudoCombinedTrack.PlayPrepared(currentSample);
+                previousTrack?.Dispose();
             }
         }
 
