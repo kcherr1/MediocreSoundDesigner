@@ -171,6 +171,12 @@ public partial class FrmMain : Form
                         t.Dispose();
                         trackManager.RemTrack(t);
                     }
+
+                    if (trackManager.Tracks.Count == 0)
+                    {
+                        ResetPlayheadToStart();
+                    }
+
                     UpdateSizes();
                     return true;
                 }
@@ -206,10 +212,23 @@ public partial class FrmMain : Form
 
     private void bttnReset_Click(object sender, EventArgs e)
     {
+        ResetPlayheadToStart();
+    }
+
+    private void ResetPlayheadToStart()
+    {
         tmrUpdate.Stop(); // stop first so the "playback ended" check doesn't move the playhead to the end
         trackManager.ResetPlayhead();
+        playlineX = 0;
+        sldPlayhead.MaxContentX = 0;
+        sldPlayhead.OriginX = 0;
+        sldPlayhead.ContentX = 0;
+        sldPlayhead.Invalidate();
         bttnPlay.BackgroundImage = Resources.play;
         panTracks.AutoScrollPosition = new Point(0, -panTracks.AutoScrollPosition.Y); // scroll back to the left
+        lblCurrTime.Visible = true;
+        lblCurrTime.Text = "00:00.00/00:00.00";
+        lblCurrTime.Update();
         RefreshPlayheadVisuals();
         BeginInvoke(new Action(RefreshPlayheadVisuals)); // again once the scroll has been applied
     }
@@ -788,6 +807,12 @@ public partial class FrmMain : Form
                 track.PanDrawSamples.Dispose();
                 track.Dispose();
                 trackManager.RemTrack(track);
+
+                if (trackManager.Tracks.Count == 0)
+                {
+                    ResetPlayheadToStart();
+                }
+
                 UpdateSizes();
             }
         };
