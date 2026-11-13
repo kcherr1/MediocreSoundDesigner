@@ -141,6 +141,7 @@
             BackColor = SystemColors.ActiveBorder;
             CancelButton = bttnCancel;
             ClientSize = new Size(800, 450);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Controls.Add(lblUpdateText);
             Controls.Add(lblPromptCharacterCount);
             Controls.Add(checkBoxInstrumental);
@@ -149,6 +150,8 @@
             Controls.Add(lblPrompt);
             Controls.Add(lblTitle);
             Controls.Add(txtBoxPrompt);
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FrmGenerate";
             Text = "Generate Sounds";
             ResumeLayout(false);
