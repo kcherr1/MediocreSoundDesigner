@@ -54,7 +54,8 @@
             menuGen = new ToolStripMenuItem();
             menuGenRecord = new ToolStripMenuItem();
             menuGenNoise = new ToolStripMenuItem();
-            menuGenGradientNoise = new ToolStripMenuItem();
+            menuGenSpeedUp = new ToolStripMenuItem();
+            menuGenSlowDown = new ToolStripMenuItem();
             tmrUpdate = new System.Windows.Forms.Timer(components);
             sfdSaveFile = new SaveFileDialog();
             colorDialog = new ColorDialog();
@@ -302,7 +303,7 @@
             // 
             // menuGen
             // 
-            menuGen.DropDownItems.AddRange(new ToolStripItem[] { menuGenRecord, menuGenNoise, menuGenGradientNoise });
+            menuGen.DropDownItems.AddRange(new ToolStripItem[] { menuGenRecord, menuGenNoise, menuGenSpeedUp, menuGenSlowDown });
             menuGen.Name = "menuGen";
             menuGen.Size = new Size(66, 20);
             menuGen.Text = "&Generate";
@@ -321,12 +322,19 @@
             menuGenNoise.Text = "Noise";
             menuGenNoise.Click += menuGenNoise_Click;
             // 
-            // menuGenGradientNoise
+            // menuGenSpeedUp
             // 
-            menuGenGradientNoise.Name = "menuGenGradientNoise";
-            menuGenGradientNoise.Size = new Size(152, 22);
-            menuGenGradientNoise.Text = "Gradient Noise";
-            menuGenGradientNoise.Click += menuGenGradientNoise_Click;
+            menuGenSpeedUp.Name = "menuGenSpeedUp";
+            menuGenSpeedUp.Size = new Size(152, 22);
+            menuGenSpeedUp.Text = "Speed Up";
+            menuGenSpeedUp.Click += menuGenSpeedUp_Click;
+            // 
+            // menuGenSlowDown
+            // 
+            menuGenSlowDown.Name = "menuGenSlowDown";
+            menuGenSlowDown.Size = new Size(152, 22);
+            menuGenSlowDown.Text = "Slow Down";
+            menuGenSlowDown.Click += menuGenSlowDown_Click;
             // 
             // tmrUpdate
             // 
@@ -465,7 +473,8 @@
     private System.Windows.Forms.Timer tmrUpdate;
     private ToolStripMenuItem menuGen;
     private ToolStripMenuItem menuGenNoise;
-    private ToolStripMenuItem menuGenGradientNoise;
+    private ToolStripMenuItem menuGenSpeedUp;
+    private ToolStripMenuItem menuGenSlowDown;
     private ToolStripMenuItem menuEditFlip;
     private SaveFileDialog sfdSaveFile;
     private TrackBar trkDrawTimescale;

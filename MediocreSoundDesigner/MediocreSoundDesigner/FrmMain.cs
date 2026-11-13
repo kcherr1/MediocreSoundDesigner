@@ -20,6 +20,7 @@ public partial class FrmMain : Form
     private int renderedRecordingSampleCount;
     private int recordingTimelineStartSample;
     private int recordingSilenceSampleCount;
+    private readonly Dictionary<Track, Button> undoButtons = new();
 
     // ctor
     public FrmMain()
@@ -115,6 +116,7 @@ public partial class FrmMain : Form
                     trackName.ForeColor = Settings.Color.WinFg;
                 }
             }
+
         }
 
         // slider range comes from the same constants the clamp uses
@@ -349,6 +351,7 @@ public partial class FrmMain : Form
         {
             t.Flip();
             t.PanDrawSamples.Invalidate();
+            UpdateUndoButton(t);
         }
     }
 
@@ -360,6 +363,7 @@ public partial class FrmMain : Form
         {
             t.Reverse();
             t.PanDrawSamples.Invalidate();
+            UpdateUndoButton(t);
         }
     }
 
@@ -590,30 +594,31 @@ public partial class FrmMain : Form
         UpdateSizes();
         newTrack.PanDrawSamples.Invalidate();
     }
-    private void menuGenGradientNoise_Click(object sender, EventArgs e)
+
+    private void menuGenSpeedUp_Click(object sender, EventArgs e)
     {
         if (!RequirePausedForEdit()) return;
 
-        const int NUM_SAMPLES = 250_000;
-        float[] samples = new float[NUM_SAMPLES];
-        Random rand = new();
-        float cur = 0;
-        float inc = 0.005f;
-        int dir = +1;
-        for (int i = 0; i < NUM_SAMPLES; i++)
+        foreach (Track track in trackManager.SelectedTracks)
         {
-            cur += (inc * dir);
-            if (rand.NextSingle() < 0.5f)
-            {
-                dir *= -1;
-            }
+            track.AlterTimeScale(2.0f);
+            track.PanDrawSamples?.Invalidate();
+            UpdateUndoButton(track);
         }
-        Track newTrack = new(samples);
-        CreateTrackPanel(newTrack);
-        trackManager.AddTrack(newTrack);
-        SetDefaultZoom();
         UpdateSizes();
-        newTrack.PanDrawSamples.Invalidate();
+    }
+
+    private void menuGenSlowDown_Click(object sender, EventArgs e)
+    {
+        if (!RequirePausedForEdit()) return;
+
+        foreach (Track track in trackManager.SelectedTracks)
+        {
+            track.AlterTimeScale(0.5f);
+            track.PanDrawSamples?.Invalidate();
+            UpdateUndoButton(track);
+        }
+        UpdateSizes();
     }
 
     private void tmrUpdatePlaybackState_Tick(object sender, EventArgs e)
@@ -813,7 +818,18 @@ public partial class FrmMain : Form
             FlatStyle = FlatStyle.Flat,
             FlatAppearance = { BorderSize = 0, MouseDownBackColor = Color.Transparent, MouseOverBackColor = Color.Transparent },
             Size = new Size(34, 35),
-            Location = new Point(43, 6),
+            Location = new Point(50, 6),
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
+        };
+        Button bttnUndo = new()
+        {
+            BackColor = Color.Transparent,
+            BackgroundImage = Resources.undoButton,
+            BackgroundImageLayout = ImageLayout.Stretch,
+            FlatStyle = FlatStyle.Flat,
+            FlatAppearance = { BorderSize = 0, MouseDownBackColor = Color.Transparent, MouseOverBackColor = Color.Transparent },
+            Size = new Size(34, 35),
+            Location = new Point(105, 6),
             Font = new Font("Segoe UI", 12, FontStyle.Bold),
         };
         Button bttnDelete = new()
@@ -833,7 +849,7 @@ public partial class FrmMain : Form
         {
             Text = string.IsNullOrWhiteSpace(fileName) ? $"Track {trackManager.TrackCounter}" : fileName,
             AutoSize = true,
-            Location = new Point(100, 6),
+            Location = new Point(160, 6),
             Font = new Font("Segoe UI", 20, FontStyle.Bold),
             ForeColor = Settings.Color.WinFg,
             BackColor = Color.Transparent // lets the playline show behind the track name
@@ -849,6 +865,7 @@ public partial class FrmMain : Form
 
         // add inner elements to the track container panel
         panTrackContainer.Controls.Add(bttnMute);
+        panTrackContainer.Controls.Add(bttnUndo);
         panTrackContainer.Controls.Add(panTrack);
         panTrackContainer.Controls.Add(bttnDelete);
         panTrackContainer.Controls.Add(lblTrackName);
@@ -863,6 +880,17 @@ public partial class FrmMain : Form
             track.ToggleDisabled();
             bttnMute.BackgroundImage = track.IsDisabled ? Resources.mute : Resources.volume;
             track.PanDrawSamples.Invalidate();
+        };
+        bttnUndo.Click += (sender, e) =>
+        {
+            if (!RequirePausedForEdit()) return;
+
+            if (track.UndoLastEffect())
+            {
+                track.PanDrawSamples?.Invalidate();
+                UpdateUndoButton(track);
+                UpdateSizes();
+            }
         };
         panTrack.DoubleClick += (sender, e) =>
         {
@@ -974,8 +1002,20 @@ public partial class FrmMain : Form
         panTracks.Controls.Add(panTrackContainer);
         track.LinkPanels(panTrack, panTracks);
         trackManager.SelectTrack(track);
+        undoButtons[track] = bttnUndo;
+        bttnUndo.Visible = track.CanUndoEffect;
 
         return panTrackContainer;
+    }
+
+    private void UpdateUndoButton(Track track)
+    {
+        if (!undoButtons.TryGetValue(track, out Button undoButton))
+        {
+            return;
+        }
+
+        undoButton.Visible = track.CanUndoEffect;
     }
 
     private void DeleteTracks(IEnumerable<Track> tracks)
@@ -1006,6 +1046,7 @@ public partial class FrmMain : Form
 
             track.Dispose();
             trackManager.RemTrack(track);
+            undoButtons.Remove(track);
         }
 
         ResetPlayheadToStart();
