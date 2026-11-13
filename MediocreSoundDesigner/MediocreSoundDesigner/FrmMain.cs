@@ -207,11 +207,14 @@ public partial class FrmMain : Form
     {
         tmrUpdate.Stop(); // stop first so the "playback ended" check doesn't move the playhead to the end
         trackManager.ResetPlayhead();
+
+        int oldPlaylineX = playlineX;
         playlineX = 0;
-        sldPlayhead.MaxContentX = 0;
-        sldPlayhead.OriginX = 0;
-        sldPlayhead.ContentX = 0;
-        sldPlayhead.Invalidate();
+        InvalidatePlayline(oldPlaylineX);
+        InvalidatePlayline(playlineX);
+
+        sldPlayhead.ResetToStart();
+        isScrubbing = false;
         bttnPlay.BackgroundImage = Resources.play;
         panTracks.AutoScrollPosition = new Point(0, -panTracks.AutoScrollPosition.Y); // scroll back to the left
         lblCurrTime.Visible = true;
@@ -933,6 +936,7 @@ public partial class FrmMain : Form
             trackManager.RemTrack(track);
         }
 
+        ResetPlayheadToStart();
         UpdateSizes();
     }
 

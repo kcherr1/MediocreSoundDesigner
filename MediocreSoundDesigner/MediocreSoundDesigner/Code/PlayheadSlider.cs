@@ -47,6 +47,15 @@ public class PlayheadSlider : Control
         TabStop = false;
     }
 
+    public void ResetToStart()
+    {
+        dragging = false;
+        contentX = 0;
+        originX = 0;
+        MaxContentX = 0;
+        Invalidate();
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
