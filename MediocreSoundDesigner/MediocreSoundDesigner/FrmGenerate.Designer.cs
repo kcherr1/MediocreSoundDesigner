@@ -115,12 +115,14 @@
             // 
             // lblUpdateText
             // 
-            lblUpdateText.AutoSize = true;
+            lblUpdateText.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblUpdateText.AutoSize = false;
             lblUpdateText.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblUpdateText.Location = new Point(333, 303);
+            lblUpdateText.Location = new Point(52, 282);
             lblUpdateText.Name = "lblUpdateText";
-            lblUpdateText.Size = new Size(0, 32);
+            lblUpdateText.Size = new Size(697, 91);
             lblUpdateText.TabIndex = 8;
+            lblUpdateText.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblPromptCharacterCount
             // 
@@ -139,6 +141,7 @@
             BackColor = SystemColors.ActiveBorder;
             CancelButton = bttnCancel;
             ClientSize = new Size(800, 450);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Controls.Add(lblUpdateText);
             Controls.Add(lblPromptCharacterCount);
             Controls.Add(checkBoxInstrumental);
@@ -147,6 +150,8 @@
             Controls.Add(lblPrompt);
             Controls.Add(lblTitle);
             Controls.Add(txtBoxPrompt);
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FrmGenerate";
             Text = "Generate Sounds";
             ResumeLayout(false);
