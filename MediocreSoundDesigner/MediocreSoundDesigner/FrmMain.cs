@@ -370,6 +370,15 @@ public partial class FrmMain : Form
     {
         try
         {
+            if (trackManager.State == PlaybackState.Playing)
+            {
+                trackManager.PauseAll();
+                bttnPlay.BackgroundImage = Resources.play;
+                tmrUpdate.Stop();
+                MessageBox.Show("Pause track before recording", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (WaveIn.DeviceCount == 0)
             {
                 throw new InvalidOperationException("No audio input devices are available.");
