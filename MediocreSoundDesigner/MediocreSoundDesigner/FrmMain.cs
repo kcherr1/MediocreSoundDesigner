@@ -188,6 +188,11 @@ public partial class FrmMain : Form
     {
         if (trackManager.State is NAudio.Wave.PlaybackState.Stopped or NAudio.Wave.PlaybackState.Paused)
         {
+            if (isRecording && MessageBox.Show("Wear headphones while listening to the tracks to prevent the output from being fed back into the microphone.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
+            {
+                return;
+            }
+
             trackManager.PlayAll();
             bttnPlay.BackgroundImage = Resources.pause;
             tmrUpdatePlaybackState_Tick(sender, e);
@@ -367,6 +372,17 @@ public partial class FrmMain : Form
                 throw new InvalidOperationException("No audio input devices are available.");
             }
 
+            if (trackManager.Tracks.Count > 0)
+            {
+                if (MessageBox.Show("Wear headphones while listening to the tracks to prevent the output from being fed back into the microphone.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                trackManager.PlayAll();
+                bttnPlay.BackgroundImage = Resources.pause;
+            }
+
             int deviceNumber = Settings.AudioInputDeviceNumber;
             if (deviceNumber < 0 || deviceNumber >= WaveIn.DeviceCount)
             {
@@ -417,6 +433,7 @@ public partial class FrmMain : Form
         isRecording = false;
         UpdateLiveRecording(force: true);
         waveSource?.StopRecording();
+        trackManager.PauseAll();
         bttnRecord.BackgroundImage = Resources.record;
 
         if (trackManager.State != PlaybackState.Playing)
