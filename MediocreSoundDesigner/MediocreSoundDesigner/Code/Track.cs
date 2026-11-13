@@ -29,6 +29,7 @@ public class Track : IDisposable
     private float[] samples;
     private float waveformDisplayScale;
     private float pitch;
+    private readonly Stack<EffectState> effectHistory = new();
     private AudioFileReader fileReader; // playback only
     private WaveOut outputDevice;
     private Panel panContainer;
@@ -47,6 +48,7 @@ public class Track : IDisposable
     public int? SelectionEndSample { get; set; } = null;
     public bool HasSelection => SelectionStartSample.HasValue && SelectionEndSample.HasValue;
     public int SampleCount => samples?.Length ?? 0;
+    public bool CanUndoEffect => effectHistory.Count > 0;
     // length of the audio actually played/saved (includes the dead space from DrawOffset)
     public int AdjustedSampleCount => DrawOffset * drawTimescale + SampleCount;
 
@@ -158,7 +160,62 @@ public class Track : IDisposable
     }
     public void AlterTimeScale(float scale)
     {
+        if (scale <= 0 || samples.Length == 0)
+        {
+            return;
+        }
+
+        var (start, end) = GetTargetRange();
+        int targetLength = end - start;
+        if (targetLength == 0)
+        {
+            return;
+        }
+
+        SaveEffectState();
+
+        int alteredLength = Math.Max(1, (int)Math.Round(targetLength / scale, MidpointRounding.AwayFromZero));
+        float[] alteredSamples = new float[samples.Length - targetLength + alteredLength];
+        Array.Copy(samples, 0, alteredSamples, 0, start);
+
+        for (int i = 0; i < alteredLength; i++)
+        {
+            float sourcePosition = i * scale;
+            int sourceIndex = Math.Min((int)sourcePosition, end - 1);
+            int nextIndex = Math.Min(sourceIndex + 1, end - 1);
+            float fraction = sourcePosition - sourceIndex;
+            alteredSamples[start + i] = samples[sourceIndex] +
+                ((samples[nextIndex] - samples[sourceIndex]) * fraction);
+        }
+
+        Array.Copy(samples, end, alteredSamples, start + alteredLength, samples.Length - end);
+        samples = alteredSamples;
+        duration = TimeSpan.FromSeconds((double)samples.Length / INTERNAL_SAMPLE_RATE);
+        waveformDisplayScale = CalculateWaveformDisplayScale();
+
+        if (HasSelection)
+        {
+            SetSelection(start, start + alteredLength);
+        }
     }
+
+    public bool UndoLastEffect()
+    {
+        if (effectHistory.Count == 0)
+        {
+            return false;
+        }
+
+        EffectState previous = effectHistory.Pop();
+        samples = previous.Samples;
+        SelectionStartSample = previous.SelectionStartSample;
+        SelectionEndSample = previous.SelectionEndSample;
+        duration = TimeSpan.FromSeconds((double)samples.Length / INTERNAL_SAMPLE_RATE);
+        waveformDisplayScale = CalculateWaveformDisplayScale();
+        return true;
+    }
+
+    private sealed record EffectState(float[] Samples, int? SelectionStartSample, int? SelectionEndSample);
     public void SetVolume(float newVolume)
     {
         Volume = newVolume;
@@ -166,6 +223,8 @@ public class Track : IDisposable
     public void Flip()
     {
         var (start, end) = GetTargetRange();
+        if (start == end) return;
+        SaveEffectState();
         for (int i = start; i < end; i++)
         {
             samples[i] *= -1;
@@ -176,6 +235,8 @@ public class Track : IDisposable
     {
         var (start, end) = GetTargetRange();
         int len = end - start;
+        if (len == 0) return;
+        SaveEffectState();
         for (int i = 0; i < len / 2; i++)
         {
             var temp = samples[start + i];
@@ -187,10 +248,18 @@ public class Track : IDisposable
     public void ApplyVolume(float factor)
     {
         var (start, end) = GetTargetRange();
+        if (start == end) return;
+        SaveEffectState();
         for (int i = start; i < end; i++)
         {
             samples[i] *= factor;
         }
+    }
+
+    private void SaveEffectState()
+    {
+        effectHistory.Push(new EffectState(
+            (float[])samples.Clone(), SelectionStartSample, SelectionEndSample));
     }
 
     public void EliminateSilence(SampleRegion region, float minDuration, float thres)
