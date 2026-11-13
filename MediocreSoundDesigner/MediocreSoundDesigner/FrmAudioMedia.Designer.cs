@@ -108,7 +108,7 @@
             // 
             // btnConfirm
             // 
-            btnConfirm.Location = new Point(302, 290);
+            btnConfirm.Location = new Point(404, 290);
             btnConfirm.Name = "btnConfirm";
             btnConfirm.Size = new Size(94, 29);
             btnConfirm.TabIndex = 5;
@@ -118,7 +118,7 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(404, 290);
+            btnCancel.Location = new Point(302, 290);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(94, 29);
             btnCancel.TabIndex = 6;
@@ -134,6 +134,9 @@
             CancelButton = btnCancel;
             ClientSize = new Size(582, 408);
             Controls.Add(doubleBufferedPanel1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FrmAudioMedia";
             Text = "Media Settings";
             doubleBufferedPanel1.ResumeLayout(false);
