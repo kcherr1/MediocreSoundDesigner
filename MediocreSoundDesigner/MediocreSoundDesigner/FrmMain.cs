@@ -18,6 +18,8 @@ public partial class FrmMain : Form
     private List<float> recordedSamples = new();
     private readonly object recordedSamplesLock = new();
     private int renderedRecordingSampleCount;
+    private int recordingTimelineStartSample;
+    private int recordingSilenceSampleCount;
 
     // ctor
     public FrmMain()
@@ -373,15 +375,15 @@ public partial class FrmMain : Form
                 throw new InvalidOperationException("No audio input devices are available.");
             }
 
-            if (trackManager.Tracks.Count > 0)
+            bool playExistingTracks = trackManager.Tracks.Count > 0;
+            bool playbackAlreadyActive = trackManager.State == PlaybackState.Playing;
+            int recordingStartSample = playExistingTracks ? trackManager.PlayheadSample : 0;
+            if (playExistingTracks)
             {
                 if (MessageBox.Show("Wear headphones while listening to the tracks to prevent the output from being fed back into the microphone.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
                 {
                     return;
                 }
-
-                trackManager.PlayAll();
-                bttnPlay.BackgroundImage = Resources.pause;
             }
 
             int deviceNumber = Settings.AudioInputDeviceNumber;
@@ -402,11 +404,14 @@ public partial class FrmMain : Form
                 recordedSamples.Clear();
             }
             renderedRecordingSampleCount = 0;
+            recordingTimelineStartSample = 0;
+            recordingSilenceSampleCount = recordingStartSample;
 
             waveSource = new WaveIn
             {
                 DeviceNumber = deviceNumber,
-                WaveFormat = new WaveFormat(Track.INTERNAL_SAMPLE_RATE, 16, Track.INTERNAL_CHANNELS)
+                WaveFormat = new WaveFormat(Track.INTERNAL_SAMPLE_RATE, 16, Track.INTERNAL_CHANNELS),
+                BufferMilliseconds = 20
             };
             waveSource.DataAvailable += WaveSource_DataAvailable;
             waveSource.RecordingStopped += WaveSource_RecordingStopped;
@@ -415,6 +420,20 @@ public partial class FrmMain : Form
             isRecording = true;
             bttnRecord.BackgroundImage = Resources.stop;
             tmrUpdate.Start();
+
+            // Start input before preparing playback. PlayAll writes the combined WAV synchronously;
+            // starting it first would make the recording timeline begin after playback has already started.
+            if (playExistingTracks && !playbackAlreadyActive)
+            {
+                trackManager.PlayAll();
+                lock (recordedSamplesLock)
+                {
+                    // Discard input captured while the existing tracks were being prepared.
+                    // The preserved silence still places the recording at the paused playhead.
+                    recordingTimelineStartSample = recordedSamples.Count;
+                }
+                bttnPlay.BackgroundImage = Resources.pause;
+            }
         }
         catch (Exception ex)
         {
@@ -479,8 +498,11 @@ public partial class FrmMain : Form
         float[] samples;
         lock (recordedSamplesLock)
         {
-            if (!force && recordedSamples.Count == renderedRecordingSampleCount) return;
-            samples = recordedSamples.ToArray();
+            int capturedSamples = Math.Max(0, recordedSamples.Count - recordingTimelineStartSample);
+            int totalSamples = recordingSilenceSampleCount + capturedSamples;
+            if (!force && totalSamples == renderedRecordingSampleCount) return;
+            samples = new float[totalSamples];
+            recordedSamples.CopyTo(recordingTimelineStartSample, samples, recordingSilenceSampleCount, capturedSamples);
         }
 
         renderedRecordingSampleCount = samples.Length;
